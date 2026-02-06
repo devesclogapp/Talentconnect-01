@@ -1,0 +1,138 @@
+import React, { useState } from 'react';
+import {
+    User,
+    MapPin,
+    Mail,
+    ChevronRight,
+    LogOut,
+    Camera,
+    Shield,
+    CreditCard,
+    Settings,
+    Bell,
+    Star,
+    Activity,
+    ArrowUpRight
+} from 'lucide-react';
+import { signOut } from '../services/authService';
+import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
+import AvatarUpload from '../components/AvatarUpload';
+
+interface Props {
+    user: any;
+    onLogout: () => void;
+    onNavigate: (v: string) => void;
+}
+
+const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
+    const userName = resolveUserName(user);
+    const userAvatar = resolveUserAvatar(user);
+
+    const handleLogout = async () => {
+        await signOut();
+        onLogout();
+    };
+
+    return (
+        <div className="min-h-screen bg-bg-primary pb-32 animate-fade-in">
+            {/* Luxury Profile Header */}
+            <div className="h-[220px] bg-bg-secondary relative border-b border-border-subtle overflow-hidden">
+                <div className="absolute top-[-50px] left-[-50px] w-64 h-64 bg-accent-primary/5 rounded-full blur-[80px]"></div>
+                <div className="absolute bottom-[-30px] right-[-30px] w-80 h-80 bg-blue-500/5 rounded-full blur-[100px]"></div>
+
+                <div className="absolute bottom-[-50px] left-8 transform translate-y-[-50%] flex flex-col items-center">
+                    <div className="relative group">
+                        <div className="w-32 h-32 rounded-[40px] border-[6px] border-bg-primary overflow-hidden shadow-2xl relative">
+                            <AvatarUpload user={user}>
+                                <div className="w-full h-full bg-bg-tertiary flex items-center justify-center">
+                                    <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
+                                </div>
+                            </AvatarUpload>
+                        </div>
+                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-accent-primary rounded-[14px] flex items-center justify-center text-bg-primary shadow-glow">
+                            <Camera size={18} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="pt-24 px-8">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="heading-3xl tracking-tighter text-text-primary">{userName}</h1>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="meta px-2 py-0.5 rounded-full bg-accent-primary/10 text-text-primary border border-accent-primary/20 leading-none">
+                                {user?.role === 'provider' ? 'Prestador Verificado' : 'Membro Ativo'}
+                            </span>
+                            <p className="meta !text-text-tertiary flex items-center gap-1">
+                                <MapPin size={10} /> {user?.metadata?.city || 'Brasil'}
+                            </p>
+                        </div>
+                    </div>
+                    <button className="btn-icon !w-12 !h-12 bg-bg-secondary">
+                        <Settings size={22} className="text-text-secondary" />
+                    </button>
+                </div>
+
+                {/* Portfolio Stats */}
+                <div className="grid grid-cols-3 gap-3 mb-12">
+                    {[
+                        { label: 'Rating', value: user?.rating?.toFixed(1) || '0.0', sub: 'Estrelas', color: 'text-text-primary' },
+                        { label: 'Pedidos', value: user?.orders_count || '0', sub: 'Total', color: 'text-text-primary' },
+                        { label: 'Confiança', value: '100%', sub: 'Score', color: 'text-text-primary' }
+                    ].map(stat => (
+                        <div key={stat.label} className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center">
+                            <p className="meta !text-[8px] mb-1">{stat.label}</p>
+                            <p className={`text-xl font-black ${stat.color}`}>{stat.value}</p>
+                            <p className="meta !text-[7px] !lowercase text-text-tertiary">{stat.sub}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Action Menu (Security & Preferences) */}
+                <div className="space-y-4">
+                    <h4 className="heading-md uppercase tracking-[0.2em] text-text-tertiary mb-6">Segurança & Preferências</h4>
+
+                    {[
+                        { icon: <User size={20} />, label: 'Informações Pessoais', sub: 'Gerencie seus dados de perfil' },
+                        { icon: <Shield size={20} />, label: 'Segurança & Privacidade', sub: '2FA e Chaves de Acesso' },
+                        { icon: <CreditCard size={20} />, label: 'Métodos de Pagamento', sub: 'Carteira e Repasses' },
+                        { icon: <Bell size={20} />, label: 'Notificações', sub: 'Alertas e Webhooks' },
+                        { icon: <Activity size={20} />, label: 'Atividade na Plataforma', sub: 'Logs de auditoria e eventos' },
+                    ].map((item, i) => (
+                        <button
+                            key={i}
+                            className="card-transaction w-full group !bg-bg-primary "
+                        >
+                            <div className="w-10 h-10 rounded-[14px] bg-bg-secondary flex items-center justify-center text-text-secondary group-hover:bg-accent-primary/10 group-hover:text-accent-primary transition-all">
+                                {item.icon}
+                            </div>
+                            <div className="flex-1 text-left">
+                                <p className="text-sm font-bold text-text-primary">{item.label}</p>
+                                <p className="meta !text-[9px] !lowercase text-text-tertiary">{item.sub}</p>
+                            </div>
+                            <ChevronRight size={18} className="text-text-tertiary group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    ))}
+
+                    <button
+                        onClick={handleLogout}
+                        className="card-transaction w-full mt-10 !bg-error/5 border-error/10 text-error group hover:bg-error/10"
+                    >
+                        <div className="w-10 h-10 rounded-[14px] bg-error/10 flex items-center justify-center">
+                            <LogOut size={20} />
+                        </div>
+                        <div className="flex-1 text-left">
+                            <p className="text-sm font-bold">Encerrar Sessão</p>
+                            <p className="meta !text-[9px] !lowercase text-error/60">Finalizar todos os acessos ativos</p>
+                        </div>
+                        <ArrowUpRight size={18} className="text-error/40 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    );
+};
+
+export default Profile;
