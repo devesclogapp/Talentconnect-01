@@ -32,6 +32,7 @@ import ReceivedOrders from './screens/ReceivedOrders';
 import OrderAcceptReject from './screens/OrderAcceptReject';
 import ServiceExecution from './screens/ServiceExecution';
 import EditProfile from './screens/EditProfile';
+import ClientsList from './screens/ClientsList';
 
 import { useAppStore } from './store';
 import {
@@ -448,6 +449,8 @@ const App: React.FC = () => {
         return <Agenda onBack={goBack} onNavigate={navigate} />;
       case 'NOTIFICATIONS':
         return <NotificationCenter onBack={goBack} />;
+      case 'CLIENTS_LIST':
+        return <ClientsList onBack={goBack} />;
 
       default:
         return <Login

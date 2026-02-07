@@ -257,7 +257,10 @@ const ProviderDashboard: React.FC<Props> = ({
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="card-stat group interactive">
+                        <div
+                            className="card-stat group interactive cursor-pointer"
+                            onClick={() => onNavigate('CLIENTS_LIST')}
+                        >
                             <div className="absolute right-[-10px] top-[-10px] opacity-5 transition-transform duration-500">
                                 <Users size={80} />
                             </div>
