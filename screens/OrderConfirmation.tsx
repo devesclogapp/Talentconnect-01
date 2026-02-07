@@ -56,25 +56,30 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                 service_id: orderData.service.id,
                 pricing_mode: orderData.pricingMode,
                 scheduled_at: scheduledAt,
-                location_text: orderData.location,
+                location_text: `${orderData.location}, ${orderData.city} - ${orderData.uf}`,
                 notes: orderData.notes,
-                total_amount: Number(orderData.totalEstimated), // Ensure number
+                total_amount: orderData.totalEstimated,
                 status: 'sent',
                 // Snapshots para garantir integridade histórica
                 service_title_snapshot: orderData.service.title,
                 service_description_snapshot: orderData.service.description,
                 service_category_snapshot: orderData.service.category,
-                service_base_price_snapshot: orderData.service.base_price
+                service_base_price_snapshot: orderData.basePrice
             };
 
-            console.log("Enviando payload:", payload);
+            console.log("Enviando payload corrigido:", payload);
 
             const order = await createOrder(payload as any);
 
-            console.log("Pedido criado com sucesso:", order);
+            console.log("Pedido criado com sucesso (objeto order):", order);
+
+            if (!order) {
+                throw new Error("O servidor não retornou os dados do pedido criado.");
+            }
+
             onConfirm(order);
         } catch (error: any) {
-            console.error("Erro ao criar pedido:", error);
+            console.error("Erro detalhado ao criar pedido:", error);
             alert(`Não foi possível confirmar o pedido: ${error.message || 'Erro desconhecido'}`);
         } finally {
             setIsSubmitting(false);
@@ -144,8 +149,11 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                                     <MapPin size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-black font-normal text-[9px]">Endereço</p>
-                                    <p className="font-normal text-sm">{orderData?.location}</p>
+                                    <p className="text-black font-normal text-[9px]">Local do serviço</p>
+                                    <p className="font-normal text-sm leading-snug">
+                                        {orderData?.location}<br />
+                                        <span className="text-black/60 !text-[10px]">{orderData?.city} - {orderData?.uf}</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>

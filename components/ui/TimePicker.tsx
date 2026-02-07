@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Clock } from 'lucide-react';
+import { Sun, Sunset, Moon, Clock } from 'lucide-react';
 
 export function cn(...inputs: (string | undefined | null | false)[]) {
     return twMerge(clsx(inputs));
@@ -10,8 +10,8 @@ export function cn(...inputs: (string | undefined | null | false)[]) {
 interface TimePickerProps {
     value?: string;
     onChange: (time: string) => void;
-    minTime?: string; // "HH:mm" - used if date is today
-    interval?: number; // minutes, default 30
+    minTime?: string;
+    interval?: number;
     className?: string;
 }
 
@@ -19,14 +19,15 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     value,
     onChange,
     minTime,
-    interval = 30,
+    interval = 60, // Changed to 60 for simplification
     className
 }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const generateTimeSlots = () => {
         const slots = [];
-        for (let i = 0; i < 24 * 60; i += interval) {
+        // Only daytime slots (07:00 to 22:00) for simplification
+        for (let i = 7 * 60; i <= 22 * 60; i += interval) {
             const h = Math.floor(i / 60);
             const m = i % 60;
             const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
@@ -36,61 +37,63 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     };
 
     const slots = generateTimeSlots();
-
-    // Filter slots based on minTime
     const filteredSlots = slots.filter(slot => {
         if (!minTime) return true;
         return slot >= minTime;
     });
 
-    // Auto-scroll to selected time
-    useEffect(() => {
-        if (value && scrollRef.current) {
-            const selectedEl = scrollRef.current.querySelector(`[data-time="${value}"]`);
-            if (selectedEl) {
-                selectedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            }
-        }
-    }, [value]);
+    const groups = [
+        { label: 'Manhã', icon: Sun, range: ['07:00', '12:00'] },
+        { label: 'Tarde', icon: Sunset, range: ['12:01', '18:00'] },
+        { label: 'Noite', icon: Moon, range: ['18:01', '22:00'] },
+    ];
 
     return (
-        <div className={cn("w-full", className)}>
-            <div className="flex items-center gap-2 mb-3 px-1">
-                <Clock size={16} className="text-black" />
-                <span className="text-xs font-bold text-black uppercase tracking-widest">Horários Disponíveis</span>
+        <div className={cn("w-full space-y-6", className)}>
+            <div className="flex items-center gap-2 px-1">
+                <Clock size={16} className="text-black/40" />
+                <span className="text-[10px] font-bold text-black opacity-30 uppercase tracking-[0.2em]">Escolha o horário</span>
             </div>
 
-            <div
-                ref={scrollRef}
-                className="flex gap-3 overflow-x-auto pb-4 snap-x hide-scrollbar px-1"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-                {filteredSlots.length > 0 ? (
-                    filteredSlots.map((time) => {
-                        const isSelected = value === time;
-                        return (
-                            <button
-                                key={time}
-                                data-time={time}
-                                type="button"
-                                onClick={() => onChange(time)}
-                                className={cn(
-                                    "flex-shrink-0 px-6 py-3 rounded-2xl text-sm font-bold transition-all snap-center border-2",
-                                    isSelected
-                                        ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white shadow-lg shadow-black/20 scale-105"
-                                        : "bg-white dark:bg-neutral-900 text-black dark:text-white border-neutral-100 dark:border-neutral-800"
-                                )}
-                            >
-                                {time}
-                            </button>
-                        );
-                    })
-                ) : (
-                    <div className="text-sm text-black py-3 italic">
-                        Nenhum horário disponível
+            {groups.map((group) => {
+                const groupSlots = filteredSlots.filter(s => s >= group.range[0] && s <= group.range[1]);
+                if (groupSlots.length === 0) return null;
+
+                return (
+                    <div key={group.label} className="space-y-3">
+                        <div className="flex items-center gap-2 px-1 text-black/60">
+                            <group.icon size={14} />
+                            <span className="text-[11px] font-bold tracking-wide">{group.label}</span>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto hide-scrollbar snap-x px-1">
+                            {groupSlots.map((time) => {
+                                const isSelected = value === time;
+                                return (
+                                    <button
+                                        key={time}
+                                        type="button"
+                                        onClick={() => onChange(time)}
+                                        className={cn(
+                                            "flex-shrink-0 min-w-[70px] py-3.5 rounded-2xl text-[13px] font-bold transition-all snap-start border",
+                                            isSelected
+                                                ? "bg-primary-green text-black border-primary-green shadow-lg shadow-primary-green/20"
+                                                : "bg-white text-black/40 border-neutral-100 hover:border-black/10"
+                                        )}
+                                    >
+                                        {time}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                )}
-            </div>
+                );
+            })}
+
+            {filteredSlots.length === 0 && (
+                <div className="p-8 rounded-3xl border-2 border-dashed border-neutral-100 text-center">
+                    <p className="text-xs text-black/40 font-bold uppercase tracking-wider">Nenhum horário disponível para hoje</p>
+                </div>
+            )}
         </div>
     );
 };

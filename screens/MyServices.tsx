@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getProviderServices, deleteService } from '../services/servicesService';
 import { getCurrentUser } from '../services/authService';
 import { CATEGORY_MAP } from '../constants';
+import { Trash2, Edit2, Plus, ArrowLeft, Loader2 } from 'lucide-react';
 
 interface Props {
     onBack: () => void;
@@ -18,7 +19,8 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
             const user = await getCurrentUser();
             if (user) {
                 const data = await getProviderServices(user.id);
-                setServices(data || []);
+                // Filtramos apenas os ativos para que o "soft delete" funcione visualmente
+                setServices(data?.filter(s => s.active === true) || []);
             }
         } catch (error) {
             console.error("Erro ao carregar meus serviços:", error);
@@ -42,15 +44,31 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (window.confirm("Tem certeza que deseja remover este serviço?")) {
+        if (window.confirm("Deseja realmente excluir este serviço? Se houver pedidos vinculados, ele será apenas desativado para novos clientes.")) {
             try {
-                console.log('Deletando serviço:', id);
-                await deleteService(id);
-                setServices(prev => prev.filter(s => s.id !== id));
-                alert("Serviço excluído com sucesso!");
-            } catch (error) {
-                console.error("Erro ao deletar serviço:", error);
-                alert("Erro ao deletar serviço.");
+                setLoading(true);
+
+                // Tenta deleção física (API REST regular)
+                try {
+                    await deleteService(id);
+                    console.log("Serviço excluído fisicamente.");
+                } catch (err: any) {
+                    // Se falhar (ex: erro de ForeignKey/integridade), tentamos desativar
+                    console.warn("Falha na deleção física, tentando desativar:", err.message);
+                    const { deactivateService } = await import('../services/servicesService');
+                    await deactivateService(id);
+                    console.log("Serviço desativado com sucesso.");
+                }
+
+                // Atualiza a lista local chamando a função de fetch
+                await fetchMyServices();
+                alert("Operação realizada com sucesso!");
+
+            } catch (error: any) {
+                console.error("Erro crítico ao processar ação de exclusão:", error);
+                alert("Não foi possível processar a solicitação: " + (error.message || "Erro de conexão"));
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -58,12 +76,12 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
     return (
         <div className="bg-app-bg min-h-screen pb-24 transition-colors">
             <header className="sticky top-0 z-50 bg-bg-primary border-b border-border-subtle px-4 py-6 flex items-center justify-between">
-                <button onClick={onBack} className="w-10 h-10 flex items-center justify-center text-text-primary active:scale-90 transition-transform">
-                    <span className="material-symbols-outlined">arrow_back</span>
+                <button onClick={onBack} className="btn-icon">
+                    <ArrowLeft size={20} />
                 </button>
                 <h1 className="heading-md uppercase tracking-widest text-text-primary">Meus Serviços</h1>
-                <button onClick={() => onNavigate('SERVICE_REGISTRATION')} className="w-10 h-10 flex items-center justify-center text-text-primary active:scale-90 transition-transform">
-                    <span className="material-symbols-outlined">add</span>
+                <button onClick={() => onNavigate('SERVICE_REGISTRATION')} className="btn-icon">
+                    <Plus size={20} />
                 </button>
             </header>
 
@@ -92,17 +110,17 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
                                     <div className="flex gap-1">
                                         <button
                                             onClick={(e) => handleEdit(e, service.id)}
-                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-text-primary border border-border-subtle shadow-sm active:scale-90 transition-transform"
+                                            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-bg-primary text-text-primary border border-border-subtle shadow-md active:scale-90 transition-all hover:border-accent-primary"
                                             title="Editar"
                                         >
-                                            <span className="material-symbols-outlined text-[16px]">edit</span>
+                                            <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={(e) => handleDelete(e, service.id)}
-                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-error border border-border-subtle shadow-sm active:scale-90 transition-transform"
+                                            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-bg-primary text-error border border-border-subtle shadow-md active:scale-90 transition-all hover:bg-error/10 hover:border-error"
                                             title="Excluir"
                                         >
-                                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>

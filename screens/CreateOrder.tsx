@@ -5,6 +5,8 @@ import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Calendar } from '../components/ui/Calendar';
 import { TimePicker } from '../components/ui/TimePicker';
+import { Select } from '../components/ui/Select';
+import { BRAZILIAN_STATES, CITIES_BY_STATE } from '../constants';
 
 interface CreateOrderProps {
     service: any;
@@ -18,6 +20,8 @@ const CreateOrder: React.FC<CreateOrderProps> = ({ service, provider, onBack, on
         date: '',
         time: '',
         location: '',
+        city: '',
+        uf: '',
         notes: '',
         estimatedHours: (service?.pricing_mode === 'hourly') ? 2 : 0
     });
@@ -46,25 +50,39 @@ const CreateOrder: React.FC<CreateOrderProps> = ({ service, provider, onBack, on
             newErrors.location = 'Endereço é obrigatório';
         }
 
+        if (!formData.city.trim()) {
+            newErrors.city = 'Cidade é obrigatória';
+        }
+
+        // UF validation: now just checks if it exists, as Select gives the value directly
+        if (!formData.uf || !formData.uf.trim()) {
+            newErrors.uf = 'UF obrigatória';
+        }
+
         if (service?.pricing_mode === 'hourly' && formData.estimatedHours < 1) {
             newErrors.estimatedHours = 'Mínimo de 1 hora';
         }
 
+        console.log("Validation current errors:", newErrors);
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        e.stopPropagation();
+
+        console.log("Tentando submeter formulário:", formData);
 
         if (!validateForm()) {
+            console.warn("Validação falhou:", errors);
             return;
         }
 
         const basePrice = service?.base_price || 0;
         const pricingMode = service?.pricing_mode || 'fixed';
 
-        const orderData = {
+        const orderDataResult = {
             service,
             provider: provider || service.provider,
             ...formData,
@@ -75,7 +93,8 @@ const CreateOrder: React.FC<CreateOrderProps> = ({ service, provider, onBack, on
                 : basePrice
         };
 
-        onConfirm(orderData);
+        console.log("Enviando para revisão:", orderDataResult);
+        onConfirm(orderDataResult);
     };
 
     const handleInputChange = (field: string, value: string | number) => {
@@ -153,16 +172,45 @@ const CreateOrder: React.FC<CreateOrderProps> = ({ service, provider, onBack, on
                 {/* Location */}
                 <div className="space-y-4">
                     <h3 className="text-black font-normal text-sm px-1">Onde?</h3>
-                    <div className="relative">
-                        <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
-                        <input
-                            type="text"
-                            placeholder="Endereço completo do serviço"
-                            value={formData.location}
-                            onChange={(e) => handleInputChange('location', e.target.value)}
-                            className="w-full bg-white dark:bg-neutral-900 border-2 border-neutral-100 dark:border-neutral-800 rounded-[20px] p-4 pl-12 body-bold text-black dark:text-white focus:border-primary-green outline-none transition-all font-normal"
-                        />
-                        {errors.location && <p className="text-[10px] text-error font-normal mt-1 px-1">{errors.location}</p>}
+                    <div className="space-y-3">
+                        <div className="relative">
+                            <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
+                            <input
+                                type="text"
+                                placeholder="Endereço completo do serviço"
+                                value={formData.location}
+                                onChange={(e) => handleInputChange('location', e.target.value)}
+                                className="w-full bg-white dark:bg-neutral-900 border-2 border-neutral-100 dark:border-neutral-800 rounded-[20px] p-4 pl-12 body-bold text-black dark:text-white focus:border-primary-green outline-none transition-all font-normal"
+                            />
+                            {errors.location && <p className="text-[10px] text-error font-normal mt-1 px-1">{errors.location}</p>}
+                        </div>
+
+                        <div className="flex gap-3">
+                            <div className="flex-1">
+                                <Select
+                                    value={formData.uf}
+                                    onChange={(val) => {
+                                        handleInputChange('uf', val);
+                                        handleInputChange('city', '');
+                                    }}
+                                    options={BRAZILIAN_STATES}
+                                    placeholder="UF"
+                                    error={errors.uf}
+                                />
+                            </div>
+
+                            <div className="flex-[3]">
+                                <Select
+                                    value={formData.city}
+                                    onChange={(val) => handleInputChange('city', val)}
+                                    options={formData.uf ? CITIES_BY_STATE[formData.uf] || [] : []}
+                                    placeholder="Cidade"
+                                    disabled={!formData.uf}
+                                    error={errors.city}
+                                    searchable={true}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 

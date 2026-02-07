@@ -264,9 +264,12 @@ const App: React.FC = () => {
         return <OrderConfirmation
           orderData={orderData}
           onConfirm={(createdOrder) => {
-            setSelectedOrder(createdOrder);
-            // Redirect to Order Detail instead of Payment to wait for provider acceptance
-            setView('ORDER_DETAIL');
+            console.log("Navigating to TRACKING with order:", createdOrder);
+            if (createdOrder) {
+              setSelectedOrder(createdOrder);
+            }
+            // Redireciona para a tela de Acompanhamento (Tracking) após confirmar
+            setView('TRACKING');
           }}
           onEdit={goBack}
         />;
