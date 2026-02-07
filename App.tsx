@@ -444,7 +444,6 @@ const App: React.FC = () => {
     'PROVIDER_DASHBOARD',
     'PROFILE',
     'AGENDA',
-    'EARNINGS',
     'TRACKING',
     'ORDER_HISTORY',
     'RECEIVED_ORDERS',

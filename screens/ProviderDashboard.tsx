@@ -45,12 +45,15 @@ const ProviderDashboard: React.FC<Props> = ({
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalRevenue: 0,
+        grossRevenue: 0,
+        operatorFees: 0,
         monthlyRevenue: 0,
         completedCount: 0,
         pendingCount: 0,
         growth: 0
     });
     const [recentRequests, setRecentRequests] = useState<any[]>([]);
+    const [showFinancialDetails, setShowFinancialDetails] = useState(false);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -58,9 +61,27 @@ const ProviderDashboard: React.FC<Props> = ({
                 setLoading(true);
                 const orders: any[] = await getProviderOrders();
 
+                // Helper to get payment details
+                const getPaymentDetails = (order: any) => {
+                    const payment = Array.isArray(order.payment) ? order.payment[0] : order.payment;
+                    return {
+                        net: payment?.provider_amount || 0,
+                        gross: payment?.amount_total || order.total_amount || 0,
+                        fee: payment?.operator_fee || ((order.total_amount || 0) - (payment?.provider_amount || 0))
+                    };
+                };
+
                 // Calculate Stats
                 const completed = orders?.filter(o => o.status === 'completed') || [];
-                const total = completed.reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+
+                const totals = completed.reduce((acc, curr) => {
+                    const { net, gross, fee } = getPaymentDetails(curr);
+                    return {
+                        net: acc.net + net,
+                        gross: acc.gross + gross,
+                        fee: acc.fee + fee
+                    };
+                }, { net: 0, gross: 0, fee: 0 });
 
                 // Monthly
                 const now = new Date();
@@ -68,7 +89,11 @@ const ProviderDashboard: React.FC<Props> = ({
                     const d = new Date(o.scheduled_at || o.created_at);
                     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
                 });
-                const monthTotal = thisMonth.reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+
+                const monthTotal = thisMonth.reduce((acc, curr) => {
+                    const { net } = getPaymentDetails(curr);
+                    return acc + net;
+                }, 0);
 
                 // Last Month for Growth
                 const lastMonth = completed.filter(o => {
@@ -77,14 +102,21 @@ const ProviderDashboard: React.FC<Props> = ({
                     const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
                     return d.getMonth() === prevMonth && d.getFullYear() === prevYear;
                 });
-                const lastMonthTotal = lastMonth.reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+
+                const lastMonthTotal = lastMonth.reduce((acc, curr) => {
+                    const { net } = getPaymentDetails(curr);
+                    return acc + net;
+                }, 0);
+
                 const growth = lastMonthTotal > 0 ? ((monthTotal - lastMonthTotal) / lastMonthTotal) * 100 : (monthTotal > 0 ? 100 : 0);
 
                 // Requests (status 'sent')
                 const pending = orders?.filter(o => o.status === 'sent') || [];
 
                 setStats({
-                    totalRevenue: total,
+                    totalRevenue: totals.net,
+                    grossRevenue: totals.gross,
+                    operatorFees: totals.fee,
                     monthlyRevenue: monthTotal,
                     completedCount: completed.length,
                     pendingCount: pending.length,
@@ -132,11 +164,38 @@ const ProviderDashboard: React.FC<Props> = ({
                 {/* Revenue Display - Financial Dashboard Style */}
                 <div className="space-y-6">
                     <div className="flex items-end justify-between">
-                        <div>
-                            <p className="meta !text-[9px] text-text-tertiary mb-2">Valor Total do Portfolio</p>
+                        <div
+                            className="cursor-pointer transition-opacity active:opacity-70"
+                            onClick={() => setShowFinancialDetails(!showFinancialDetails)}
+                        >
+                            <div className="flex items-center gap-2 mb-2">
+                                <p className="meta !text-[9px] text-text-tertiary">
+                                    Valor Líquido do Portfolio
+                                </p>
+                                <div className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${showFinancialDetails ? 'bg-accent-primary text-white' : 'bg-bg-tertiary text-text-tertiary'}`}>
+                                    {showFinancialDetails ? 'Detalhado' : 'Resumo'}
+                                </div>
+                            </div>
+
                             <h1 className="heading-4xl tracking-tighter mb-2">
                                 R$ {stats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </h1>
+
+                            {/* Financial Breakdown (Collapsible) */}
+                            {showFinancialDetails && (
+                                <div className="mb-4 space-y-1 animate-slide-down">
+                                    <div className="flex items-center gap-2 text-xs text-text-secondary">
+                                        <span className="w-16">Total Bruto:</span>
+                                        <span className="font-semibold">R$ {stats.grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-error/80">
+                                        <span className="w-16">Operadora:</span>
+                                        <span className="font-semibold">- R$ {stats.operatorFees.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                    </div>
+                                    <div className="h-px bg-border-subtle w-32 my-1"></div>
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-3">
                                 <span className={`flex items-center gap-1.5 text-[11px] font-black ${stats.growth >= 0 ? 'text-success bg-success/10' : 'text-error bg-error/10'} px-3 py-1.5 rounded-full uppercase tracking-wider`}>
                                     {stats.growth >= 0 ? <ArrowUpRight size={14} /> : <TrendingDown size={14} className="rotate-90" />}

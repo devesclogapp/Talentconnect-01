@@ -25,6 +25,7 @@ const Earnings: React.FC<Props> = ({ onBack, onNavigate }) => {
   const [completedOrders, setCompletedOrders] = useState<any[]>([]);
   const [monthlyEarnings, setMonthlyEarnings] = useState(0);
   const [totalServices, setTotalServices] = useState(0);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEarnings = async () => {
@@ -37,20 +38,36 @@ const Earnings: React.FC<Props> = ({ onBack, onNavigate }) => {
         setCompletedOrders(completed.slice(0, 5)); // Last 5 for history
         setTotalServices(completed.length);
 
-        // Calculate total balance
-        const total = completed.reduce((acc, current) => acc + (current.total_amount || 0), 0);
+        // Helper to get payment details
+        const getPaymentDetails = (o: any) => {
+          const payment = Array.isArray(o.payment) ? o.payment[0] : o.payment;
+          // Fallback: If no provider_amount, estimate 85% of total (prevent zero-graph for legacy/mock data)
+          const rawNet = payment?.provider_amount;
+          const gross = payment?.amount_total || o.total_amount || 0;
+          const estimatedNet = gross * 0.85;
+          const net = rawNet !== undefined && rawNet !== null ? rawNet : estimatedNet;
+
+          return {
+            net: net,
+            gross: gross,
+            fee: payment?.operator_fee || (gross - net)
+          };
+        };
+
+        // Calculate total balance (NET)
+        const total = completed.reduce((acc, current) => acc + getPaymentDetails(current).net, 0);
         setBalance(total);
 
-        // Calculate this month's earnings
+        // Calculate this month's earnings (NET)
         const now = new Date();
         const thisMonth = completed.filter(o => {
           const orderDate = new Date(o.scheduled_at || o.created_at);
           return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
         });
-        const monthTotal = thisMonth.reduce((acc, current) => acc + (current.total_amount || 0), 0);
+        const monthTotal = thisMonth.reduce((acc, current) => acc + getPaymentDetails(current).net, 0);
         setMonthlyEarnings(monthTotal);
 
-        // Calculate weekly data (last 7 days)
+        // Calculate weekly data (last 7 days - NET)
         const days = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
         const dayMap: Record<string, number> = {};
 
@@ -64,7 +81,7 @@ const Earnings: React.FC<Props> = ({ onBack, onNavigate }) => {
         completed.forEach(o => {
           const d = new Date(o.scheduled_at || o.created_at).toDateString();
           if (dayMap[d] !== undefined) {
-            dayMap[d] += (o.total_amount || 0);
+            dayMap[d] += getPaymentDetails(o).net;
           }
         });
 
@@ -154,25 +171,25 @@ const Earnings: React.FC<Props> = ({ onBack, onNavigate }) => {
                       dataKey="name"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 9, fill: '#666', fontWeight: 700 }}
+                      tick={{ fontSize: 9, fill: 'var(--text-secondary)', fontWeight: 700 }}
                     />
                     <Tooltip
-                      cursor={{ fill: 'rgba(255, 95, 31, 0.05)' }}
+                      cursor={{ fill: 'var(--bg-tertiary)', opacity: 0.5 }}
                       contentStyle={{
-                        backgroundColor: '#000',
+                        backgroundColor: 'var(--bg-secondary)',
                         borderRadius: '0px',
-                        border: '1px solid #333',
+                        border: '1px solid var(--border-subtle)',
                         padding: '10px'
                       }}
-                      itemStyle={{ color: '#FF5F1F', fontSize: '10px', fontWeight: 'bold' }}
-                      labelStyle={{ color: '#999', fontSize: '8px', marginBottom: '4px', textTransform: 'uppercase' }}
-                      formatter={(value: any) => [`R$ ${value}`, 'VALOR']}
+                      itemStyle={{ color: 'var(--text-primary)', fontSize: '10px', fontWeight: 'bold' }}
+                      labelStyle={{ color: 'var(--text-tertiary)', fontSize: '8px', marginBottom: '4px', textTransform: 'uppercase' }}
+                      formatter={(value: any) => [`R$ ${value.toFixed(2)}`, 'VALOR']}
                     />
-                    <Bar dataKey="value" radius={[0, 0, 0, 0]} barSize={20}>
+                    <Bar dataKey="value" radius={[2, 2, 2, 2]} barSize={20}>
                       {chartData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={entry.value > 0 ? '#FF5F1F' : 'rgba(102, 102, 102, 0.2)'}
+                          fill={entry.value > 0 ? 'var(--text-primary)' : 'var(--border-medium)'}
                         />
                       ))}
                     </Bar>
@@ -187,33 +204,75 @@ const Earnings: React.FC<Props> = ({ onBack, onNavigate }) => {
         {completedOrders.length > 0 && (
           <section className="px-4 pb-10">
             <h3 className="meta-bold text-neutral-300 uppercase tracking-[0.2em] !text-[9px] mb-4">Registro Histórico</h3>
-            <div className="space-y-1">
-              {completedOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="bg-white dark:bg-neutral-950 p-4 border-b border-neutral-50 dark:border-neutral-900 flex items-center justify-between group interactive"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-sm bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center text-black-orange border border-neutral-100 dark:border-neutral-800">
-                      <CheckCircle size={16} />
+            <div className="space-y-2">
+              {completedOrders.map((order) => {
+                const getPaymentDetails = (o: any) => {
+                  const payment = Array.isArray(o.payment) ? o.payment[0] : o.payment;
+                  return {
+                    net: payment?.provider_amount || 0,
+                    gross: payment?.amount_total || o.total_amount || 0,
+                    fee: payment?.operator_fee || ((o.total_amount || 0) - (payment?.provider_amount || 0))
+                  };
+                };
+
+                const { net, gross, fee } = getPaymentDetails(order);
+                const isExpanded = expandedOrderId === order.id;
+
+                return (
+                  <div
+                    key={order.id}
+                    onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                    className={`bg-white dark:bg-neutral-950 border border-neutral-50 dark:border-neutral-900 rounded-sm transition-all duration-300 overflow-hidden group interactive ${isExpanded ? 'shadow-lg border-primary-orange/30' : ''}`}
+                  >
+                    <div className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-sm flex items-center justify-center border transition-colors ${isExpanded ? 'bg-primary-orange/10 border-primary-orange/30 text-primary-orange' : 'bg-neutral-50 dark:bg-neutral-900 text-black-orange border-neutral-100 dark:border-neutral-800'}`}>
+                          {isExpanded ? <DollarSign size={16} /> : <CheckCircle size={16} />}
+                        </div>
+                        <div>
+                          <p className="meta-bold uppercase tracking-tight !text-[12px] text-text-primary">
+                            {order.service?.title || 'Serviço'}
+                          </p>
+                          <p className="meta !text-[9px] text-text-secondary flex items-center gap-1 uppercase tracking-widest mt-0.5">
+                            <Clock size={10} />
+                            {new Date(order.scheduled_at || order.created_at).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`meta-bold !text-[14px] transition-colors ${isExpanded ? 'text-primary-orange' : 'text-text-primary'}`}>
+                          +R$ {net.toFixed(2)}
+                        </p>
+                        {isExpanded && <p className="meta !text-[8px] uppercase tracking-widest text-text-tertiary">Líquido</p>}
+                      </div>
                     </div>
-                    <div>
-                      <p className="meta-bold uppercase tracking-tight !text-[12px] text-text-primary">
-                        {order.service?.title || 'Serviço'}
-                      </p>
-                      <p className="meta !text-[9px] text-text-secondary flex items-center gap-1 uppercase tracking-widest mt-0.5">
-                        <Clock size={10} />
-                        {new Date(order.scheduled_at || order.created_at).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
+
+                    {/* Expanded Details */}
+                    {isExpanded && (
+                      <div className="px-4 pb-4 bg-neutral-50/50 dark:bg-neutral-900/30 border-t border-neutral-100 dark:border-neutral-800 animate-slide-down">
+                        <div className="pt-4 grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <p className="meta !text-[8px] text-text-tertiary uppercase tracking-widest mb-1">Valor Bruto</p>
+                            <p className="font-bold text-text-primary text-xs">R$ {gross.toFixed(2)}</p>
+                          </div>
+                          <div>
+                            <p className="meta !text-[8px] text-text-tertiary uppercase tracking-widest mb-1">Taxa Operadora</p>
+                            <p className="font-bold text-error text-xs">- R$ {fee.toFixed(2)}</p>
+                          </div>
+                          <div>
+                            <p className="meta !text-[8px] text-text-tertiary uppercase tracking-widest mb-1">Seu Ganho</p>
+                            <p className="font-bold text-success text-xs">R$ {net.toFixed(2)}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-dashed border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+                          <span className="meta !text-[8px] text-text-tertiary uppercase tracking-widest">ID: #{order.id.slice(0, 8)}</span>
+                          <button className="text-[10px] font-bold text-primary-orange uppercase tracking-widest hover:underline">Ver Recibo</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <p className="meta-bold !text-[14px] text-black-orange">
-                      +R$ {order.total_amount?.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
