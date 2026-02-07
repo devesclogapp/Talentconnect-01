@@ -59,8 +59,8 @@ const Onboarding: React.FC<Props> = ({ onNavigate }) => {
             <Sparkles size={18} className="text-accent-primary" />
           </div>
           <div>
-            <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none">protocolo de mercado</p>
-            <h2 className="heading-md tracking-tight">Talent Connect</h2>
+            <p className="meta !text-[8px] text-text-tertiary leading-none font-normal">Protocolo de mercado</p>
+            <h2 className="heading-md">Talent Connect</h2>
           </div>
         </div>
 
@@ -70,7 +70,7 @@ const Onboarding: React.FC<Props> = ({ onNavigate }) => {
             {steps[activeTab].icon}
           </div>
 
-          <h1 className="heading-4xl tracking-tighter whitespace-pre-line animate-fade-in leading-[1.05]">
+          <h1 className="heading-4xl whitespace-pre-line animate-fade-in leading-[1.05]">
             {steps[activeTab].title}
           </h1>
 
@@ -103,7 +103,7 @@ const Onboarding: React.FC<Props> = ({ onNavigate }) => {
               <div className="w-9 h-9 rounded-full bg-bg-primary/20 flex items-center justify-center">
                 <Play size={16} fill="currentColor" />
               </div>
-              <span className="uppercase tracking-[0.25em] font-black text-[12px]">Entrar</span>
+              <span className="font-normal text-[12px]">Entrar</span>
             </div>
             <ArrowRight size={22} className="transition-transform group" />
           </button>
@@ -112,14 +112,14 @@ const Onboarding: React.FC<Props> = ({ onNavigate }) => {
             onClick={() => onNavigate('REGISTER')}
             className="w-full h-[56px] rounded-2xl bg-bg-secondary border border-border-medium flex items-center justify-center gap-2 text-text-secondary   transition-all group"
           >
-            <span className="text-xs font-black uppercase tracking-[0.3em]">Criar Conta</span>
+            <span className="text-xs font-normal">Criar conta</span>
             <ArrowRight size={16} className="opacity-0 group transition-opacity" />
           </button>
         </div>
 
         {/* Footer */}
         <div className="pt-6 pb-10 text-center border-t border-border-subtle/30">
-          <p className="meta !text-[8px] opacity-40">Talent Connect v3.0 • Infraestrutura Segura</p>
+          <p className="meta !text-[8px] opacity-40 font-normal">Talent Connect v3.0 • Infraestrutura segura</p>
         </div>
       </div>
     </div>

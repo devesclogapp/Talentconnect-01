@@ -134,11 +134,11 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder, 
                         className="flex items-center gap-2 text-text-primary mb-6 hover:opacity-70 transition-opacity"
                     >
                         <ArrowLeft size={20} />
-                        <span className="text-sm font-semibold">Voltar</span>
+                        <span className="text-sm font-normal">Voltar</span>
                     </button>
 
-                    <h1 className="heading-2xl tracking-tight text-text-primary mb-1">
-                        Pedidos Recebidos
+                    <h1 className="heading-2xl text-text-primary mb-1">
+                        Pedidos recebidos
                     </h1>
                     <p className="text-xs text-text-tertiary font-normal">
                         {orders.length} pedidos no total
@@ -271,10 +271,10 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder, 
                                 {/* Footer: Price & Action */}
                                 <div className="flex items-end justify-between border-t border-border-subtle pt-5">
                                     <div>
-                                        <p className="text-[9px] font-normal text-text-tertiary tracking-normal mb-1">Valor Total</p>
+                                        <p className="text-[9px] font-medium text-text-tertiary mb-1">Valor Total</p>
                                         <div className="flex items-baseline gap-0.5">
                                             <span className="text-sm font-bold text-text-secondary">R$</span>
-                                            <span className="text-2xl font-black text-text-primary tracking-tight">
+                                            <span className="text-2xl font-bold text-text-primary">
                                                 {order.total_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                             </span>
                                         </div>

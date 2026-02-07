@@ -89,10 +89,10 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                     <CheckCircle size={48} className="text-black-green" />
                 </div>
 
-                <h1 className="text-3xl font-black text-black dark:text-white mb-2">
-                    Resumo do Pedido
+                <h1 className="text-3xl font-bold text-black dark:text-white mb-2">
+                    Resumo do pedido
                 </h1>
-                <p className="meta-bold text-black uppercase tracking-widest">
+                <p className="text-black font-normal text-xs">
                     Revise as informações abaixo
                 </p>
             </div>
@@ -101,33 +101,33 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                 {/* Service & Provider */}
                 <div className="grid grid-cols-1 gap-4">
                     <Card className="p-8 rounded-[32px] border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-                        <h3 className="meta-bold text-black uppercase tracking-widest mb-6">Serviço & Profissional</h3>
+                        <h3 className="text-black font-normal text-sm mb-6">Serviço & profissional</h3>
                         <div className="flex items-center gap-4 mb-6">
                             <div className="w-16 h-16 rounded-[24px] bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
                                 {orderData?.provider?.avatar_url ? (
                                     <img src={orderData.provider.avatar_url} className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-black text-2xl font-black">{orderData?.provider?.name?.[0] || 'P'}</div>
+                                    <div className="w-full h-full flex items-center justify-center text-black text-2xl font-bold">{orderData?.provider?.name?.[0] || 'P'}</div>
                                 )}
                             </div>
                             <div>
-                                <h3 className="body-bold text-xl">{orderData?.service?.title || 'Serviço'}</h3>
-                                <p className="meta-bold text-black-green uppercase tracking-widest !text-[9px]">{orderData?.provider?.name || 'Profissional'}</p>
+                                <h3 className="text-xl font-bold">{orderData?.service?.title || 'Serviço'}</h3>
+                                <p className="text-black-green font-normal text-[9px]">{orderData?.provider?.name || 'Profissional'}</p>
                             </div>
                         </div>
                     </Card>
 
                     {/* Schedule */}
                     <Card className="p-8 rounded-[32px] border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-                        <h3 className="meta-bold text-black uppercase tracking-widest mb-6">Agendamento</h3>
+                        <h3 className="text-black font-normal text-sm mb-6">Agendamento</h3>
                         <div className="space-y-4">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-primary-green/10 flex items-center justify-center text-black-green">
                                     <Calendar size={20} />
                                 </div>
                                 <div>
-                                    <p className="meta-bold text-black uppercase tracking-widest !text-[9px]">Data</p>
-                                    <p className="body-bold capitalize">{formatDate(orderData?.date)}</p>
+                                    <p className="text-black font-normal text-[9px]">Data</p>
+                                    <p className="capitalize font-normal text-sm">{formatDate(orderData?.date)}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -135,8 +135,8 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                                     <Clock size={20} />
                                 </div>
                                 <div>
-                                    <p className="meta-bold text-black uppercase tracking-widest !text-[9px]">Horário</p>
-                                    <p className="body-bold">{orderData?.time}</p>
+                                    <p className="text-black font-normal text-[9px]">Horário</p>
+                                    <p className="font-normal text-sm">{orderData?.time}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -144,8 +144,8 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                                     <MapPin size={20} />
                                 </div>
                                 <div>
-                                    <p className="meta-bold text-black uppercase tracking-widest !text-[9px]">Endereço</p>
-                                    <p className="body-bold">{orderData?.location}</p>
+                                    <p className="text-black font-normal text-[9px]">Endereço</p>
+                                    <p className="font-normal text-sm">{orderData?.location}</p>
                                 </div>
                             </div>
                         </div>
@@ -154,18 +154,21 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                     {/* Financial */}
                     <Card className="p-8 rounded-[32px] border-none bg-black dark:bg-neutral-800 text-white shadow-2xl">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="meta-bold text-white/50 uppercase tracking-widest">Total Estimado</h3>
+                            <h3 className="text-white/50 font-normal text-xs">Total estimado</h3>
                             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
                                 <CreditCard size={20} className="text-black-green" />
                             </div>
                         </div>
-                        <p className="text-4xl font-black mb-2 text-white">R$ {orderData?.totalEstimated?.toFixed(2)}</p>
+                        <div className="flex items-baseline gap-1.5 mb-2">
+                            <span className="text-xl font-bold text-accent-secondary">R$</span>
+                            <p className="text-5xl font-black text-white tracking-tighter">{orderData?.totalEstimated?.toFixed(2)}</p>
+                        </div>
                         <p className="meta text-white/40">O pagamento só será liberado após a sua confirmação de conclusão do serviço.</p>
                     </Card>
                 </div>
 
                 {/* Terms */}
-                <p className="text-[10px] text-center text-black dark:text-gray-400 px-6 uppercase tracking-wider leading-relaxed">
+                <p className="text-[10px] text-center text-black dark:text-gray-400 px-6 leading-relaxed font-normal">
                     Ao confirmar, você concorda que o valor ficará retido pela Talent Connect até a conclusão.
                 </p>
             </div>
@@ -175,17 +178,17 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                 <button
                     onClick={onEdit}
                     disabled={isSubmitting}
-                    className="flex-1 py-5 border-2 border-neutral-100 dark:border-neutral-800 rounded-[20px] label-semibold uppercase tracking-wide text-black dark:text-white"
+                    className="flex-1 py-5 border-2 border-neutral-100 dark:border-neutral-800 rounded-[20px] text-black dark:text-white font-normal text-sm"
                 >
                     Editar
                 </button>
                 <button
                     onClick={handleConfirm}
                     disabled={isSubmitting}
-                    className="flex-[2] py-5 bg-primary-green text-black rounded-[20px] label-semibold uppercase tracking-wide shadow-xl shadow-primary-green/20 flex items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap"
+                    className="flex-[2] py-5 bg-primary-green text-black rounded-[20px] shadow-xl shadow-primary-green/20 flex items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap font-normal text-sm"
                 >
                     {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle size={20} />}
-                    {isSubmitting ? 'Enviando...' : 'Confirmar Pedido'}
+                    {isSubmitting ? 'Enviando...' : 'Confirmar pedido'}
                 </button>
             </footer>
         </div>

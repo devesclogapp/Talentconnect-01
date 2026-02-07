@@ -77,7 +77,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
     }
   };
 
-  if (loading) return <div className="container min-h-screen flex items-center justify-center meta-bold text-black dark:text-white">CARREGANDO...</div>;
+  if (loading) return <div className="container min-h-screen flex items-center justify-center font-normal text-black dark:text-white">Carregando...</div>;
 
   if (!activeOrder) {
     return (
@@ -87,7 +87,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
         </div>
         <h2 className="heading-lg text-black dark:text-white">Nenhum pedido ativo</h2>
         <p className="body mt-2 max-w-[280px] text-black">Seus agendamentos ativos aparecerão aqui.</p>
-        <button onClick={onBack} className="button--primary mt-10 !bg-primary-green !text-black border-none !px-8 label-semibold rounded-2xl">Voltar ao Início</button>
+        <button onClick={onBack} className="button--primary mt-10 !bg-primary-green !text-black border-none !px-8 font-normal rounded-2xl">Voltar ao início</button>
       </div>
     );
   }
@@ -114,8 +114,8 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
           <ArrowLeft size={20} className="text-black dark:text-white" />
         </button>
         <div className="flex-1 text-center">
-          <h2 className="heading-md tracking-widest text-[12px] text-black dark:text-white">Status do Pedido</h2>
-          <p className="meta-bold text-black tracking-widest !text-[9px]">ID: #{activeOrder.id.slice(0, 8)}</p>
+          <h2 className="heading-md text-[12px] text-black dark:text-white">Status do pedido</h2>
+          <p className="text-black font-normal !text-[9px]">ID: #{activeOrder.id.slice(0, 8)}</p>
         </div>
         <button onClick={onSupport} className="w-10 h-10 flex items-center justify-center interactive">
           <LifeBuoy size={20} className="text-black dark:text-white" />
@@ -227,22 +227,22 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                   <CreditCard size={24} />
                 </div>
                 <div>
-                  <h4 className="heading-md !text-lg mb-0 text-white">Pagamento Pendente</h4>
-                  <p className="meta-bold text-white/40 tracking-widest !text-[9px]">O profissional aceitou seu pedido!</p>
+                  <h4 className="heading-md !text-lg mb-0 text-white">Pagamento pendente</h4>
+                  <p className="text-white/40 font-normal !text-[9px]">O profissional aceitou seu pedido!</p>
                 </div>
               </div>
               <div className="bg-white/5 p-4 rounded-2xl">
                 <div className="flex justify-between items-center text-sm mb-2">
-                  <span className="text-white/60">Total do Serviço</span>
-                  <span className="font-black text-white">R$ {activeOrder.total_amount?.toFixed(2)}</span>
+                  <span className="text-white/60">Total do serviço</span>
+                  <span className="font-bold text-white">R$ {activeOrder.total_amount?.toFixed(2)}</span>
                 </div>
-                <p className="text-[10px] text-white/30 tracking-widest">O valor ficará retido com segurança até a conclusão.</p>
+                <p className="text-[10px] text-white/30 font-normal">O valor ficará retido com segurança até a conclusão.</p>
               </div>
               <button
                 onClick={() => onPay?.(activeOrder)} // In App.tsx, we can handle the navigation
-                className="w-full bg-primary-green text-black py-5 rounded-[20px] label-semibold tracking-widest active:scale-95 transition-all shadow-lg shadow-primary-green/20"
+                className="w-full bg-primary-green text-black py-5 rounded-[20px] font-normal active:scale-95 transition-all shadow-lg shadow-primary-green/20"
               >
-                Pagar Agora
+                Pagar agora
               </button>
             </Card>
           </section>
@@ -257,22 +257,22 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                     {activeOrder.provider?.avatar_url ? (
                       <img src={activeOrder.provider.avatar_url} alt="Provider" className="w-full h-full rounded-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 meta-bold text-black dark:text-white">{providerName[0]}</div>
+                      <div className="w-full h-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 font-normal text-black dark:text-white">{providerName[0]}</div>
                     )}
                   </div>
                   <div className="absolute bottom-0 right-0 w-4 h-4 bg-primary-green border-2 border-white dark:border-neutral-900 rounded-full"></div>
                 </div>
                 <div>
                   <h4 className="heading-md mb-0 text-black dark:text-white">{providerName}</h4>
-                  <p className="meta-bold text-black dark:text-neutral-400 mt-1 tracking-tight">Profissional Verificado</p>
+                  <p className="text-black dark:text-neutral-400 mt-1 font-normal text-xs">Profissional verificado</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <button className="flex-1 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 py-4 rounded-2xl label-semibold interactive flex items-center justify-center gap-2 text-sm">
+                <button className="flex-1 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 py-4 rounded-2xl font-normal interactive flex items-center justify-center gap-2 text-sm">
                   <MessageSquare size={16} /> Chat
                 </button>
-                <button className="flex-1 bg-primary-black text-white dark:bg-white dark:text-black py-4 rounded-2xl label-semibold interactive flex items-center justify-center gap-2 text-sm">
+                <button className="flex-1 bg-primary-black text-white dark:bg-white dark:text-black py-4 rounded-2xl font-normal interactive flex items-center justify-center gap-2 text-sm">
                   <Phone size={16} /> Ligar
                 </button>
               </div>
@@ -285,7 +285,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
             <div className="container !px-0 flex flex-col gap-4">
               <div className="flex items-center gap-2 justify-center">
                 <AlertCircle size={16} className="text-black-green" />
-                <p className="meta-bold tracking-widest text-[10px]">O Profissional indicou o início do serviço</p>
+                <p className="font-normal text-[10px]">O profissional indicou o início do serviço</p>
               </div>
               <button
                 onClick={async () => {
@@ -295,9 +295,9 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                     fetchActiveOrder();
                   } catch (e) { alert("Erro: " + e); }
                 }}
-                className="w-full bg-primary-green text-black py-5 rounded-2xl label-semibold shadow-xl"
+                className="w-full bg-primary-green text-black py-5 rounded-2xl font-normal shadow-xl"
               >
-                Confirmar Presença/Início
+                Confirmar presença/início
               </button>
             </div>
           </div>
@@ -308,13 +308,13 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
             <div className="container !px-0 flex flex-col gap-4">
               <div className="flex items-center gap-2 justify-center">
                 <AlertCircle size={16} className="text-black-green" />
-                <p className="meta-bold tracking-widest text-[10px]">Profissional solicitou finalização</p>
+                <p className="font-normal text-[10px]">Profissional solicitou finalização</p>
               </div>
               <button
                 onClick={handleConfirmFinish}
-                className="w-full bg-primary-green text-black py-5 rounded-2xl label-semibold shadow-xl"
+                className="w-full bg-primary-green text-black py-5 rounded-2xl font-normal shadow-xl"
               >
-                Confirmar Conclusão
+                Confirmar conclusão
               </button>
             </div>
           </div>
@@ -356,8 +356,8 @@ const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, varia
         <div className={`w-0.5 h-full ${active && completed ? (variant === 'info' ? 'bg-info' : variant === 'warning' ? 'bg-warning' : 'bg-success') : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>
       </div>
       <div className="pt-2 flex-1">
-        <p className={`body-bold transition-colors ${titleColorClass}`}>{title}</p>
-        {desc && <p className={`text-[10px] font-bold tracking-wide mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
+        <p className={`font-bold transition-colors ${titleColorClass}`}>{title}</p>
+        {desc && <p className={`text-[10px] font-normal mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
       </div>
     </div>
   );
@@ -397,7 +397,7 @@ const IntermediateStep = ({ label, active, completed, variant = 'warning' }: any
       </div>
       <div className="py-3 flex-1">
         <p
-          className={`text-[11px] font-light tracking-[0px] transition-colors ${textColorClass}`}
+          className={`text-[11px] font-normal transition-colors ${textColorClass}`}
         >
           {label}
         </p>

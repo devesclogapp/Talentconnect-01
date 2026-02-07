@@ -43,7 +43,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                 <div className="w-16 h-16 rounded-[22px] bg-bg-secondary border border-border-medium flex items-center justify-center mb-8 shadow-glow-accent">
                     <ShieldCheck size={32} className="text-accent-primary" />
                 </div>
-                <h1 className="heading-4xl tracking-tighter mb-3">Acesso Seguro</h1>
+                <h1 className="heading-4xl mb-3">Acesso Seguro</h1>
                 <p className="body max-w-[260px]">Insira suas credenciais para gerenciar seu perfil.</p>
             </div>
 
@@ -56,14 +56,14 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                     <button
                         type="button"
                         onClick={() => setRole('client')}
-                        className={`relative z-10 flex-1 py-3 text-xs font-black uppercase tracking-widest transition-colors ${role === 'client' ? 'text-text-black' : 'text-text-tertiary'}`}
+                        className={`relative z-10 flex-1 py-3 text-xs font-normal transition-colors ${role === 'client' ? 'text-text-black' : 'text-text-tertiary'}`}
                     >
                         Cliente
                     </button>
                     <button
                         type="button"
                         onClick={() => setRole('provider')}
-                        className={`relative z-10 flex-1 py-3 text-xs font-black uppercase tracking-widest transition-colors ${role === 'provider' ? 'text-text-black' : 'text-text-tertiary'}`}
+                        className={`relative z-10 flex-1 py-3 text-xs font-normal transition-colors ${role === 'provider' ? 'text-text-black' : 'text-text-tertiary'}`}
                     >
                         Profissional
                     </button>
@@ -109,7 +109,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                 {error && (
                     <div className="p-4 bg-error/10 border border-error/20 rounded-xl flex items-center gap-3 animate-fade-in">
                         <div className="w-2 h-2 rounded-full bg-error"></div>
-                        <p className="text-[10px] font-bold text-error uppercase tracking-wider">{error}</p>
+                        <p className="text-[10px] font-normal text-error">{error}</p>
                     </div>
                 )}
 
@@ -119,7 +119,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                         disabled={loading}
                         className="btn-primary w-full justify-between group shadow-glow"
                     >
-                        <span className="uppercase tracking-[0.2em]">{loading ? 'Verificando...' : 'Entrar'}</span>
+                        <span className="font-normal">{loading ? 'Verificando...' : 'Entrar'}</span>
                         <div className="w-8 h-8 rounded-full bg-bg-primary/20 flex items-center justify-center transition-transform group">
                             <ArrowRight size={18} />
                         </div>

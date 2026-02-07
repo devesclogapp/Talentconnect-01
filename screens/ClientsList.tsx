@@ -134,7 +134,7 @@ const ClientsList: React.FC<Props> = ({ onBack }) => {
                                     <div className="flex items-center justify-between mb-1">
                                         <h3 className="font-bold text-text-primary truncate pr-2">{client.name}</h3>
                                         <span className="text-[10px] font-normal bg-accent-primary/10 text-accent-primary px-2 py-0.5 rounded-full whitespace-nowrap">
-                                            {client.totalServices} {client.totalServices === 1 ? 'Job' : 'Jobs'}
+                                            {client.totalServices} {client.totalServices === 1 ? 'Serviço' : 'Serviços'}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3 text-xs text-text-tertiary">

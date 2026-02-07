@@ -73,12 +73,12 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             // Update order status to 'paid_escrow_held'
-            const { error } = await supabase
+            const { error } = await (supabase as any)
                 .from('orders')
                 .update({
                     status: 'paid_escrow_held',
                     updated_at: new Date().toISOString()
-                } as any)
+                })
                 .eq('id', order.id);
 
             if (error) throw error;
@@ -114,9 +114,9 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                     <div className="w-24 h-24 rounded-[32px] bg-primary-green flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-primary-green/30">
                         <CheckCircle size={48} className="text-black" />
                     </div>
-                    <h1 className="text-3xl font-black text-black dark:text-white mb-4">Pagamento Seguro!</h1>
+                    <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Pagamento seguro!</h1>
                     <p className="body text-black mb-8">Seu valor está retido com segurança e será liberado apenas após a conclusão do serviço.</p>
-                    <div className="flex items-center justify-center gap-3 text-black-green meta-bold uppercase tracking-widest">
+                    <div className="flex items-center justify-center gap-3 text-black-green font-normal text-[10px]">
                         <Loader2 size={16} className="animate-spin" />
                         Redirecionando...
                     </div>
@@ -133,7 +133,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                     className="interactive flex items-center gap-2 text-black mb-4"
                 >
                     <ArrowLeft size={20} />
-                    <span className="meta-bold uppercase tracking-widest text-[10px]">Resumo do Pedido</span>
+                    <span className="font-normal text-[10px]">Resumo do pedido</span>
                 </button>
                 <h1 className="text-2xl font-bold text-black dark:text-white">Pagamento</h1>
             </header>
@@ -152,13 +152,13 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
 
                 {/* Total */}
                 <div className="text-center py-4">
-                    <p className="meta-bold text-black uppercase tracking-widest mb-1">Total a Reter</p>
-                    <h2 className="text-5xl font-black text-black dark:text-white">R$ {order?.total_amount?.toFixed(2)}</h2>
+                    <p className="text-black font-normal text-sm mb-1">Total a reter</p>
+                    <h2 className="text-5xl font-bold text-black dark:text-white">R$ {order?.total_amount?.toFixed(2)}</h2>
                 </div>
 
                 {/* Methods */}
                 <div className="space-y-3">
-                    <h3 className="meta-bold text-black uppercase tracking-widest px-1">Escolha o método</h3>
+                    <h3 className="text-black font-normal text-sm px-1">Escolha o método</h3>
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             onClick={() => setPaymentMethod('credit')}
@@ -168,7 +168,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                                 }`}
                         >
                             <CreditCard size={24} />
-                            <span className="label-semibold uppercase tracking-widest text-[11px]">Cartão</span>
+                            <span className="text-[11px] font-normal">Cartão</span>
                         </button>
                         <button
                             onClick={() => setPaymentMethod('pix')}
@@ -178,7 +178,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                                 }`}
                         >
                             <div className="text-2xl">🔷</div>
-                            <span className="label-semibold uppercase tracking-widest text-[11px]">PIX Instantâneo</span>
+                            <span className="text-[11px] font-normal">Pix instantâneo</span>
                         </button>
                     </div>
                 </div>
@@ -186,10 +186,10 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                 {/* Card Fields */}
                 {paymentMethod !== 'pix' && (
                     <Card className="p-8 rounded-[32px] border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-4 animate-fade-in">
-                        {errors.general && <p className="text-xs text-error meta-bold uppercase text-center bg-error/10 p-2 rounded-lg">{errors.general}</p>}
+                        {errors.general && <p className="text-xs text-error font-normal text-center bg-error/10 p-2 rounded-lg">{errors.general}</p>}
 
                         <div className="space-y-1">
-                            <label className="meta-bold text-black uppercase tracking-widest !text-[9px] px-1">Número do Cartão</label>
+                            <label className="text-black font-normal !text-[9px] px-1">Número do cartão</label>
                             <Input
                                 placeholder="0000 0000 0000 0000"
                                 value={cardData.number}
@@ -200,9 +200,9 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                         </div>
 
                         <div className="space-y-1">
-                            <label className="meta-bold text-black uppercase tracking-widest !text-[9px] px-1">Nome no Cartão</label>
+                            <label className="text-black font-normal !text-[9px] px-1">Nome no cartão</label>
                             <Input
-                                placeholder="JOSÉ SILVA"
+                                placeholder="José Silva"
                                 value={cardData.name}
                                 onChange={(e) => setCardData(prev => ({ ...prev, name: e.target.value.toUpperCase() }))}
                                 error={errors.name}
@@ -211,7 +211,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="meta-bold text-black uppercase tracking-widest !text-[9px] px-1">Validade</label>
+                                <label className="text-black font-normal !text-[9px] px-1">Validade</label>
                                 <Input
                                     placeholder="MM/AA"
                                     value={cardData.expiry}
@@ -221,7 +221,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="meta-bold text-black uppercase tracking-widest !text-[9px] px-1">CVV</label>
+                                <label className="text-black font-normal !text-[9px] px-1">CVV</label>
                                 <Input
                                     type="password"
                                     placeholder="000"
@@ -240,7 +240,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                     <button
                         onClick={handlePayment}
                         disabled={isProcessing}
-                        className="w-full py-6 bg-primary-black text-white rounded-[24px] label-semibold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all"
+                        className="w-full py-6 bg-primary-black text-white rounded-[24px] shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all font-normal"
                     >
                         {isProcessing ? <Loader2 size={20} className="animate-spin" /> : <Lock size={20} />}
                         {isProcessing ? 'Processando...' : `Confirmar R$ ${order?.total_amount?.toFixed(2)}`}

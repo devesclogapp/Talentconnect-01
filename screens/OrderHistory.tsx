@@ -120,10 +120,10 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                     className="interactive flex items-center gap-2 text-text-primary mb-6 group"
                 >
                     <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="label-semibold text-[13px] uppercase tracking-widest">Painel do Cliente</span>
+                    <span className="text-[13px] font-normal">Painel do Cliente</span>
                 </button>
 
-                <h1 className="text-[32px] font-black text-text-primary tracking-tighter mb-6">
+                <h1 className="text-[32px] font-bold text-text-primary mb-6">
                     Meus Pedidos
                 </h1>
 
@@ -134,7 +134,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                     <input
                         type="text"
                         placeholder="Buscar por serviço ou profissional..."
-                        className="w-full bg-bg-secondary border border-border-subtle rounded-2xl py-4 pl-12 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-primary/20 transition-all text-black"
+                        className="w-full bg-bg-secondary border border-border-subtle rounded-2xl py-4 pl-12 pr-4 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-accent-primary/20 transition-all text-black"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -150,13 +150,13 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                         <button
                             key={tab.id}
                             onClick={() => setFilterStatus(tab.id)}
-                            className={`flex items-center gap-2 px-5 py-3 rounded-2xl label-semibold uppercase tracking-widest whitespace-nowrap transition-all border ${filterStatus === tab.id
+                            className={`flex items-center gap-2 px-5 py-3 rounded-2xl whitespace-nowrap transition-all border ${filterStatus === tab.id
                                 ? 'bg-black text-white border-black shadow-lg scale-[1.02]'
                                 : 'bg-white text-black border-border-subtle hover:border-black/20'
                                 }`}
                         >
                             {tab.icon}
-                            <span className="text-[10px]">{tab.label}</span>
+                            <span className="text-[10px] font-normal">{tab.label}</span>
                         </button>
                     ))}
                 </div>
@@ -166,7 +166,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                 {loading ? (
                     <div className="text-center py-20 flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin"></div>
-                        <p className="meta-bold text-text-primary uppercase tracking-widest">Sincronizando Carteira...</p>
+                        <p className="text-text-primary font-normal text-sm">Sincronizando carteira...</p>
                     </div>
                 ) : filteredOrders.length === 0 ? (
                     <div className="text-center py-20 px-8 bg-bg-secondary/30 rounded-[32px] border border-dashed border-border-subtle">
@@ -198,7 +198,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                                         {providerAvatar ? (
                                             <img src={providerAvatar} className="w-full h-full object-cover" />
                                         ) : (
-                                            <span className="text-xl meta-bold text-text-primary">{providerName[0]}</span>
+                                            <span className="text-xl font-bold text-text-primary">{providerName[0]}</span>
                                         )}
                                     </div>
 
@@ -232,9 +232,12 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                                     <span className="text-sm text-text-secondary truncate flex-1 mr-4">
                                         📍 {order.location_text || 'Local do serviço'}
                                     </span>
-                                    <span className="text-lg font-bold text-black-green-dark">
-                                        R$ {order.total_amount?.toFixed(2) || '0.00'}
-                                    </span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] font-bold text-accent-secondary">R$</span>
+                                        <span className="text-lg font-black text-text-primary leading-none">
+                                            {order.total_amount?.toFixed(2) || '0.00'}
+                                        </span>
+                                    </div>
                                 </div>
                             </button>
                         );

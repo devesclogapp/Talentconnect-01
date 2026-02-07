@@ -154,7 +154,7 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                                     />
                                 ))}
                             </div>
-                            <span className="text-[11px] font-normal text-text-secondary">{stats.rating} rating</span>
+                            <span className="text-[11px] font-normal text-text-secondary">{stats.rating} avaliação</span>
                         </div>
 
                         <div className="flex items-center gap-2">

@@ -39,20 +39,20 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
         completedJobs: 143,
         memberSince: '2023',
         responseTime: '2h',
-        bio: 'Professional with over 10 years of specialized experience in high-performance infrastructure and complex logistical solutions. Delivery of excellence guaranteed.',
+        bio: 'Profissional com mais de 10 anos de experiência especializada em infraestrutura de alta performance e soluções logísticas complexas. Entrega de excelência garantida.',
         services: [
             {
                 id: '1',
-                title: 'Premium Structural Maintenance',
-                description: 'Full audit and high-performance repair of building systems.',
+                title: 'Manutenção Estrutural Premium',
+                description: 'Auditoria completa e reparo de alta performance em sistemas prediais.',
                 price: 185,
                 priceType: 'hourly' as const,
                 duration: '2-4h'
             },
             {
                 id: '2',
-                title: 'Critical Emergency Response',
-                description: 'Rapid identification and real-time correction of infrastructure failures.',
+                title: 'Resposta de Emergência Crítica',
+                description: 'Identificação rápida e correção em tempo real de falhas de infraestrutura.',
                 price: 350,
                 priceType: 'fixed' as const,
                 duration: '1-2h'
@@ -61,20 +61,20 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
         reviews: [
             {
                 id: '1',
-                clientName: 'Market Agent Alpha',
+                clientName: 'Agente de Mercado Alpha',
                 rating: 5,
                 date: '2024-01-15',
-                comment: 'Excellent execution. The system was restored to peak performance within the predicted window.'
+                comment: 'Execução excelente. O sistema foi restaurado para performance máxima dentro da janela prevista.'
             },
             {
                 id: '2',
-                clientName: 'Contractor Gamma',
+                clientName: 'Contratante Gamma',
                 rating: 5,
                 date: '2024-01-10',
-                comment: 'High trust factor. Punctual and technically precise.'
+                comment: 'Alto fator de confiança. Pontual e tecnicamente preciso.'
             }
         ],
-        certifications: ['Global Safety Standard', 'Industry 4.0 Protocol', 'Advanced Infrastructure Auditor']
+        certifications: ['Padrão Global de Segurança', 'Protocolo Indústria 4.0', 'Auditor de Infraestrutura Avançado']
     };
 
     return (
@@ -121,7 +121,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                 <MapPin size={12} className="text-accent-primary" /> {providerData.location}
                             </p>
                             <p className="meta !text-text-tertiary flex items-center gap-1.5 font-normal">
-                                <Star size={12} className="text-warning" fill="currentColor" /> {providerData.rating} ({providerData.reviewCount} ops)
+                                <Star size={12} className="text-warning" fill="currentColor" /> {providerData.rating} ({providerData.reviewCount} avaliações)
                             </p>
                         </div>
                     </div>
@@ -136,28 +136,28 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                 {/* Performance Analytics Bar */}
                 <div className="grid grid-cols-3 gap-3 mb-12">
                     <div className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center group interactive">
-                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Verified Jobs</p>
+                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Trabalhos Verificados</p>
                         <p className="text-xl font-black text-text-primary dark:text-white">{providerData.completedJobs}</p>
-                        <p className="meta !text-[7px] !lowercase text-accent-primary font-normal">+4.2% yield</p>
+                        <p className="meta !text-[7px] text-accent-primary font-normal">+4.2% rendimento</p>
                     </div>
                     <div className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center group interactive">
-                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Response Time</p>
+                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Tempo de Resposta</p>
                         <p className="text-xl font-black text-text-primary dark:text-white">{providerData.responseTime}</p>
-                        <p className="meta !text-[7px] !lowercase text-text-tertiary font-normal">market lead</p>
+                        <p className="meta !text-[7px] text-text-tertiary font-normal">líder de mercado</p>
                     </div>
                     <div className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center group interactive">
-                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Trust Index</p>
+                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Índice de Confiança</p>
                         <p className="text-xl font-black text-accent-primary">AA+</p>
-                        <p className="meta !text-[7px] !lowercase text-text-tertiary font-normal">authorized</p>
+                        <p className="meta !text-[7px] text-text-tertiary font-normal">autorizado</p>
                     </div>
                 </div>
 
                 {/* Service Terminal Tabs */}
                 <div className="flex gap-2 mb-8 bg-bg-secondary p-1.5 rounded-2xl border border-border-subtle">
                     {[
-                        { id: 'services', label: 'Offerings' },
-                        { id: 'about', label: 'Credentials' },
-                        { id: 'reviews', label: 'History' }
+                        { id: 'services', label: 'Ofertas' },
+                        { id: 'about', label: 'Credenciais' },
+                        { id: 'reviews', label: 'Histórico' }
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -184,7 +184,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                                 {service.title}
                                             </h3>
                                             <p className="meta !text-[9px] px-2 py-0.5 rounded-md bg-accent-primary/10 text-accent-primary inline-block mb-3 font-normal">
-                                                {service.duration} protocol
+                                                protocolo de {service.duration}
                                             </p>
                                         </div>
                                         <div className="w-10 h-10 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-tertiary group">
@@ -199,10 +199,10 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                     <div className="flex items-center justify-between pt-5 border-t border-border-subtle">
                                         <div>
                                             <span className="text-2xl font-black text-text-primary dark:text-white">
-                                                $ {service.price}
+                                                R$ {service.price}
                                             </span>
-                                            <span className="meta !text-[8px] !lowercase text-text-tertiary ml-2 font-normal">
-                                                {service.priceType === 'hourly' ? '/hour baseline' : ' fixed contract'}
+                                            <span className="meta !text-[8px] text-text-tertiary ml-2 font-normal">
+                                                {service.priceType === 'hourly' ? '/ hora base' : ' contrato fixo'}
                                             </span>
                                         </div>
 
@@ -210,7 +210,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                             onClick={() => onBookService(service)}
                                             className="btn-primary !h-[48px] !px-6 !text-[11px] !rounded-xl font-normal"
                                         >
-                                            Confirm Hire
+                                            Confirmar Contratação
                                         </button>
                                     </div>
                                 </div>
@@ -221,7 +221,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                     {activeTab === 'about' && (
                         <div className="space-y-4 pb-10">
                             <div className="bg-bg-secondary rounded-3xl border border-border-subtle p-8">
-                                <p className="meta !text-accent-primary text-[9px] mb-4 font-normal">Experience Narrative</p>
+                                <p className="meta !text-accent-primary text-[9px] mb-4 font-normal">Narrativa de Experiência</p>
                                 <p className="body !leading-relaxed">
                                     {providerData.bio}
                                 </p>
@@ -229,7 +229,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
 
                             <div className="bg-bg-secondary rounded-3xl border border-border-subtle p-8">
                                 <h3 className="heading-md text-text-tertiary mb-6 flex items-center gap-2">
-                                    <Award size={16} /> Market Authorizations
+                                    <Award size={16} /> Autorizações de Mercado
                                 </h3>
                                 <div className="space-y-4">
                                     {providerData.certifications.map((cert, idx) => (
@@ -258,8 +258,8 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                                 <p className="text-[11px] font-normal text-text-primary">
                                                     {review.clientName}
                                                 </p>
-                                                <p className="meta !text-[8px] !lowercase text-text-tertiary font-normal">
-                                                    {new Date(review.date).toLocaleDateString()} • Verified Contract
+                                                <p className="meta !text-[8px] text-text-tertiary font-normal">
+                                                    {new Date(review.date).toLocaleDateString()} • Contrato Verificado
                                                 </p>
                                             </div>
                                         </div>

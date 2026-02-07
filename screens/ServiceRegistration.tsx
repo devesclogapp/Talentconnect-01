@@ -4,18 +4,12 @@ import {
   ArrowLeft,
   ChevronDown,
   Check,
-  Hammer,
-  Zap,
-  Droplets,
-  Briefcase,
-  Truck,
-  Dog,
-  HeartPulse,
   Sparkles,
   DollarSign,
   Clock
 } from 'lucide-react';
 import { useAppStore } from '../store';
+import { CATEGORIES_LIST as CATEGORIES, CATEGORY_MAP } from '../constants';
 
 interface Props {
   onBack: () => void;
@@ -23,17 +17,7 @@ interface Props {
   serviceId?: string; // ID do serviço para edição
 }
 
-const CATEGORIES = [
-  { id: 'Limpeza', label: 'Limpeza', icon: <Sparkles size={18} /> },
-  { id: 'Reparos', label: 'Reparos', icon: <Hammer size={18} /> },
-  { id: 'Elétrica', label: 'Elétrica', icon: <Zap size={18} /> },
-  { id: 'Hidráulica', label: 'Hidráulica', icon: <Droplets size={18} /> },
-  { id: 'Beleza', label: 'Beleza', icon: <HeartPulse size={18} /> }, // Using HeartPulse as placeholder for Beauty
-  { id: 'Saúde', label: 'Saúde', icon: <HeartPulse size={18} /> },
-  { id: 'Pet', label: 'Pet', icon: <Dog size={18} /> },
-  { id: 'Mudança', label: 'Mudança', icon: <Truck size={18} /> },
-  { id: 'Consultoria', label: 'Consultoria', icon: <Briefcase size={18} /> },
-];
+
 
 const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId }) => {
   const [step, setStep] = useState(1);
@@ -100,6 +84,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
         description: formData.description,
         pricing_mode: formData.pricingMode,
         duration_hours: parseFloat(formData.durationHours) || 0,
+        image_url: CATEGORY_MAP[formData.category]?.image || null,
         active: true
       };
 
@@ -195,7 +180,10 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-bg-tertiary flex items-center justify-center text-accent-primary">
-                        {selectedCategoryObj.icon}
+                        {(() => {
+                          const Icon = selectedCategoryObj.icon;
+                          return <Icon size={18} />;
+                        })()}
                       </div>
                       <div className="text-left">
                         <p className="text-sm font-bold text-text-primary leading-tight">{selectedCategoryObj.label}</p>
@@ -220,7 +208,10 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                           >
                             <div className="flex items-center gap-3">
                               <div className={`p-1.5 rounded-lg ${formData.category === cat.id ? 'bg-accent-primary text-white shadow-glow' : 'bg-bg-tertiary text-text-tertiary'}`}>
-                                {React.cloneElement(cat.icon as React.ReactElement, { size: 14 })}
+                                {(() => {
+                                  const Icon = cat.icon;
+                                  return <Icon size={14} />;
+                                })()}
                               </div>
                               <span className="text-sm font-medium">{cat.label}</span>
                             </div>

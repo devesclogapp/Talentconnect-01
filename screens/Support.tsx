@@ -79,8 +79,8 @@ const Support: React.FC<Props> = ({ onBack }) => {
           <ArrowLeft size={20} className="text-black dark:text-white" />
         </button>
         <div className="flex-1 text-center">
-          <h2 className="heading-md tracking-widest text-[12px]">Suporte por IA</h2>
-          <p className="meta-bold text-black-green tracking-widest !text-[9px]">Justlife Intelligent Assistant</p>
+          <h2 className="heading-md text-[12px]">Suporte por IA</h2>
+          <p className="text-black-green font-normal !text-[9px]">Talent Connect Intelligent Assistant</p>
         </div>
         <div className="w-10"></div>
       </header>
@@ -91,7 +91,7 @@ const Support: React.FC<Props> = ({ onBack }) => {
           <div key={m.id} className={`flex ${m.sender === 'USER' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-5 rounded-[24px] shadow-sm leading-relaxed ${m.sender === 'USER' ? 'bg-primary-black text-white rounded-br-none' : 'bg-white dark:bg-neutral-900 text-black dark:text-white border border-neutral-100 dark:border-neutral-800 rounded-bl-none'}`}>
               <p className="body !leading-snug">{m.text}</p>
-              <p className={`meta-bold mt-2 opacity-30 !text-[9px] tracking-tighter ${m.sender === 'USER' ? 'text-right' : 'text-left'}`}>
+              <p className={`mt-2 opacity-30 !text-[9px] font-normal ${m.sender === 'USER' ? 'text-right' : 'text-left'}`}>
                 {m.time}
               </p>
             </div>
@@ -99,7 +99,7 @@ const Support: React.FC<Props> = ({ onBack }) => {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-neutral-50 dark:bg-neutral-900 px-6 py-4 rounded-[20px] rounded-bl-none animate-pulse text-black meta-bold tracking-widest border border-neutral-100 dark:border-neutral-800">
+            <div className="bg-neutral-50 dark:bg-neutral-900 px-6 py-4 rounded-[20px] rounded-bl-none animate-pulse text-black font-normal border border-neutral-100 dark:border-neutral-800 text-xs">
               Processando resposta...
             </div>
           </div>
@@ -114,7 +114,7 @@ const Support: React.FC<Props> = ({ onBack }) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Descreva seu problema..."
-            className="flex-1 bg-transparent border-none focus:ring-0 body-small px-0 py-3 text-black dark:text-white placeholder:text-black"
+            className="flex-1 bg-transparent border-none focus:ring-0 body-small px-0 py-3 text-black dark:text-white placeholder:text-text-tertiary"
           />
           <button onClick={handleSend} className="w-12 h-12 bg-primary-green text-black rounded-full flex items-center justify-center interactive shadow-lg">
             <Send size={20} strokeWidth={2.5} />

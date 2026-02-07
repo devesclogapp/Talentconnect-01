@@ -40,7 +40,7 @@ const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, varia
             </div>
             <div className="pt-2 flex-1">
                 <p className={`body-bold transition-colors ${titleColorClass}`}>{title}</p>
-                {desc && <p className={`text-[10px] font-bold tracking-wide mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
+                {desc && <p className={`text-[10px] font-normal mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
             </div>
         </div>
     );
@@ -187,7 +187,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-xl font-bold text-black dark:text-white">Pedido #{order.id.slice(0, 8)}</h1>
-                        <p className="text-xs text-neutral-500 uppercase tracking-widest mt-1">Detalhes e Rastreio</p>
+                        <p className="text-xs text-neutral-500 mt-1 font-normal">Detalhes e rastreio</p>
                     </div>
                     <Badge variant={statusConfig.variant}>
                         <StatusIcon size={14} className="mr-1" />
@@ -207,7 +207,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                                 <Calendar size={18} />
                             </div>
                             <div>
-                                <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Data</p>
+                                <p className="text-[10px] text-neutral-400 font-normal">Data</p>
                                 <p className="font-semibold text-black dark:text-white capitalize">{formatDate(order.scheduled_at)}</p>
                             </div>
                         </div>
@@ -217,7 +217,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                                 <Clock size={18} />
                             </div>
                             <div>
-                                <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Horário</p>
+                                <p className="text-[10px] text-neutral-400 font-normal">Horário</p>
                                 <p className="font-semibold text-black dark:text-white">{formatTime(order.scheduled_at)}</p>
                             </div>
                         </div>
@@ -227,7 +227,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                                 <MapPin size={18} />
                             </div>
                             <div>
-                                <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Local</p>
+                                <p className="text-[10px] text-neutral-400 font-normal">Local</p>
                                 <p className="font-semibold text-black dark:text-white">{order.location_text || 'Endereço não informado'}</p>
                             </div>
                         </div>
@@ -238,16 +238,19 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                 <Card className="p-6">
                     <div className="flex justify-between items-start mb-4">
                         <div>
-                            <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-1">{order.service_category_snapshot || order.service?.category || 'Serviço'}</p>
+                            <p className="text-[10px] text-neutral-400 font-normal mb-1">{order.service_category_snapshot || order.service?.category || 'Serviço'}</p>
                             <h2 className="text-lg font-bold text-black dark:text-white leading-tight">
                                 {order.service_title_snapshot || order.service?.title || 'Detalhes do Serviço'}
                             </h2>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-1">Total</p>
-                            <span className="text-xl font-black text-black dark:text-white">
-                                R$ {order.total_amount?.toFixed(2)}
-                            </span>
+                            <p className="text-[10px] text-neutral-400 font-normal mb-1">Total</p>
+                            <div className="flex items-center justify-end gap-1">
+                                <span className="text-xs font-bold text-accent-secondary">R$</span>
+                                <span className="text-2xl font-black text-black dark:text-white leading-none">
+                                    {order.total_amount?.toFixed(2)}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </Card>
@@ -438,7 +441,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                                     }
                                 }
                             }}
-                            className="w-full py-4 text-feedback-error text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 rounded-[20px] transition-colors hover:bg-feedback-error/5"
+                            className="w-full py-4 text-feedback-error text-xs font-normal flex items-center justify-center gap-2 rounded-[20px] transition-colors hover:bg-feedback-error/5"
                         >
                             <XCircle size={16} />
                             Cancelar Pedido

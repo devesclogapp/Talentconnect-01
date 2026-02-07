@@ -210,7 +210,7 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                                     <button
                                         key={tag}
                                         onClick={() => handleTagToggle(tag)}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${isSelected
+                                        className={`px-4 py-2 rounded-full text-sm font-normal transition-all border-2 ${isSelected
                                             ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-500 text-emerald-700 dark:text-emerald-400 scale-105 shadow-sm'
                                             : 'bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:border-emerald-200 dark:hover:border-emerald-800'
                                             }`}
@@ -242,7 +242,7 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                                     <button
                                         key={tag}
                                         onClick={() => handleTagToggle(tag)}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${isSelected
+                                        className={`px-4 py-2 rounded-full text-sm font-normal transition-all border-2 ${isSelected
                                             ? 'bg-red-100 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-400 scale-105 shadow-sm'
                                             : 'bg-white dark:bg-neutral-900 border-red-200 dark:border-red-800/50 text-neutral-600 dark:text-neutral-300 hover:border-red-300'
                                             }`}

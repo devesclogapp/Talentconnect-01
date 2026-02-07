@@ -104,7 +104,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                     <div className="w-16 h-16 rounded-[22px] bg-bg-secondary border border-border-medium flex items-center justify-center mx-auto mb-8 shadow-glow">
                         <Globe size={32} className="text-accent-primary" />
                     </div>
-                    <h1 className="heading-4xl tracking-tighter mb-3">Junte-se à Elite</h1>
+                    <h1 className="heading-4xl mb-3">Junte-se à Elite</h1>
                     <p className="body max-w-[280px] mx-auto">Selecione seu perfil de acesso.</p>
                 </div>
 
@@ -119,8 +119,8 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                                     <User className="text-text-secondary group" size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="heading-lg tracking-tight mb-0.5 group">Contratante</h3>
-                                    <p className="meta !text-[9px] !lowercase text-text-tertiary">Contrate especialistas de alto nível</p>
+                                    <h3 className="heading-lg mb-0.5 group">Contratante</h3>
+                                    <p className="meta !text-[9px] text-text-tertiary font-normal">Contrate especialistas de alto nível</p>
                                 </div>
                             </div>
                             <ChevronRight size={20} className="text-text-tertiary group transition-transform group" />
@@ -137,8 +137,8 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                                     <Zap className="text-text-secondary group" size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="heading-lg tracking-tight mb-0.5 group">Profissional</h3>
-                                    <p className="meta !text-[9px] !lowercase text-text-tertiary">Ofereça seu talento especializado</p>
+                                    <h3 className="heading-lg mb-0.5 group">Profissional</h3>
+                                    <p className="meta !text-[9px] text-text-tertiary font-normal">Ofereça seu talento especializado</p>
                                 </div>
                             </div>
                             <ChevronRight size={20} className="text-text-tertiary group transition-transform group" />
@@ -147,7 +147,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                 </div>
 
                 <div className="mt-auto pt-10 text-center relative z-10 opacity-40">
-                    <p className="meta !text-[8px]">Segurança garantida pelo Protocolo de Identidade</p>
+                    <p className="meta !text-[8px] font-normal">Segurança garantida pelo protocolo de identidade</p>
                 </div>
             </div>
         );
@@ -162,7 +162,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
             </button>
 
             <div className="mb-10 relative z-10">
-                <h1 className="heading-3xl tracking-tighter mb-2">Criar Conta</h1>
+                <h1 className="heading-3xl mb-2">Criar Conta</h1>
                 <p className="body max-w-[260px]">
                     Registrar como <span className="text-accent-primary font-bold">{selectedRole === 'CLIENT' ? 'Contratante' : 'Profissional'}</span>
                 </p>
@@ -172,7 +172,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                 {errors.general && (
                     <div className="p-4 bg-error/10 border border-error/20 rounded-xl flex items-center gap-3 animate-fade-in">
                         <div className="w-2 h-2 rounded-full bg-error"></div>
-                        <p className="text-[10px] font-bold text-error uppercase tracking-wider">{errors.general}</p>
+                        <p className="text-[10px] font-normal text-error">{errors.general}</p>
                     </div>
                 )}
 
@@ -183,7 +183,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         </div>
                         <Input
                             placeholder="Nome Completo"
-                            className="input pl-12"
+                            className="input pl-12 font-normal"
                             value={formData.name}
                             onChange={(e) => handleInputChange('name', e.target.value)}
                             error={!!errors.name}
@@ -197,7 +197,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         <Input
                             type="email"
                             placeholder="Email"
-                            className="input pl-12"
+                            className="input pl-12 font-normal"
                             value={formData.email}
                             onChange={(e) => handleInputChange('email', e.target.value)}
                             error={!!errors.email}
@@ -211,7 +211,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         <Input
                             type="tel"
                             placeholder="Telefone"
-                            className="input pl-12"
+                            className="input pl-12 font-normal"
                             value={formData.phone}
                             onChange={(e) => handleInputChange('phone', e.target.value)}
                             error={!!errors.phone}
@@ -225,7 +225,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         <Input
                             type="password"
                             placeholder="Senha"
-                            className="input pl-12"
+                            className="input pl-12 font-normal"
                             value={formData.password}
                             onChange={(e) => handleInputChange('password', e.target.value)}
                             error={!!errors.password}
@@ -239,7 +239,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         <Input
                             type="password"
                             placeholder="Confirmar Senha"
-                            className="input pl-12"
+                            className="input pl-12 font-normal"
                             value={formData.confirmPassword}
                             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                             error={!!errors.confirmPassword}
@@ -253,7 +253,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                             </div>
                             <Input
                                 placeholder="Endereço Base"
-                                className="input pl-12"
+                                className="input pl-12 font-normal"
                                 value={formData.address}
                                 onChange={(e) => handleInputChange('address', e.target.value)}
                             />
@@ -267,12 +267,12 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         disabled={isLoading}
                         className="btn-primary w-full justify-between group shadow-glow"
                     >
-                        <span className="uppercase tracking-[0.2em]">{isLoading ? 'Iniciando...' : 'Confirmar Registro'}</span>
+                        <span className="font-normal">{isLoading ? 'Iniciando...' : 'Confirmar Registro'}</span>
                         <div className="w-8 h-8 rounded-full bg-bg-primary/20 flex items-center justify-center transition-transform group">
                             <ArrowRight size={18} />
                         </div>
                     </button>
-                    <p className="text-center meta !text-[8px] mt-6 opacity-40">
+                    <p className="text-center meta !text-[8px] mt-6 opacity-40 font-normal">
                         Ao continuar, você concorda com os Termos de Uso.
                     </p>
                 </div>

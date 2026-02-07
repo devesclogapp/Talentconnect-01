@@ -1,4 +1,5 @@
 import React from 'react';
+import { CATEGORY_MAP } from '../constants';
 
 interface Props {
   service: any;
@@ -11,7 +12,7 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
 
   const providerName = service.provider?.name || 'Profissional';
   const providerAvatar = service.provider?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(providerName)}&background=34A853&color=fff`;
-  const serviceImage = service.image_url || `https://picsum.photos/seed/${service.id}/600/400`;
+  const serviceImage = service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/600/400`;
   const rating = service.provider?.provider_profile?.rating_average || 0;
   const reviews = service.provider?.provider_profile?.total_ratings || 0;
 
@@ -37,7 +38,13 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
             </p>
           </div>
           <div className="text-right">
-            <p className="heading-xl text-black-green-dark">R${service.base_price}<span className="meta-bold text-text-secondary !text-xs">{service.pricing_mode === 'hourly' ? '/h' : ''}</span></p>
+            <div className="flex items-center justify-end gap-1 mb-1">
+              <span className="text-[14px] font-bold text-accent-secondary">R$</span>
+              <span className="text-3xl font-black text-text-primary leading-none">{service.base_price}</span>
+            </div>
+            <p className="text-[8px] text-text-tertiary uppercase tracking-widest font-bold">
+              {service.pricing_mode === 'hourly' ? 'por hora base' : 'valor fechado'}
+            </p>
           </div>
         </div>
 
@@ -67,7 +74,7 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
           </div>
           <div className="bg-success/5 dark:bg-success/10 p-4 rounded-3xl border border-success/10 dark:border-success/20">
             <span className="material-symbols-outlined text-success">bolt</span>
-            <p className="meta-bold text-success mt-2 !text-[10px]">Express Booking</p>
+            <p className="meta-bold text-success mt-2 !text-[10px]">Reserva Expressa</p>
           </div>
         </div>
       </div>

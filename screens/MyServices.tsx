@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProviderServices, deleteService } from '../services/servicesService';
 import { getCurrentUser } from '../services/authService';
+import { CATEGORY_MAP } from '../constants';
 
 interface Props {
     onBack: () => void;
@@ -84,7 +85,7 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
                     services.map(service => (
                         <div key={service.id} className="bg-bg-secondary border border-border-subtle p-5 rounded-2xl flex gap-5 active:scale-[0.98] transition-all">
                             <div className="w-24 h-24 rounded-2xl bg-bg-tertiary bg-cover bg-center shrink-0 border border-border-subtle"
-                                style={{ backgroundImage: `url(${service.image_url || `https://picsum.photos/seed/${service.id}/200/200`})` }}></div>
+                                style={{ backgroundImage: `url(${service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/200/200`})` }}></div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start mb-2">
                                     <h3 className="heading-md text-text-primary truncate pr-2">{service.title}</h3>

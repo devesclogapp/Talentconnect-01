@@ -10,16 +10,13 @@ import {
     Filter,
     ArrowUpRight,
     Zap,
-    Hammer,
-    Brush,
-    Dog,
-    Monitor,
     ShieldCheck,
     Briefcase,
     ArrowRight
 } from 'lucide-react';
-import { getActiveServices, getServiceCategories } from '../services/servicesService';
+import { getActiveServices } from '../services/servicesService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
+import { CATEGORY_MAP, CATEGORIES_LIST } from '../constants';
 
 interface Props {
     onSelectCategory: (category?: string) => void;
@@ -28,22 +25,11 @@ interface Props {
     user?: any;
 }
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-    "Maintenance": <Hammer size={18} />,
-    "Manutenção": <Hammer size={18} />,
-    "Creative": <Brush size={18} />,
-    "Criativo": <Brush size={18} />,
-    "Digital": <Monitor size={18} />,
-    "Elite": <ShieldCheck size={18} />,
-    "Animais": <Dog size={18} />,
-    "Consultoria": <Briefcase size={18} />,
-};
+
 
 const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, onNavigate, user }) => {
     const [services, setServices] = useState<any[]>([]);
-    const [categories, setCategories] = useState<{ name: string, icon: React.ReactNode }[]>([]);
     const [loading, setLoading] = useState(true);
-    const [catsLoading, setCatsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeSlide, setActiveSlide] = useState(0);
 
@@ -56,21 +42,6 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                 console.error("Error fetching marketplace services:", error);
             } finally {
                 setLoading(false);
-            }
-        };
-
-        const fetchCategories = async () => {
-            try {
-                const catNames = await getServiceCategories();
-                const fetchedCategories = catNames.map(name => ({
-                    name,
-                    icon: CATEGORY_ICONS[name] || <Zap size={18} />
-                }));
-                setCategories(fetchedCategories);
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-            } finally {
-                setCatsLoading(false);
             }
         };
 
@@ -88,7 +59,6 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
         };
 
         fetchTopServices();
-        fetchCategories();
         fetchMarketStats();
     }, []);
 
@@ -114,8 +84,8 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                         <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
                     </div>
                     <div>
-                        <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none">acesso autorizado</p>
-                        <h2 className="heading-md">{userName.split(' ')[0]}</h2>
+                        <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none font-normal">Acesso autorizado</p>
+                        <h2 className="heading-md font-bold">Início</h2>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -138,7 +108,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                     <input
                         type="text"
                         placeholder="Buscar..."
-                        className="input !pl-10 !pr-10 !h-12 !text-sm !bg-bg-secondary/30 border-transparent  focus:bg-bg-primary focus:border-border-subtle focus:shadow-sm transition-all rounded-xl"
+                        className="input !pl-10 !pr-10 !h-12 !text-sm !bg-bg-secondary/30 border-transparent  focus:bg-bg-primary focus:border-border-subtle focus:shadow-sm transition-all rounded-xl font-normal"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -164,12 +134,12 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 </div>
                                 <div className="flex flex-col justify-between h-48 pb-6">
                                     <div>
-                                        <p className="meta !text-text-tertiary font-black mb-2">Exclusivo do Mercado</p>
-                                        <h3 className="heading-2xl text-accent-primary font-black leading-tight">Eleve suas contratações <br />ao Nível Expert.</h3>
+                                        <p className="meta !text-white/60 font-normal mb-2">Exclusivo do mercado</p>
+                                        <h3 className="heading-2xl text-white font-bold leading-tight">Eleve suas contratações <br />ao nível expert.</h3>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-normal text-white opacity-90">Acesso Platinum Ativo</p>
-                                        <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse"></div>
+                                        <p className="text-xs font-normal text-white opacity-90">Acesso Platinum ativo</p>
+                                        <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
                                     </div>
                                 </div>
                             </div>
@@ -183,11 +153,11 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 </div>
                                 <div className="flex flex-col justify-between h-48 pb-6">
                                     <div>
-                                        <p className="meta !text-text-tertiary font-black mb-2">Profissionais Verificados</p>
-                                        <h3 className="heading-2xl text-accent-primary font-black leading-tight">Conecte-se com <br />Especialistas Elite.</h3>
+                                        <p className="meta !text-white/60 font-normal mb-2">Profissionais verificados</p>
+                                        <h3 className="heading-2xl text-white font-bold leading-tight">Conecte-se com <br />especialistas elite.</h3>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-normal text-white">Rede 100% Verificada</p>
+                                        <p className="text-xs font-normal text-white">Rede 100% verificada</p>
                                         <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
                                     </div>
                                 </div>
@@ -202,11 +172,11 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 </div>
                                 <div className="flex flex-col justify-between h-48 pb-6">
                                     <div>
-                                        <p className="meta !text-text-tertiary font-black mb-2">Performance Garantida</p>
-                                        <h3 className="heading-2xl text-accent-primary font-black leading-tight">Serviços de Qualidade <br />Sob Demanda.</h3>
+                                        <p className="meta !text-white/60 font-normal mb-2">Performance garantida</p>
+                                        <h3 className="heading-2xl text-white font-bold leading-tight">Serviços de qualidade <br />sob demanda.</h3>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-normal text-white">Suporte 24/7 Disponível</p>
+                                        <p className="text-xs font-normal text-white">Suporte 24/7 disponível</p>
                                         <div className="w-2 h-2 rounded-full bg-info animate-pulse"></div>
                                     </div>
                                 </div>
@@ -234,31 +204,25 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
             <header className="px-6 pt-6 pb-4 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-primary/5 rounded-full blur-[120px] -z-10"></div>
 
-                <h2 className="text-[14px] font-bold text-text-primary mb-6">Categoria</h2>
+                <h2 className="text-[14px] font-normal text-text-primary mb-6">Categorias</h2>
 
                 {/* Market Vectors (Categories) */}
                 <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6">
-                    {catsLoading ? (
-                        [1, 2, 3, 4].map(i => (
-                            <div key={i} className="flex flex-col items-center gap-2 min-w-[72px] animate-pulse">
-                                <div className="w-16 h-16 rounded-2xl bg-bg-secondary border border-border-subtle shadow-sm"></div>
-                                <div className="h-2 w-10 bg-bg-secondary rounded"></div>
-                            </div>
-                        ))
-                    ) : (
-                        categories.map(cat => (
+                    {CATEGORIES_LIST.map(cat => {
+                        const Icon = cat.icon;
+                        return (
                             <button
-                                key={cat.name}
-                                onClick={() => onSelectCategory(cat.name)}
-                                className="flex flex-col items-center gap-2 min-w-[72px] group active:scale-95 transition-transform"
+                                key={cat.id}
+                                onClick={() => onSelectCategory(cat.id)}
+                                className="flex flex-col items-center gap-3 min-w-[80px] group interactive"
                             >
-                                <div className="w-16 h-16 rounded-2xl bg-bg-secondary border border-border-subtle flex items-center justify-center text-text-tertiary transition-all shadow-sm">
-                                    {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as React.ReactElement, { size: 28 }) : cat.icon}
+                                <div className="w-16 h-16 rounded-[24px] bg-bg-secondary border border-border-subtle flex items-center justify-center text-text-tertiary group-hover:bg-accent-primary group-hover:text-bg-primary group-hover:border-accent-primary group-hover:shadow-glow transition-all duration-300">
+                                    <Icon size={24} />
                                 </div>
-                                <span className="text-[10px] font-normal text-text-primary text-center leading-tight max-w-[80px]">{cat.name}</span>
+                                <span className="text-[10px] font-normal text-text-secondary group-hover:text-text-primary transition-colors">{cat.label}</span>
                             </button>
-                        ))
-                    )}
+                        );
+                    })}
                 </div>
             </header>
 
@@ -267,8 +231,8 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                 <section>
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h4 className="heading-lg tracking-tight mb-1">Operações em Destaque</h4>
-                            <p className="meta !text-[8px] !lowercase text-text-tertiary">Serviços de alta performance em tempo real</p>
+                            <h4 className="heading-lg mb-1">Operações em Destaque</h4>
+                            <p className="meta !text-[8px] !lowercase text-text-tertiary font-normal">Serviços de alta performance em tempo real</p>
                         </div>
                     </div>
 
@@ -277,45 +241,45 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                             <div className="h-64 col-span-2 flex items-center justify-center">
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="w-10 h-10 border-4 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin"></div>
-                                    <span className="meta text-text-primary uppercase tracking-[0.2em] !text-[10px]">Lendo Mercado...</span>
+                                    <span className="meta text-text-primary !text-[10px] font-normal">Lendo Mercado...</span>
                                 </div>
                             </div>
                         ) : services.length === 0 ? (
                             <div className="p-12 text-center bg-bg-secondary/20 rounded-[32px] border border-dashed border-border-subtle">
                                 <Zap size={40} className="mx-auto text-text-tertiary mb-4 opacity-20" />
-                                <p className="meta text-text-tertiary uppercase tracking-widest !text-[10px]">Mercado limpo. Aguardando novos especialistas.</p>
+                                <p className="meta text-text-tertiary !text-[10px] font-normal">Mercado limpo. Aguardando novos especialistas.</p>
                             </div>
                         ) : services.map(service => (
                             <div
                                 key={service.id}
                                 onClick={() => onSelectService(service)}
-                                className="group relative rounded-3xl overflow-hidden bg-bg-secondary border border-border-subtle p-2 transition-all  active:scale-[0.98] cursor-pointer shadow-lg flex items-center pr-4"
+                                className="group relative rounded-[32px] overflow-hidden bg-bg-secondary border border-border-subtle transition-all active:scale-[0.98] cursor-pointer shadow-lg flex items-center pr-5"
                             >
-                                <div className="relative w-28 h-28 shrink-0 rounded-2xl overflow-hidden">
+                                <div className="relative w-32 h-32 shrink-0 overflow-hidden">
                                     <img
-                                        src={service.image_url || `https://picsum.photos/seed/${service.id}/600/400`}
+                                        src={service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/600/400`}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         alt={service.title}
-                                        className="w-full h-full object-cover transition-transform duration-700"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/80 via-transparent to-transparent"></div>
                                     <div className="absolute top-2 left-2">
-                                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-bg-primary/40 backdrop-blur-md border border-white/10">
-                                            <Star size={8} className="text-accent-primary" fill="currentColor" />
-                                            <span className="text-[8px] font-normal text-white">4.9</span>
+                                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-bg-primary/60 backdrop-blur-md border border-white/20">
+                                            <Star size={8} className="text-accent-secondary" fill="currentColor" />
+                                            <span className="text-[8px] font-bold text-text-primary">4.9</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex-1 pl-4 py-1">
                                     <div className="flex items-start justify-between mb-1">
                                         <div className="flex-1">
-                                            <span className="meta px-1.5 py-0.5 rounded-md bg-accent-primary/10 text-text-primary border border-accent-primary/20 mb-1 inline-block text-[9px]">
+                                            <span className="meta px-1.5 py-0.5 rounded-md bg-accent-primary/10 text-text-primary border border-accent-primary/20 mb-1 inline-block text-[9px] font-normal">
                                                 {service.category}
                                             </span>
-                                            <h3 className="heading-lg tracking-tight leading-tight line-clamp-1 text-[15px]">{service.title}</h3>
+                                            <h3 className="heading-lg leading-tight line-clamp-1 text-[15px] font-bold">{service.title}</h3>
                                         </div>
                                     </div>
 
-                                    <p className="body !text-[10px] line-clamp-2 opacity-60 mb-2 leading-snug">
+                                    <p className="body !text-[10px] line-clamp-2 text-text-secondary mb-2 leading-snug font-normal">
                                         {service.description || "Execução de serviço de nível expert com garantia de qualidade premium."}
                                     </p>
 
@@ -326,8 +290,14 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                             </div>
                                             <p className="text-[9px] font-normal text-text-primary">Prestador Verificado</p>
                                         </div>
-                                        <div className="px-2.5 py-1 rounded-full bg-accent-primary text-bg-primary text-[10px] font-normal">
-                                            R$ {service.base_price}
+                                        <div className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <span className="text-[10px] font-bold text-accent-secondary">R$</span>
+                                                <span className="text-lg font-black text-text-primary leading-none">{service.base_price}</span>
+                                            </div>
+                                            <p className="text-[7px] text-text-tertiary uppercase tracking-tighter font-bold mt-0.5">
+                                                {service.pricing_mode === 'hourly' ? 'por hora' : 'valor fixo'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -342,18 +312,18 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                         <div className="absolute right-[-10px] top-[-10px] opacity-5">
                             <TrendingUp size={60} />
                         </div>
-                        <p className="meta !text-[8px] !lowercase text-text-tertiary mb-3">operações atuais</p>
-                        <h5 className="text-3xl font-black text-text-primary tracking-tighter mb-1">
+                        <p className="meta !text-[8px] text-text-tertiary mb-3 font-normal">Operações atuais</p>
+                        <h5 className="text-3xl font-bold text-text-primary mb-1">
                             {activeOrdersCount.toString().padStart(2, '0')}
                         </h5>
-                        <p className="text-[9px] font-normal text-text-primary">Contratos Ativos</p>
+                        <p className="text-[9px] font-normal text-text-primary">Contratos ativos</p>
                     </div>
                     <div className="bg-bg-secondary p-6 rounded-3xl border border-border-subtle relative overflow-hidden group interactive">
-                        <p className="meta !text-[8px] !lowercase text-text-tertiary mb-3">posição no mercado</p>
-                        <h5 className="text-3xl font-black text-text-primary tracking-tighter mb-1">
-                            {activeOrdersCount > 5 ? 'ELITE' : (activeOrdersCount > 0 ? 'PRO' : 'USER')}
+                        <p className="meta !text-[8px] text-text-tertiary mb-3 font-normal">Posição no mercado</p>
+                        <h5 className="text-3xl font-bold text-text-primary mb-1">
+                            {activeOrdersCount > 5 ? 'Elite' : (activeOrdersCount > 0 ? 'Pro' : 'User')}
                         </h5>
-                        <p className="text-[9px] font-normal text-text-primary">Nível de Conta</p>
+                        <p className="text-[9px] font-normal text-text-primary">Nível de conta</p>
                     </div>
                 </section>
 
