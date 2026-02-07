@@ -17,6 +17,7 @@ import {
 import { signOut } from '../services/authService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import AvatarUpload from '../components/AvatarUpload';
+import { useAppStore } from '../store';
 
 interface Props {
     user: any;
@@ -27,6 +28,7 @@ interface Props {
 const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
     const userName = resolveUserName(user);
     const userAvatar = resolveUserAvatar(user);
+    const setUser = useAppStore((state) => state.setUser);
 
     const handleLogout = async () => {
         await signOut();
@@ -106,14 +108,30 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
 
                 <div className="absolute bottom-[-50px] left-8 transform translate-y-[-50%] flex flex-col items-center">
                     <div className="relative group">
-                        <div className="w-32 h-32 rounded-[40px] border-[6px] border-bg-primary overflow-hidden shadow-2xl relative">
-                            <AvatarUpload user={user}>
-                                <div className="w-full h-full bg-bg-tertiary flex items-center justify-center">
+                        <div className="w-32 h-32 rounded-full border-[6px] border-bg-primary overflow-hidden shadow-2xl relative group bg-bg-tertiary">
+                            <AvatarUpload
+                                user={user}
+                                onUploadComplete={(newUrl) => {
+                                    // Update global store without reload
+                                    setUser({
+                                        ...user,
+                                        avatar_url: newUrl,
+                                        user_metadata: {
+                                            ...user.user_metadata,
+                                            avatar_url: newUrl
+                                        }
+                                    });
+                                }}
+                            >
+                                <div className="w-full h-full flex items-center justify-center relative">
                                     <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Camera size={24} className="text-white" />
+                                    </div>
                                 </div>
                             </AvatarUpload>
                         </div>
-                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-accent-primary rounded-[14px] flex items-center justify-center text-bg-primary shadow-glow">
+                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-accent-primary rounded-[14px] flex items-center justify-center text-bg-primary shadow-glow pointer-events-none">
                             <Camera size={18} />
                         </div>
                     </div>

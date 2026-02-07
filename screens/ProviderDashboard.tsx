@@ -143,8 +143,8 @@ const ProviderDashboard: React.FC<Props> = ({
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-4">
                         <div className="relative">
-                            <div className="w-16 h-16 rounded-[24px] border-2 border-accent-primary p-0.5 overflow-hidden shadow-glow">
-                                <img src={userAvatar} alt={userName} className="w-full h-full object-cover rounded-[20px]" />
+                            <div className="w-16 h-16 rounded-full border-2 border-accent-primary p-0.5 overflow-hidden shadow-glow">
+                                <img src={userAvatar} alt={userName} className="w-full h-full object-cover rounded-full" />
                             </div>
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success border-2 border-bg-secondary rounded-full flex items-center justify-center">
                                 <Zap size={12} className="text-white" fill="currentColor" />
@@ -204,12 +204,6 @@ const ProviderDashboard: React.FC<Props> = ({
                                 <span className="text-[10px] text-text-tertiary font-medium">vs mês anterior</span>
                             </div>
                         </div>
-                        <button
-                            onClick={() => onNavigate('MY_SERVICES')}
-                            className="w-16 h-16 rounded-2xl bg-accent-primary text-bg-primary flex items-center justify-center shadow-glow transition-transform"
-                        >
-                            <Plus size={28} strokeWidth={3} />
-                        </button>
                     </div>
 
                     {/* Revenue Breakdown Pills */}

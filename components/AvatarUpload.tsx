@@ -1,71 +1,83 @@
 import React, { useRef, useState } from 'react';
-import { Camera, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
+import { uploadAvatar } from '../services/storageService';
 
 interface AvatarUploadProps {
     user: any;
     children: React.ReactNode;
+    onUploadComplete?: (newUrl: string) => void;
 }
 
-const AvatarUpload: React.FC<AvatarUploadProps> = ({ user, children }) => {
+const AvatarUpload: React.FC<AvatarUploadProps> = ({ user, children, onUploadComplete }) => {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
             setUploading(true);
 
             if (!event.target.files || event.target.files.length === 0) {
-                throw new Error('You must select an image to upload.');
+                return;
             }
 
             const file = event.target.files[0];
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-            const filePath = `avatars/${fileName}`;
+            const userId = user.id;
 
-            // 1. Upload the file to Supabase Storage
-            const { error: uploadError } = await supabase.storage
-                .from('profiles')
-                .upload(filePath, file);
+            // 1. Upload to Storage
+            const publicUrl = await uploadAvatar(file, userId);
 
-            if (uploadError) throw uploadError;
+            // 2. Update Auth Metadata (Session persistence)
+            const { error: authError } = await supabase.auth.updateUser({
+                data: { avatar_url: publicUrl }
+            });
+            if (authError) throw authError;
 
-            // 2. Get the public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('profiles')
-                .getPublicUrl(filePath);
-
-            // 3. Update the user's profile with the new avatar_url
-            const { error: updateError } = await supabase
-                .from('profiles')
+            // 3. Update Public Users Table (Relationships)
+            const { error: dbError } = await supabase
+                .from('users')
                 .update({ avatar_url: publicUrl })
-                .eq('id', user.id);
+                .eq('id', userId);
 
-            if (updateError) throw updateError;
+            if (dbError) {
+                console.warn("Could not update public users table, but auth is updated.", dbError);
+            }
 
-            // Refresh page to show new avatar (simple approach)
-            window.location.reload();
+            // 4. Callback to update UI immediately
+            if (onUploadComplete) {
+                onUploadComplete(publicUrl);
+            } else {
+                // Fallback if no callback provided (e.g. legacy usage)
+                window.location.reload();
+            }
 
         } catch (error: any) {
-            alert('Error uploading avatar: ' + error.message);
+            console.error('Error uploading avatar:', error);
+            alert('Erro ao enviar imagem: ' + error.message);
         } finally {
             setUploading(false);
+            // Reset input
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
     return (
-        <div className="relative group cursor-pointer" onClick={() => !uploading && fileInputRef.current?.click()}>
+        <div
+            className="relative group cursor-pointer w-full h-full"
+            onClick={() => !uploading && fileInputRef.current?.click()}
+        >
             {children}
+
             {uploading && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-inherit">
-                    <Loader2 className="animate-spin text-accent-primary" size={24} />
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-[inherit] z-50">
+                    <Loader2 className="animate-spin text-white" size={24} />
                 </div>
             )}
+
             <input
                 type="file"
                 ref={fileInputRef}
-                onChange={handleUpload}
+                onChange={handleFileChange}
                 accept="image/*"
                 className="hidden"
                 disabled={uploading}

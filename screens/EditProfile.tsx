@@ -59,19 +59,30 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
 
             <main className="p-6 max-w-md mx-auto">
                 <div className="flex flex-col items-center mb-8">
-                    <div className="relative group cursor-pointer">
-                        <div className="w-28 h-28 rounded-full border-4 border-white dark:border-neutral-800 shadow-xl overflow-hidden">
-                            <AvatarUpload user={user} onUploadComplete={() => { /* Realtime subscription handles updates usually, or we could force refresh */ }}>
-                                <img
-                                    src={resolveUserAvatar(user)}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover"
-                                />
-                            </AvatarUpload>
-                        </div>
-                        <div className="absolute bottom-0 right-0 w-8 h-8 bg-accent-primary rounded-full flex items-center justify-center text-white border-2 border-white dark:border-black shadow-sm">
-                            <Camera size={14} />
-                        </div>
+                    <div className="w-28 h-28 rounded-full border-4 border-white dark:border-neutral-800 shadow-xl overflow-hidden relative group">
+                        <AvatarUpload
+                            user={user}
+                            onUploadComplete={(newUrl) => {
+                                // Update local state immediately so user sees the change
+                                onUpdate({
+                                    ...user,
+                                    avatar_url: newUrl,
+                                    user_metadata: {
+                                        ...user.user_metadata,
+                                        avatar_url: newUrl
+                                    }
+                                });
+                            }}
+                        >
+                            <img
+                                src={resolveUserAvatar(user)}
+                                alt="Profile"
+                                className="w-full h-full object-cover rounded-full"
+                            />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Camera size={24} className="text-white" />
+                            </div>
+                        </AvatarUpload>
                     </div>
                     <p className="mt-4 meta text-text-secondary uppercase tracking-widest text-[10px]">Alterar Foto</p>
                 </div>
