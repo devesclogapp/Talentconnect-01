@@ -81,21 +81,44 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
         <section className="py-6 px-4 bg-white dark:bg-black border-b border-neutral-100 dark:border-neutral-900 overflow-x-auto no-scrollbar">
           <div className="flex justify-between gap-3">
             {upcomingDays.map((d) => {
-              const hasAppointments = orders.some(o => {
+              // Get orders for this day
+              const dayOrders = orders.filter(o => {
                 const orderDate = new Date(o.scheduled_at || o.created_at).toDateString();
                 return orderDate === d.dateString;
               });
+
+              let dotColor = null;
+
+              if (dayOrders.length > 0) {
+                // Priority: Active > Completed > Cancelled
+                const hasActive = dayOrders.some(o => !['completed', 'cancelled', 'rejected'].includes(o.status));
+                const hasCompleted = dayOrders.some(o => o.status === 'completed');
+                const hasCancelled = dayOrders.some(o => ['cancelled', 'rejected'].includes(o.status));
+
+                if (hasActive) dotColor = 'bg-blue-500';
+                else if (hasCompleted) dotColor = 'bg-black dark:bg-white';
+                else if (hasCancelled) dotColor = 'bg-red-500';
+              }
+
+              const isSelected = selectedDateString === d.dateString;
+
+              // If selected (Black BG), a Black dot is invisible, so force it to White.
+              // Other colors (Blue/Red) are visible on Black.
+              // Note: 'bg-black dark:bg-white' handles standard 'completed' state.
+              if (isSelected && dotColor === 'bg-black dark:bg-white') {
+                dotColor = 'bg-white';
+              }
 
               return (
                 <button
                   key={d.dateString}
                   onClick={() => setSelectedDateString(d.dateString)}
-                  className={`relative flex flex-col items-center justify-center p-3 min-w-[55px] rounded-2xl transition-all border shadow-sm ${selectedDateString === d.dateString ? 'bg-primary-black text-white border-primary-black shadow-lg shadow-black/10' : 'bg-bg-secondary border-border-subtle text-text-primary'}`}
+                  className={`relative flex flex-col items-center justify-center p-3 min-w-[55px] rounded-2xl transition-all border shadow-sm ${isSelected ? 'bg-primary-black text-white border-primary-black shadow-lg shadow-black/10' : 'bg-bg-secondary border-border-subtle text-text-primary'}`}
                 >
-                  <span className={`meta-bold !text-[9px] uppercase tracking-tighter mb-1 ${selectedDateString === d.dateString ? 'opacity-70' : 'opacity-40'}`}>{d.name}</span>
+                  <span className={`meta-bold !text-[9px] uppercase tracking-tighter mb-1 ${isSelected ? 'opacity-70' : 'opacity-40'}`}>{d.name}</span>
                   <span className="body-bold">{d.date}</span>
-                  {hasAppointments && (
-                    <div className={`absolute bottom-1.5 w-1 h-1 rounded-full ${selectedDateString === d.dateString ? 'bg-white' : 'bg-accent-primary'}`}></div>
+                  {dotColor && (
+                    <div className={`absolute bottom-1.5 w-1.5 h-1.5 rounded-full ${dotColor}`}></div>
                   )}
                 </button>
               );

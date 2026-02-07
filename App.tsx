@@ -31,6 +31,7 @@ import MyServices from './screens/MyServices';
 import ReceivedOrders from './screens/ReceivedOrders';
 import OrderAcceptReject from './screens/OrderAcceptReject';
 import ServiceExecution from './screens/ServiceExecution';
+import EditProfile from './screens/EditProfile';
 
 import { useAppStore } from './store';
 import {
@@ -40,7 +41,8 @@ import {
   User as UserIcon,
   ReceiptText,
   MessageSquare,
-  Bell
+  Bell,
+  Plus
 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -65,7 +67,9 @@ const App: React.FC = () => {
     setSelectedServiceId,
     selectedCategory,
     setSelectedCategory,
-    logout
+    logout,
+    goBack,
+    resetHistory
   } = useAppStore();
 
   const [refreshKey, setRefreshKey] = useState(0); // For forcing OrderHistory refresh
@@ -96,6 +100,7 @@ const App: React.FC = () => {
 
           if (view === 'SPLASH') {
             setView(role.toLowerCase() === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            resetHistory();
           }
         } else if (view === 'SPLASH') {
           setTimeout(() => setView('ONBOARDING'), 2500);
@@ -126,9 +131,11 @@ const App: React.FC = () => {
 
         if (['LOGIN', 'REGISTER', 'ONBOARDING', 'SPLASH'].includes(view)) {
           setView(role.toLowerCase() === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+          resetHistory();
         }
       } else if (event === 'SIGNED_OUT') {
         logout();
+        resetHistory();
       }
     });
 
@@ -140,6 +147,7 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     await supabaseSignOut();
     logout();
+    resetHistory();
   };
 
 
@@ -167,6 +175,7 @@ const App: React.FC = () => {
             } as any);
 
             setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            resetHistory();
           }}
           onRegister={() => setView('REGISTER')}
           onForgotPassword={() => setView('FORGOT_PASSWORD')}
@@ -174,7 +183,10 @@ const App: React.FC = () => {
       case 'REGISTER':
         return <Register
           onBack={() => setView('LOGIN')}
-          onRegisterSuccess={(role) => setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')}
+          onRegisterSuccess={(role) => {
+            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            resetHistory();
+          }}
         />;
       case 'FORGOT_PASSWORD':
         return <ForgotPassword onBack={() => setView('LOGIN')} />;
@@ -200,7 +212,7 @@ const App: React.FC = () => {
           initialCategory={selectedCategory}
           onBack={() => {
             setSelectedCategory(undefined);
-            setView('CLIENT_DASHBOARD');
+            goBack();
           }}
           onSelectService={(service) => {
             setSelectedService(service);
@@ -210,7 +222,7 @@ const App: React.FC = () => {
       case 'SERVICE_DETAILS':
         return <ServiceDetails
           service={selectedService}
-          onBack={() => setView('SERVICE_LISTING')}
+          onBack={goBack}
           onBook={(service) => {
             setSelectedService(service);
             setSelectedProvider(service.provider);
@@ -221,7 +233,7 @@ const App: React.FC = () => {
       // New Client Flows
       case 'PROVIDER_LISTING':
         return <ProviderListing
-          onBack={() => setView('CLIENT_DASHBOARD')}
+          onBack={goBack}
           onSelectProvider={(provider) => {
             setSelectedProvider(provider);
             setView('PROVIDER_PROFILE');
@@ -230,7 +242,7 @@ const App: React.FC = () => {
       case 'PROVIDER_PROFILE':
         return <ProviderProfile
           provider={selectedProvider}
-          onBack={() => setView('PROVIDER_LISTING')}
+          onBack={goBack}
           onBookService={(service) => {
             setSelectedService(service);
             setView('CREATE_ORDER');
@@ -241,7 +253,7 @@ const App: React.FC = () => {
         return <CreateOrder
           service={selectedService}
           provider={selectedProvider}
-          onBack={() => setView('PROVIDER_PROFILE')}
+          onBack={goBack}
           onConfirm={(data) => {
             setOrderData(data);
             setView('ORDER_CONFIRMATION');
@@ -255,18 +267,18 @@ const App: React.FC = () => {
             // Redirect to Order Detail instead of Payment to wait for provider acceptance
             setView('ORDER_DETAIL');
           }}
-          onEdit={() => setView('CREATE_ORDER')}
+          onEdit={goBack}
         />;
       case 'PAYMENT':
         return <Payment
           order={selectedOrder}
-          onBack={() => setView('ORDER_CONFIRMATION')}
+          onBack={goBack}
           onPaymentSuccess={() => setView('TRACKING')}
         />;
       case 'ORDER_HISTORY':
         return <OrderHistory
           key={refreshKey} // Force remount when key changes
-          onBack={() => setView('CLIENT_DASHBOARD')}
+          onBack={goBack}
           onSelectOrder={(order) => {
             setSelectedOrder(order);
             setView('ORDER_DETAIL');
@@ -275,7 +287,7 @@ const App: React.FC = () => {
       case 'ORDER_DETAIL':
         return <OrderDetail
           order={selectedOrder}
-          onBack={() => setView('ORDER_HISTORY')}
+          onBack={goBack}
           onContact={() => alert('Chat em desenvolvimento')}
           onSupport={() => alert('Suporte em desenvolvimento')}
           onPay={(order) => {
@@ -300,7 +312,7 @@ const App: React.FC = () => {
         return <ProviderRating
           provider={selectedProvider}
           order={selectedOrder}
-          onBack={() => setView('ORDER_DETAIL')}
+          onBack={goBack}
           onSubmit={async (rating, comment) => {
             console.log('Rating submitted:', rating, comment);
             // Force local update of status to 'completed' so OrderDetail reflects it
@@ -316,7 +328,7 @@ const App: React.FC = () => {
 
       case 'TRACKING':
         return <Tracking
-          onBack={() => setView('CLIENT_DASHBOARD')}
+          onBack={goBack}
           onSupport={() => setView('SERVICE_LISTING')} // Placeholder
           onPay={(order) => {
             setSelectedOrder(order);
@@ -325,7 +337,7 @@ const App: React.FC = () => {
         />;
       // --- SHARED VIEWS (Profile, Support) ---
       case 'SUPPORT':
-        return <Support onBack={() => setView((user?.role === 'client') ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')} />;
+        return <Support onBack={goBack} />;
       case 'PROFILE':
         return <Profile
           role={(user?.role || 'client').toUpperCase()}
@@ -337,6 +349,16 @@ const App: React.FC = () => {
         />;
 
       // --- PROVIDER VIEWS ---
+      case 'EDIT_PROFILE':
+        return <EditProfile
+          user={user}
+          onBack={goBack}
+          onUpdate={(updatedUser: any) => {
+            setUser(updatedUser);
+            // Optionally update Supabase session
+            // syncUserSession(updatedUser);
+          }}
+        />;
       case 'PROVIDER_DASHBOARD':
         return <ProviderDashboard
           user={user}
@@ -352,7 +374,7 @@ const App: React.FC = () => {
 
       case 'MY_SERVICES':
         return <MyServices
-          onBack={() => setView('PROFILE')}
+          onBack={goBack}
           onNavigate={(view, serviceId) => {
             if (serviceId) {
               setSelectedServiceId(serviceId);
@@ -367,7 +389,7 @@ const App: React.FC = () => {
           serviceId={selectedServiceId}
           onBack={() => {
             setSelectedServiceId(undefined);
-            setView('MY_SERVICES');
+            goBack();
           }}
           onComplete={() => {
             setSelectedServiceId(undefined);
@@ -378,14 +400,14 @@ const App: React.FC = () => {
       case 'NEGOTIATION_FLOW':
         return <NegotiationFlow
           negotiation={selectedOrder}
-          onBack={() => setView('ORDER_ACCEPT_REJECT')}
+          onBack={goBack}
           onComplete={() => setView('RECEIVED_ORDERS')}
         />;
 
       // Provider Order Management
       case 'RECEIVED_ORDERS':
         return <ReceivedOrders
-          onBack={() => setView('PROVIDER_DASHBOARD')}
+          onBack={goBack}
           onSelectOrder={(order) => {
             setSelectedOrder(order);
             if (order.status === 'sent' || order.status === 'awaiting_details') {
@@ -400,7 +422,7 @@ const App: React.FC = () => {
       case 'ORDER_ACCEPT_REJECT':
         return <OrderAcceptReject
           order={selectedOrder}
-          onBack={() => setView('RECEIVED_ORDERS')}
+          onBack={goBack}
           onAccept={() => {
             setView('SERVICE_EXECUTION');
           }}
@@ -416,16 +438,16 @@ const App: React.FC = () => {
       case 'SERVICE_EXECUTION':
         return <ServiceExecution
           order={selectedOrder}
-          onBack={() => setView('RECEIVED_ORDERS')}
+          onBack={goBack}
           onComplete={() => setView('PROVIDER_DASHBOARD')}
         />;
 
       case 'EARNINGS':
-        return <Earnings onBack={() => setView('PROVIDER_DASHBOARD')} onNavigate={navigate} />;
+        return <Earnings onBack={goBack} onNavigate={navigate} />;
       case 'AGENDA':
-        return <Agenda onBack={() => setView('PROVIDER_DASHBOARD')} onNavigate={navigate} />;
+        return <Agenda onBack={goBack} onNavigate={navigate} />;
       case 'NOTIFICATIONS':
-        return <NotificationCenter onBack={() => setView((user?.role === 'client') ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')} />;
+        return <NotificationCenter onBack={goBack} />;
 
       default:
         return <Login
@@ -486,16 +508,41 @@ const App: React.FC = () => {
             </button>
           )}
 
-          <button
-            onClick={() => {
-              if (userRole === 'client') setSelectedCategory(undefined);
-              setView(userRole === 'client' ? 'SERVICE_LISTING' : 'AGENDA');
-            }}
-            className={`bottom-nav__item interactive ${(view === 'SERVICE_LISTING' || view === 'AGENDA') ? 'bottom-nav__item--active' : ''}`}
-          >
-            {userRole === 'client' ? <Bell size={24} /> : <Calendar size={24} />}
-            <span className="sr-only">{userRole === 'client' ? 'Descobrir' : 'Agenda'}</span>
-          </button>
+          {userRole === 'client' ? (
+            <button
+              onClick={() => {
+                if (userRole === 'client') setSelectedCategory(undefined);
+                setView('SERVICE_LISTING');
+              }}
+              className={`bottom-nav__item interactive ${view === 'SERVICE_LISTING' ? 'bottom-nav__item--active' : ''}`}
+            >
+              <Bell size={24} />
+              <span className="sr-only">Descobrir</span>
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  setSelectedServiceId(undefined);
+                  setView('SERVICE_REGISTRATION');
+                }}
+                className="bottom-nav__item interactive -mt-6"
+              >
+                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-lg shadow-primary-orange/20">
+                  <Plus size={32} />
+                </div>
+                <span className="sr-only">Novo Serviço</span>
+              </button>
+
+              <button
+                onClick={() => setView('AGENDA')}
+                className={`bottom-nav__item interactive ${view === 'AGENDA' ? 'bottom-nav__item--active' : ''}`}
+              >
+                <Calendar size={24} />
+                <span className="sr-only">Agenda</span>
+              </button>
+            </>
+          )}
 
           <button
             onClick={() => setView('PROFILE')}

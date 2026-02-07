@@ -33,6 +33,70 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
         onLogout();
     };
 
+    const [stats, setStats] = useState({
+        rating: '0.0',
+        orders: '0',
+        trust: '100%'
+    });
+
+    React.useEffect(() => {
+        const fetchStats = async () => {
+            if (!user) return;
+            // Normalize role
+            const role = (user.role || '').toUpperCase();
+            const supabase = (await import('../services/supabaseClient')).supabase;
+
+            try {
+                let rating = '5.0';
+                let ordersCount = 0;
+
+                if (role === 'PROVIDER') {
+                    // Fetch Provider Profile for Rating
+                    const { data: profile } = await supabase
+                        .from('provider_profiles')
+                        .select('rating_average')
+                        .eq('user_id', user.id)
+                        .single();
+
+                    if (profile) {
+                        rating = ((profile as any).rating_average || 0).toFixed(1);
+                    } else {
+                        rating = '0.0';
+                    }
+
+                    // Count Completed Orders (Provider)
+                    const { count } = await supabase
+                        .from('orders')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('provider_id', user.id)
+                        .eq('status', 'completed');
+
+                    ordersCount = count || 0;
+                } else {
+                    // Client Stats
+                    const { count } = await supabase
+                        .from('orders')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('client_id', user.id)
+                        .eq('status', 'completed');
+
+                    ordersCount = count || 0;
+                }
+
+                setStats({
+                    rating,
+                    orders: ordersCount.toString(),
+                    trust: '100%'
+                });
+
+            } catch (error) {
+                console.error("Error updating profile stats:", error);
+            }
+        };
+
+        fetchStats();
+    }, [user]);
+
     return (
         <div className="min-h-screen bg-bg-primary pb-32 animate-fade-in">
             {/* Luxury Profile Header */}
@@ -62,10 +126,10 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                         <h1 className="heading-3xl tracking-tighter text-text-primary">{userName}</h1>
                         <div className="flex items-center gap-2 mt-1">
                             <span className="meta px-2 py-0.5 rounded-full bg-accent-primary/10 text-text-primary border border-accent-primary/20 leading-none">
-                                {user?.role === 'provider' ? 'Prestador Verificado' : 'Membro Ativo'}
+                                {(user?.role || '').toLowerCase() === 'provider' ? 'Prestador Verificado' : 'Membro Ativo'}
                             </span>
                             <p className="meta !text-text-tertiary flex items-center gap-1">
-                                <MapPin size={10} /> {user?.metadata?.city || 'Brasil'}
+                                <MapPin size={10} /> {user?.user_metadata?.city || 'Brasil'}
                             </p>
                         </div>
                     </div>
@@ -77,9 +141,9 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                 {/* Portfolio Stats */}
                 <div className="grid grid-cols-3 gap-3 mb-12">
                     {[
-                        { label: 'Rating', value: user?.rating?.toFixed(1) || '0.0', sub: 'Estrelas', color: 'text-text-primary' },
-                        { label: 'Pedidos', value: user?.orders_count || '0', sub: 'Total', color: 'text-text-primary' },
-                        { label: 'Confiança', value: '100%', sub: 'Score', color: 'text-text-primary' }
+                        { label: 'Rating', value: stats.rating, sub: 'Estrelas', color: 'text-text-primary' },
+                        { label: 'Pedidos', value: stats.orders, sub: 'Total', color: 'text-text-primary' },
+                        { label: 'Confiança', value: stats.trust, sub: 'Score', color: 'text-text-primary' }
                     ].map(stat => (
                         <div key={stat.label} className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center">
                             <p className="meta !text-[8px] mb-1">{stat.label}</p>
@@ -94,15 +158,44 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                     <h4 className="heading-md uppercase tracking-[0.2em] text-text-tertiary mb-6">Segurança & Preferências</h4>
 
                     {[
-                        { icon: <User size={20} />, label: 'Informações Pessoais', sub: 'Gerencie seus dados de perfil' },
-                        { icon: <Shield size={20} />, label: 'Segurança & Privacidade', sub: '2FA e Chaves de Acesso' },
-                        { icon: <CreditCard size={20} />, label: 'Métodos de Pagamento', sub: 'Carteira e Repasses' },
-                        { icon: <Bell size={20} />, label: 'Notificações', sub: 'Alertas e Webhooks' },
-                        { icon: <Activity size={20} />, label: 'Atividade na Plataforma', sub: 'Logs de auditoria e eventos' },
+                        {
+                            icon: <User size={20} />,
+                            label: 'Informações Pessoais',
+                            sub: 'Gerencie seus dados de perfil',
+                            action: () => onNavigate('EDIT_PROFILE')
+                        },
+                        {
+                            icon: <Shield size={20} />,
+                            label: 'Segurança & Privacidade',
+                            sub: '2FA e Chaves de Acesso',
+                            action: () => alert('Funcionalidade em desenvolvimento: Segurança')
+                        },
+                        {
+                            icon: <CreditCard size={20} />,
+                            label: 'Métodos de Pagamento',
+                            sub: 'Carteira e Repasses',
+                            action: () => {
+                                if (user?.role === 'provider') onNavigate('EARNINGS');
+                                else alert('Gerenciamento de cartões em desenvolvimento');
+                            }
+                        },
+                        {
+                            icon: <Bell size={20} />,
+                            label: 'Notificações',
+                            sub: 'Alertas e Webhooks',
+                            action: () => onNavigate('NOTIFICATIONS')
+                        },
+                        {
+                            icon: <Activity size={20} />,
+                            label: 'Atividade na Plataforma',
+                            sub: 'Histórico de operações',
+                            action: () => onNavigate(user?.role === 'provider' ? 'RECEIVED_ORDERS' : 'ORDER_HISTORY')
+                        },
                     ].map((item, i) => (
                         <button
                             key={i}
-                            className="card-transaction w-full group !bg-bg-primary "
+                            onClick={item.action}
+                            className="card-transaction w-full group !bg-bg-primary interactive"
                         >
                             <div className="w-10 h-10 rounded-[14px] bg-bg-secondary flex items-center justify-center text-text-secondary group-hover:bg-accent-primary/10 group-hover:text-accent-primary transition-all">
                                 {item.icon}
