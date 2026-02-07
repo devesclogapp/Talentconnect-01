@@ -113,14 +113,14 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                 <div className="flex items-start justify-between mb-8">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <h1 className="heading-3xl tracking-tighter">{userName}</h1>
+                            <h1 className="heading-3xl">{userName}</h1>
                             <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
                         </div>
                         <div className="flex items-center gap-4">
                             <p className="meta !text-text-tertiary flex items-center gap-1.5">
                                 <MapPin size={12} className="text-accent-primary" /> {providerData.location}
                             </p>
-                            <p className="meta !text-text-tertiary flex items-center gap-1.5 font-bold">
+                            <p className="meta !text-text-tertiary flex items-center gap-1.5 font-normal">
                                 <Star size={12} className="text-warning" fill="currentColor" /> {providerData.rating} ({providerData.reviewCount} ops)
                             </p>
                         </div>
@@ -136,19 +136,19 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                 {/* Performance Analytics Bar */}
                 <div className="grid grid-cols-3 gap-3 mb-12">
                     <div className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center group interactive">
-                        <p className="meta !text-[8px] mb-1 opacity-60">Verified Jobs</p>
+                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Verified Jobs</p>
                         <p className="text-xl font-black text-text-primary dark:text-white">{providerData.completedJobs}</p>
-                        <p className="meta !text-[7px] !lowercase text-accent-primary">+4.2% yield</p>
+                        <p className="meta !text-[7px] !lowercase text-accent-primary font-normal">+4.2% yield</p>
                     </div>
                     <div className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center group interactive">
-                        <p className="meta !text-[8px] mb-1 opacity-60">Response Time</p>
+                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Response Time</p>
                         <p className="text-xl font-black text-text-primary dark:text-white">{providerData.responseTime}</p>
-                        <p className="meta !text-[7px] !lowercase text-text-tertiary">market lead</p>
+                        <p className="meta !text-[7px] !lowercase text-text-tertiary font-normal">market lead</p>
                     </div>
                     <div className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center group interactive">
-                        <p className="meta !text-[8px] mb-1 opacity-60">Trust Index</p>
+                        <p className="meta !text-[8px] mb-1 opacity-60 font-normal">Trust Index</p>
                         <p className="text-xl font-black text-accent-primary">AA+</p>
-                        <p className="meta !text-[7px] !lowercase text-text-tertiary">authorized</p>
+                        <p className="meta !text-[7px] !lowercase text-text-tertiary font-normal">authorized</p>
                     </div>
                 </div>
 
@@ -162,7 +162,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 py-3 rounded-xl heading-md uppercase tracking-widest text-[10px] transition-all ${activeTab === tab.id
+                            className={`flex-1 py-3 rounded-xl heading-md text-[10px] font-normal transition-all ${activeTab === tab.id
                                 ? 'bg-bg-tertiary text-accent-primary border border-border-medium shadow-md'
                                 : 'text-text-tertiary'
                                 }`}
@@ -180,10 +180,10 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                 <div key={service.id} className="bg-bg-secondary rounded-3xl border border-border-subtle p-6 transition-all  group interactive">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex-1 pr-6">
-                                            <h3 className="heading-xl tracking-tight mb-1 group">
+                                            <h3 className="heading-xl mb-1 group">
                                                 {service.title}
                                             </h3>
-                                            <p className="meta !text-[9px] px-2 py-0.5 rounded-md bg-accent-primary/10 text-accent-primary inline-block mb-3">
+                                            <p className="meta !text-[9px] px-2 py-0.5 rounded-md bg-accent-primary/10 text-accent-primary inline-block mb-3 font-normal">
                                                 {service.duration} protocol
                                             </p>
                                         </div>
@@ -192,7 +192,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                         </div>
                                     </div>
 
-                                    <p className="body !text-xs text-text-secondary line-clamp-2 mb-6 opacity-70">
+                                    <p className="body !text-xs text-text-secondary line-clamp-2 mb-6 opacity-70 font-normal">
                                         {service.description}
                                     </p>
 
@@ -201,14 +201,14 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                             <span className="text-2xl font-black text-text-primary dark:text-white">
                                                 $ {service.price}
                                             </span>
-                                            <span className="meta !text-[8px] !lowercase text-text-tertiary ml-2">
+                                            <span className="meta !text-[8px] !lowercase text-text-tertiary ml-2 font-normal">
                                                 {service.priceType === 'hourly' ? '/hour baseline' : ' fixed contract'}
                                             </span>
                                         </div>
 
                                         <button
                                             onClick={() => onBookService(service)}
-                                            className="btn-primary !h-[48px] !px-6 !text-[11px] !rounded-xl uppercase tracking-widest shadow-glow"
+                                            className="btn-primary !h-[48px] !px-6 !text-[11px] !rounded-xl font-normal"
                                         >
                                             Confirm Hire
                                         </button>
@@ -221,21 +221,21 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                     {activeTab === 'about' && (
                         <div className="space-y-4 pb-10">
                             <div className="bg-bg-secondary rounded-3xl border border-border-subtle p-8">
-                                <p className="meta !text-accent-primary uppercase tracking-widest text-[9px] mb-4">Experience Narrative</p>
+                                <p className="meta !text-accent-primary text-[9px] mb-4 font-normal">Experience Narrative</p>
                                 <p className="body !leading-relaxed">
                                     {providerData.bio}
                                 </p>
                             </div>
 
                             <div className="bg-bg-secondary rounded-3xl border border-border-subtle p-8">
-                                <h3 className="heading-md uppercase tracking-[0.2em] text-text-tertiary mb-6 flex items-center gap-2">
+                                <h3 className="heading-md text-text-tertiary mb-6 flex items-center gap-2">
                                     <Award size={16} /> Market Authorizations
                                 </h3>
                                 <div className="space-y-4">
                                     {providerData.certifications.map((cert, idx) => (
                                         <div key={idx} className="flex items-center gap-4 group">
                                             <div className="w-2 h-2 rounded-full bg-accent-primary shadow-glow group transition-transform"></div>
-                                            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider group transition-colors">
+                                            <span className="text-xs font-normal text-text-secondary group transition-colors">
                                                 {cert}
                                             </span>
                                         </div>
@@ -255,20 +255,20 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                                 <Activity size={18} />
                                             </div>
                                             <div>
-                                                <p className="text-[11px] font-black text-text-primary uppercase tracking-tighter">
+                                                <p className="text-[11px] font-normal text-text-primary">
                                                     {review.clientName}
                                                 </p>
-                                                <p className="meta !text-[8px] !lowercase text-text-tertiary">
+                                                <p className="meta !text-[8px] !lowercase text-text-tertiary font-normal">
                                                     {new Date(review.date).toLocaleDateString()} • Verified Contract
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1 text-warning">
                                             <Star size={10} fill="currentColor" />
-                                            <span className="text-[10px] font-bold">{review.rating}</span>
+                                            <span className="text-[10px] font-normal">{review.rating}</span>
                                         </div>
                                     </div>
-                                    <p className="body !text-xs !leading-snug text-text-secondary italic">
+                                    <p className="body !text-xs !leading-snug text-text-secondary italic font-normal">
                                         "{review.comment}"
                                     </p>
                                 </div>

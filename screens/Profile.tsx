@@ -138,20 +138,35 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                 </div>
             </div>
 
-            <div className="pt-24 px-8">
+            <div className="pt-12 px-8">
                 <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="heading-3xl tracking-tighter text-text-primary">{userName}</h1>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="meta px-2 py-0.5 rounded-full bg-accent-primary/10 text-text-primary border border-accent-primary/20 leading-none">
+                    <div className="flex-1">
+                        <h1 className="heading-3xl text-text-primary mb-1">{userName}</h1>
+
+                        {/* Status Stars */}
+                        <div className="flex items-center gap-1.5 mb-2.5">
+                            <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                        key={star}
+                                        size={12}
+                                        className={star <= Math.round(parseFloat(stats.rating)) ? "text-warning fill-warning" : "text-border-subtle"}
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-[11px] font-normal text-text-secondary">{stats.rating} rating</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="meta px-3 py-1 rounded-full bg-accent-primary/10 text-text-primary border border-accent-primary/20 leading-none font-normal text-[10px]">
                                 {(user?.role || '').toLowerCase() === 'provider' ? 'Prestador Verificado' : 'Membro Ativo'}
                             </span>
-                            <p className="meta !text-text-tertiary flex items-center gap-1">
-                                <MapPin size={10} /> {user?.user_metadata?.city || 'Brasil'}
+                            <p className="meta !text-text-tertiary flex items-center gap-1 font-normal text-[10px]">
+                                <MapPin size={10} className="text-accent-primary" /> {user?.user_metadata?.city || 'Brasil'}
                             </p>
                         </div>
                     </div>
-                    <button className="btn-icon !w-12 !h-12 bg-bg-secondary">
+                    <button className="btn-icon !w-12 !h-12 bg-bg-secondary border border-border-subtle shadow-sm">
                         <Settings size={22} className="text-text-secondary" />
                     </button>
                 </div>
@@ -164,16 +179,16 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                         { label: 'Confiança', value: stats.trust, sub: 'Score', color: 'text-text-primary' }
                     ].map(stat => (
                         <div key={stat.label} className="bg-bg-secondary p-4 rounded-2xl border border-border-subtle text-center">
-                            <p className="meta !text-[8px] mb-1">{stat.label}</p>
+                            <p className="meta !text-[8px] mb-1 font-normal">{stat.label}</p>
                             <p className={`text-xl font-black ${stat.color}`}>{stat.value}</p>
-                            <p className="meta !text-[7px] !lowercase text-text-tertiary">{stat.sub}</p>
+                            <p className="meta !text-[7px] !lowercase text-text-tertiary font-normal">{stat.sub}</p>
                         </div>
                     ))}
                 </div>
 
                 {/* Action Menu (Security & Preferences) */}
                 <div className="space-y-4">
-                    <h4 className="heading-md uppercase tracking-[0.2em] text-text-tertiary mb-6">Segurança & Preferências</h4>
+                    <h4 className="heading-md text-text-tertiary mb-6">Segurança & Preferências</h4>
 
                     {[
                         {
@@ -219,8 +234,8 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                                 {item.icon}
                             </div>
                             <div className="flex-1 text-left">
-                                <p className="text-sm font-bold text-text-primary">{item.label}</p>
-                                <p className="meta !text-[9px] !lowercase text-text-tertiary">{item.sub}</p>
+                                <p className="text-sm font-normal text-text-primary">{item.label}</p>
+                                <p className="meta !text-[9px] !lowercase text-text-tertiary font-normal">{item.sub}</p>
                             </div>
                             <ChevronRight size={18} className="text-text-tertiary group-hover:translate-x-1 transition-transform" />
                         </button>
@@ -241,7 +256,6 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                     </button>
                 </div>
             </div>
-
         </div>
     );
 };

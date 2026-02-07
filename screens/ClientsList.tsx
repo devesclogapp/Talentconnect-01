@@ -85,7 +85,7 @@ const ClientsList: React.FC<Props> = ({ onBack }) => {
                 </button>
                 <div>
                     <h1 className="text-xl font-bold text-text-primary leading-tight">Clientes Atendidos</h1>
-                    <p className="text-[11px] text-text-tertiary uppercase tracking-wider font-semibold">
+                    <p className="text-[11px] text-text-tertiary font-normal">
                         Sua base de fidelidade
                     </p>
                 </div>
@@ -109,7 +109,7 @@ const ClientsList: React.FC<Props> = ({ onBack }) => {
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <div className="w-8 h-8 border-2 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin"></div>
-                        <p className="text-xs text-text-tertiary uppercase tracking-wider animate-pulse">Carregando carteira...</p>
+                        <p className="text-xs text-text-tertiary animate-pulse font-normal">Carregando carteira...</p>
                     </div>
                 ) : filteredClients.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center space-y-3 opacity-60">
@@ -133,7 +133,7 @@ const ClientsList: React.FC<Props> = ({ onBack }) => {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                         <h3 className="font-bold text-text-primary truncate pr-2">{client.name}</h3>
-                                        <span className="text-[10px] font-black uppercase tracking-wider bg-accent-primary/10 text-accent-primary px-2 py-0.5 rounded-full whitespace-nowrap">
+                                        <span className="text-[10px] font-normal bg-accent-primary/10 text-accent-primary px-2 py-0.5 rounded-full whitespace-nowrap">
                                             {client.totalServices} {client.totalServices === 1 ? 'Job' : 'Jobs'}
                                         </span>
                                     </div>

@@ -190,7 +190,7 @@ const ProviderListing: React.FC<ProviderListingProps> = ({ onBack, onSelectProvi
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="flex items-center gap-1">
                                             <Star size={14} className="text-accent-yellow fill-accent-yellow" />
-                                            <span className="text-sm font-medium text-black dark:text-white">
+                                            <span className="text-sm font-normal text-black dark:text-white">
                                                 {provider.rating.toFixed(1)}
                                             </span>
                                         </div>
@@ -226,7 +226,7 @@ const ProviderListing: React.FC<ProviderListingProps> = ({ onBack, onSelectProvi
                                             <span>{provider.completedJobs} trabalhos</span>
                                         </div>
                                         {provider.hourlyRate && (
-                                            <span className="font-semibold text-accent-orange">
+                                            <span className="font-normal text-accent-orange">
                                                 R$ {provider.hourlyRate}/h
                                             </span>
                                         )}

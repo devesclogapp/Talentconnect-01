@@ -53,7 +53,7 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
                 >
                     <ArrowLeft size={20} className="text-black dark:text-white" />
                 </button>
-                <h1 className="heading-md uppercase tracking-widest text-xs">Editar Perfil</h1>
+                <h1 className="heading-md text-xs">Editar Perfil</h1>
                 <div className="w-10"></div>
             </header>
 
@@ -84,12 +84,12 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
                             </div>
                         </AvatarUpload>
                     </div>
-                    <p className="mt-4 meta text-text-secondary uppercase tracking-widest text-[10px]">Alterar Foto</p>
+                    <p className="mt-4 meta text-text-secondary text-[10px]">Alterar Foto</p>
                 </div>
 
                 <div className="space-y-4">
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-text-secondary uppercase tracking-wider ml-1">Nome Completo</label>
+                        <label className="text-xs font-normal text-text-secondary ml-1">Nome Completo</label>
                         <Input
                             icon={User}
                             placeholder="Seu nome"
@@ -99,7 +99,7 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-text-secondary uppercase tracking-wider ml-1">Telefone</label>
+                        <label className="text-xs font-normal text-text-secondary ml-1">Telefone</label>
                         <Input
                             icon={Phone}
                             placeholder="(00) 00000-0000"
@@ -109,7 +109,7 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
                     </div>
 
                     <div className="space-y-1 opacity-50 pointer-events-none">
-                        <label className="text-xs font-bold text-text-secondary uppercase tracking-wider ml-1">Email (Não editável)</label>
+                        <label className="text-xs font-normal text-text-secondary ml-1">Email (Não editável)</label>
                         <Input
                             icon={Mail}
                             value={user?.email || ''}
