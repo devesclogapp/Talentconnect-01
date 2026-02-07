@@ -24,7 +24,7 @@ const SplashScreen: React.FC = () => {
                     <h1 className="heading-xl tracking-tight mb-2">
                         Talent <span className="text-brand-primary dark:text-white">Connect</span>
                     </h1>
-                    <p className="meta-bold text-app-muted uppercase tracking-[0.2em] animate-pulse">
+                    <p className="meta-bold text-app-muted tracking-[0.2em] animate-pulse">
                         Carregando...
                     </p>
                 </div>

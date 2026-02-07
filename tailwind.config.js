@@ -51,7 +51,7 @@ export default {
                 },
             },
             fontFamily: {
-                sans: ['SF Pro Display', 'Inter', 'system-ui', 'sans-serif'],
+                sans: ['Inter', 'system-ui', 'sans-serif'],
             },
             borderRadius: {
                 'sm': 'var(--radius-sm)',

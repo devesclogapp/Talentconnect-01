@@ -79,8 +79,8 @@ const Support: React.FC<Props> = ({ onBack }) => {
           <ArrowLeft size={20} className="text-black dark:text-white" />
         </button>
         <div className="flex-1 text-center">
-          <h2 className="heading-md uppercase tracking-widest text-[12px]">Suporte por IA</h2>
-          <p className="meta-bold text-black-green uppercase tracking-widest !text-[9px]">Justlife Intelligent Assistant</p>
+          <h2 className="heading-md tracking-widest text-[12px]">Suporte por IA</h2>
+          <p className="meta-bold text-black-green tracking-widest !text-[9px]">Justlife Intelligent Assistant</p>
         </div>
         <div className="w-10"></div>
       </header>
@@ -91,7 +91,7 @@ const Support: React.FC<Props> = ({ onBack }) => {
           <div key={m.id} className={`flex ${m.sender === 'USER' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-5 rounded-[24px] shadow-sm leading-relaxed ${m.sender === 'USER' ? 'bg-primary-black text-white rounded-br-none' : 'bg-white dark:bg-neutral-900 text-black dark:text-white border border-neutral-100 dark:border-neutral-800 rounded-bl-none'}`}>
               <p className="body !leading-snug">{m.text}</p>
-              <p className={`meta-bold mt-2 opacity-30 !text-[9px] uppercase tracking-tighter ${m.sender === 'USER' ? 'text-right' : 'text-left'}`}>
+              <p className={`meta-bold mt-2 opacity-30 !text-[9px] tracking-tighter ${m.sender === 'USER' ? 'text-right' : 'text-left'}`}>
                 {m.time}
               </p>
             </div>
@@ -99,7 +99,7 @@ const Support: React.FC<Props> = ({ onBack }) => {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-neutral-50 dark:bg-neutral-900 px-6 py-4 rounded-[20px] rounded-bl-none animate-pulse text-black meta-bold uppercase tracking-widest border border-neutral-100 dark:border-neutral-800">
+            <div className="bg-neutral-50 dark:bg-neutral-900 px-6 py-4 rounded-[20px] rounded-bl-none animate-pulse text-black meta-bold tracking-widest border border-neutral-100 dark:border-neutral-800">
               Processando resposta...
             </div>
           </div>

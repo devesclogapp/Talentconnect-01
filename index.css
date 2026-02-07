@@ -100,7 +100,7 @@
   }
 
   .meta {
-    @apply text-[10px] font-bold uppercase tracking-widest;
+    @apply text-[10px] font-bold tracking-widest;
     color: var(--text-primary);
   }
 

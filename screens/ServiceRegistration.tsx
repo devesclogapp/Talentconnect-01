@@ -135,7 +135,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
         </button>
         <div className="flex flex-col items-center">
-          <h1 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary mb-1">
+          <h1 className="text-[10px] font-black tracking-[0.2em] text-text-tertiary mb-1">
             {serviceId ? 'Editar Operação' : 'Nova Operação'}
           </h1>
           <div className="flex gap-1.5">
@@ -154,7 +154,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin"></div>
-            <p className="text-[10px] uppercase tracking-widest text-text-tertiary animate-pulse">Carregando dados...</p>
+            <p className="text-[10px] tracking-widest text-text-tertiary animate-pulse">Carregando dados...</p>
           </div>
         </div>
       ) : (
@@ -170,7 +170,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
               <div className="space-y-6">
                 {/* Title Input */}
                 <div className="group">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-text-tertiary mb-2 ml-1">Título do Serviço</label>
+                  <label className="block text-[10px] font-black tracking-widest text-text-tertiary mb-2 ml-1">Título do Serviço</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -187,7 +187,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
 
                 {/* Custom Category Dropdown */}
                 <div className="relative z-20">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-text-tertiary mb-2 ml-1">Categoria Principal</label>
+                  <label className="block text-[10px] font-black tracking-widest text-text-tertiary mb-2 ml-1">Categoria Principal</label>
 
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -199,7 +199,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                       </div>
                       <div className="text-left">
                         <p className="text-sm font-bold text-text-primary leading-tight">{selectedCategoryObj.label}</p>
-                        <p className="text-[10px] text-text-tertiary uppercase tracking-wider">Selecionado</p>
+                        <p className="text-[10px] text-text-tertiary tracking-wider">Selecionado</p>
                       </div>
                     </div>
                     <ChevronDown size={20} className={`text-text-tertiary transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -256,7 +256,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                     <DollarSign size={24} />
                   </div>
                   <div className="text-center">
-                    <span className="block text-xs font-black uppercase tracking-widest mb-1">Preço Fixo</span>
+                    <span className="block text-xs font-black tracking-widest mb-1">Preço Fixo</span>
                     <span className="text-[10px] opacity-70">Valor único por serviço</span>
                   </div>
                 </button>
@@ -269,7 +269,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                     <Clock size={24} />
                   </div>
                   <div className="text-center">
-                    <span className="block text-xs font-black uppercase tracking-widest mb-1">Por Hora</span>
+                    <span className="block text-xs font-black tracking-widest mb-1">Por Hora</span>
                     <span className="text-[10px] opacity-70">Cobrança por tempo</span>
                   </div>
                 </button>
@@ -278,7 +278,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
               <div className="bg-bg-secondary border border-border-subtle rounded-3xl p-8 flex flex-col items-center justify-center gap-2 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent-primary/5 rounded-full blur-3xl -z-10"></div>
 
-                <p className="text-[10px] font-black uppercase tracking-widest text-text-tertiary">Valor Base</p>
+                <p className="text-[10px] font-black tracking-widest text-text-tertiary">Valor Base</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-medium text-text-tertiary">R$</span>
                   <input
@@ -329,7 +329,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
           <button
             onClick={() => step < 3 ? setStep(step + 1) : handleFinish()}
             disabled={loading}
-            className="flex-1 py-4 bg-accent-primary text-bg-primary font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-accent-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+            className="flex-1 py-4 bg-accent-primary text-bg-primary font-black tracking-widest rounded-2xl shadow-xl shadow-accent-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

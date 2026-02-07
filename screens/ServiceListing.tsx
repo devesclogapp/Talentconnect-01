@@ -89,7 +89,7 @@ const ServiceListing: React.FC<Props> = ({ onBack, onSelectService, initialCateg
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-5 py-2.5 rounded-full heading-md uppercase tracking-widest text-[9px] transition-all whitespace-nowrap border ${filter === cat
+              className={`px-5 py-2.5 rounded-full heading-md tracking-widest text-[9px] transition-all whitespace-nowrap border ${filter === cat
                 ? 'bg-accent-primary text-bg-primary border-accent-primary shadow-glow'
                 : 'bg-bg-tertiary text-text-tertiary border-border-medium'
                 }`}
@@ -109,7 +109,7 @@ const ServiceListing: React.FC<Props> = ({ onBack, onSelectService, initialCateg
         ) : filteredServices.length === 0 ? (
           <div className="text-center py-32 bg-bg-secondary/40 rounded-[40px] border border-dashed border-border-medium px-10">
             <Search size={40} className="text-text-tertiary mx-auto mb-4 opacity-20" />
-            <p className="heading-md uppercase tracking-widest text-text-tertiary">Zero Vectors Found</p>
+            <p className="heading-md tracking-widest text-text-tertiary">Zero Vectors Found</p>
             <p className="meta !lowercase text-text-tertiary mt-2">Adjust your filters to discover more.</p>
           </div>
         ) : (
@@ -125,7 +125,7 @@ const ServiceListing: React.FC<Props> = ({ onBack, onSelectService, initialCateg
                   <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/90 via-transparent to-transparent"></div>
 
                   <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1.5 rounded-full bg-bg-primary/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-accent-primary uppercase tracking-widest">
+                    <span className="px-3 py-1.5 rounded-full bg-bg-primary/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-accent-primary tracking-widest">
                       {service.category}
                     </span>
                   </div>
@@ -151,11 +151,11 @@ const ServiceListing: React.FC<Props> = ({ onBack, onSelectService, initialCateg
                       <div className="flex items-center gap-4 text-text-tertiary">
                         <div className="flex items-center gap-1.5">
                           <MapPin size={12} />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">Metropolis, BR</span>
+                          <span className="text-[10px] font-bold tracking-wider">Metropolis, BR</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Clock size={12} />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">2h delivery</span>
+                          <span className="text-[10px] font-bold tracking-wider">2h delivery</span>
                         </div>
                       </div>
                     </div>
@@ -166,7 +166,7 @@ const ServiceListing: React.FC<Props> = ({ onBack, onSelectService, initialCateg
                   </div>
 
                   <button className="w-full h-14 rounded-2xl bg-bg-tertiary border border-border-medium flex items-center justify-center gap-3 group group transition-all shadow-md">
-                    <span className="heading-md uppercase tracking-[0.2em] text-[11px]">View Portfolio</span>
+                    <span className="heading-md tracking-[0.2em] text-[11px]">View Portfolio</span>
                     <ArrowRight size={18} className="-rotate-45 group transition-transform" />
                   </button>
                 </div>

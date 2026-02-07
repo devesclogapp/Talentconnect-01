@@ -139,20 +139,20 @@ const ProviderDashboard: React.FC<Props> = ({
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-primary/5 rounded-full blur-[150px] -z-10"></div>
 
             {/* Portfolio Command Center Header */}
-            <header className="px-6 pt-12 pb-8 bg-gradient-to-b from-bg-secondary to-bg-primary border-b border-border-subtle">
-                <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center gap-4">
+            <header className="px-6 pt-6 pb-2">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
                         <div className="relative">
-                            <div className="w-16 h-16 rounded-full border-2 border-accent-primary p-0.5 overflow-hidden shadow-glow">
+                            <div className="w-12 h-12 rounded-full border-2 border-accent-primary p-0.5 overflow-hidden shadow-glow">
                                 <img src={userAvatar} alt={userName} className="w-full h-full object-cover rounded-full" />
                             </div>
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success border-2 border-bg-secondary rounded-full flex items-center justify-center">
-                                <Zap size={12} className="text-white" fill="currentColor" />
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success border-2 border-bg-primary rounded-full flex items-center justify-center">
+                                <Zap size={10} className="text-white" fill="currentColor" />
                             </div>
                         </div>
                         <div>
-                            <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none mb-1">provider terminal</p>
-                            <h2 className="heading-xl tracking-tight">{userName}</h2>
+                            <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none mb-0.5">provider terminal</p>
+                            <h2 className="heading-lg tracking-tight text-text-primary">{userName}</h2>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
                                 <span className="meta !text-[8px] text-success">Operações Ativas</span>
@@ -160,67 +160,74 @@ const ProviderDashboard: React.FC<Props> = ({
                         </div>
                     </div>
                 </div>
-
-                {/* Revenue Display - Financial Dashboard Style */}
-                <div className="space-y-6">
-                    <div className="flex items-end justify-between">
-                        <div
-                            className="cursor-pointer transition-opacity active:opacity-70"
-                            onClick={() => setShowFinancialDetails(!showFinancialDetails)}
-                        >
-                            <div className="flex items-center gap-2 mb-2">
-                                <p className="meta !text-[9px] text-text-tertiary">
-                                    Valor Líquido do Portfolio
-                                </p>
-                                <div className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${showFinancialDetails ? 'bg-accent-primary text-white' : 'bg-bg-tertiary text-text-tertiary'}`}>
-                                    {showFinancialDetails ? 'Detalhado' : 'Resumo'}
-                                </div>
-                            </div>
-
-                            <h1 className="heading-4xl tracking-tighter mb-2">
-                                R$ {stats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </h1>
-
-                            {/* Financial Breakdown (Collapsible) */}
-                            {showFinancialDetails && (
-                                <div className="mb-4 space-y-1 animate-slide-down">
-                                    <div className="flex items-center gap-2 text-xs text-text-secondary">
-                                        <span className="w-16">Total Bruto:</span>
-                                        <span className="font-semibold">R$ {stats.grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-error/80">
-                                        <span className="w-16">Operadora:</span>
-                                        <span className="font-semibold">- R$ {stats.operatorFees.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                    </div>
-                                    <div className="h-px bg-border-subtle w-32 my-1"></div>
-                                </div>
-                            )}
-
-                            <div className="flex items-center gap-3">
-                                <span className={`flex items-center gap-1.5 text-[11px] font-black ${stats.growth >= 0 ? 'text-success bg-success/10' : 'text-error bg-error/10'} px-3 py-1.5 rounded-full uppercase tracking-wider`}>
-                                    {stats.growth >= 0 ? <ArrowUpRight size={14} /> : <TrendingDown size={14} className="rotate-90" />}
-                                    {Math.abs(stats.growth).toFixed(1)}%
-                                </span>
-                                <span className="text-[10px] text-text-tertiary font-medium">vs mês anterior</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Revenue Breakdown Pills */}
-                    <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-bg-tertiary/50 rounded-full border border-border-subtle whitespace-nowrap">
-                            <div className="w-2 h-2 rounded-full bg-accent-primary"></div>
-                            <span className="meta !text-[9px] text-text-tertiary uppercase tracking-tighter opacity-60">Ganhos Mensais</span>
-                            <span className="text-[10px] font-bold text-text-primary">R$ {stats.monthlyRevenue.toFixed(0)}</span>
-                        </div>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-bg-tertiary/50 rounded-full border border-border-subtle whitespace-nowrap">
-                            <div className="w-2 h-2 rounded-full bg-warning"></div>
-                            <span className="meta !text-[9px] text-text-tertiary uppercase tracking-tighter opacity-60">Pendentes</span>
-                            <span className="text-[10px] font-bold text-text-primary">{stats.pendingCount}</span>
-                        </div>
-                    </div>
-                </div>
             </header>
+
+            {/* Financial Card */}
+            <div className="px-6 mb-8">
+                <div className="bg-black text-white rounded-[32px] p-6 shadow-2xl relative overflow-hidden border border-white/10">
+                    {/* Inner Content */}
+                    <div className="relative z-10 space-y-6">
+                        <div className="flex items-end justify-between">
+                            <div
+                                className="cursor-pointer transition-opacity active:opacity-70"
+                                onClick={() => setShowFinancialDetails(!showFinancialDetails)}
+                            >
+                                <div className="flex items-center gap-2 mb-2">
+                                    <p className="meta !text-[9px] text-neutral-400">
+                                        Valor Líquido do Portfolio
+                                    </p>
+                                    <div className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${showFinancialDetails ? 'bg-accent-primary text-white' : 'bg-white/10 text-neutral-300'}`}>
+                                        {showFinancialDetails ? 'Detalhado' : 'Resumo'}
+                                    </div>
+                                </div>
+
+                                <h1 className="heading-4xl tracking-tighter mb-2 text-white">
+                                    R$ {stats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                </h1>
+
+                                {/* Financial Breakdown (Collapsible) */}
+                                {showFinancialDetails && (
+                                    <div className="mb-4 space-y-1 animate-slide-down">
+                                        <div className="flex items-center gap-2 text-xs text-neutral-300">
+                                            <span className="w-16">Total Bruto:</span>
+                                            <span className="font-semibold">R$ {stats.grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-error">
+                                            <span className="w-16">Operadora:</span>
+                                            <span className="font-semibold">- R$ {stats.operatorFees.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="h-px bg-white/10 w-32 my-1"></div>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center gap-3">
+                                    <span className={`flex items-center gap-1.5 text-[11px] font-black ${stats.growth >= 0 ? 'text-success bg-success/10' : 'text-error bg-error/10'} px-3 py-1.5 rounded-full uppercase tracking-wider`}>
+                                        {stats.growth >= 0 ? <ArrowUpRight size={14} /> : <TrendingDown size={14} className="rotate-90" />}
+                                        {Math.abs(stats.growth).toFixed(1)}%
+                                    </span>
+                                    <span className="text-[10px] text-neutral-500 font-medium">vs mês anterior</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Revenue Breakdown Pills */}
+                        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 whitespace-nowrap">
+                                <div className="w-2 h-2 rounded-full bg-accent-primary"></div>
+                                <span className="meta !text-[9px] text-neutral-400 uppercase tracking-tighter opacity-80">Ganhos Mensais</span>
+                                <span className="text-[10px] font-bold text-white">R$ {stats.monthlyRevenue.toFixed(0)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 whitespace-nowrap">
+                                <div className="w-2 h-2 rounded-full bg-warning"></div>
+                                <span className="meta !text-[9px] text-neutral-400 uppercase tracking-tighter opacity-80">Pendentes</span>
+                                <span className="text-[10px] font-bold text-white">{stats.pendingCount}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {/* Decorative Background Blob inside card */}
+                    <div className="absolute top-[-50px] right-[-50px] w-[200px] h-[200px] bg-accent-primary/20 rounded-full blur-[60px] pointer-events-none"></div>
+                </div>
+            </div>
 
             <main className="px-6 mt-8">
                 {/* Quick Actions Matrix */}

@@ -153,7 +153,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                         Solicitação de finalização enviada para <b>{clientName}</b>. O pagamento será liberado assim que o cliente confirmar.
                     </p>
 
-                    <div className="flex items-center justify-center gap-3 text-black meta-bold uppercase tracking-widest text-[10px]">
+                    <div className="flex items-center justify-center gap-3 text-black meta-bold tracking-widest text-[10px]">
                         <div className="w-2 h-2 rounded-full bg-primary-green animate-pulse"></div>
                         Redirecionando para o Dashboard
                     </div>
@@ -170,7 +170,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                     className="interactive flex items-center gap-2 text-black mb-4"
                 >
                     <ArrowLeft size={20} />
-                    <span className="meta-bold uppercase tracking-widest text-[10px]">Painel de Controle</span>
+                    <span className="meta-bold tracking-widest text-[10px]">Painel de Controle</span>
                 </button>
 
                 <div className="flex items-center justify-between">
@@ -178,7 +178,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                         <h1 className="text-2xl font-bold text-black dark:text-white">
                             Status do Serviço
                         </h1>
-                        <p className="meta-bold text-black uppercase tracking-widest !text-[9px] mt-1">ID: #{order?.id.slice(0, 8)}</p>
+                        <p className="meta-bold text-black tracking-widest !text-[9px] mt-1">ID: #{order?.id.slice(0, 8)}</p>
                     </div>
                     <Badge variant={status === 'in_progress' ? 'success' : 'secondary'}>
                         <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${status === 'in_progress' ? 'bg-white animate-pulse' : 'bg-neutral-400'}`}></div>
@@ -190,7 +190,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
             <div className="px-4 py-8 space-y-6">
                 {/* Visual Timeline for Provider */}
                 <Card className="p-6 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800">
-                    <h3 className="meta-bold text-black dark:text-white uppercase tracking-widest mb-6">Linha do Tempo</h3>
+                    <h3 className="meta-bold text-black dark:text-white tracking-widest mb-6">Linha do Tempo</h3>
                     <div className="space-y-0 relative pl-2">
                         {(() => {
                             // Determine current step index based on strict order status
@@ -313,14 +313,14 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                         ? 'bg-primary-black text-white'
                         : 'bg-white dark:bg-neutral-900'
                         }`}>
-                        <h3 className={`meta-bold uppercase tracking-widest opacity-60 mb-4 ${status === 'in_progress' ? 'text-white' : 'text-black'}`}>
+                        <h3 className={`meta-bold tracking-widest opacity-60 mb-4 ${status === 'in_progress' ? 'text-white' : 'text-black'}`}>
                             Tempo de Trabalho
                         </h3>
                         <div className="text-6xl font-black mb-6 font-mono tracking-tighter">
                             {formatElapsedTime(elapsedTime)}
                         </div>
                         {status === 'in_progress' && (
-                            <div className="flex items-center justify-center gap-2 text-xs meta-bold text-black-green uppercase tracking-widest">
+                            <div className="flex items-center justify-center gap-2 text-xs meta-bold text-black-green tracking-widest">
                                 <div className="w-2 h-2 rounded-full bg-primary-green animate-ping" />
                                 <span>Gravando tempo real</span>
                             </div>
@@ -329,7 +329,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                 ) : (
                     <Card className="p-8 bg-primary-black text-white rounded-[32px] border-none shadow-xl flex items-center justify-between">
                         <div>
-                            <p className="meta-bold text-white/50 uppercase tracking-widest mb-1">Preço Fixo</p>
+                            <p className="meta-bold text-white/50 tracking-widest mb-1">Preço Fixo</p>
                             <h3 className="text-2xl font-bold">R$ {order?.total_amount?.toFixed(2) || '0.00'}</h3>
                         </div>
                         <div className="w-12 h-12 rounded-2xl bg-primary-green/20 flex items-center justify-center text-black-green">
@@ -340,7 +340,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
 
                 {/* Client & Service Info */}
                 <Card className="p-8 rounded-[32px] border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-                    <h3 className="meta-bold text-black uppercase tracking-widest mb-6">Informações do Cliente</h3>
+                    <h3 className="meta-bold text-black tracking-widest mb-6">Informações do Cliente</h3>
 
                     <div className="flex items-center gap-4 mb-8 pb-8 border-b border-neutral-100 dark:border-neutral-800">
                         <div className="w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden">
@@ -360,7 +360,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                         <div className="flex items-start gap-3">
                             <Clock size={16} className="text-black-green mt-0.5" />
                             <div>
-                                <p className="meta-bold text-black uppercase tracking-widest !text-[9px]">Agendado</p>
+                                <p className="meta-bold text-black tracking-widest !text-[9px]">Agendado</p>
                                 <p className="font-semibold text-black dark:text-white">
                                     {new Date(order?.scheduled_at).toLocaleString('pt-BR', { weekday: 'long', hour: '2-digit', minute: '2-digit' })}
                                 </p>
@@ -398,7 +398,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                         <button
                             onClick={handleStartService}
                             disabled={isProcessing}
-                            className="w-full py-6 bg-primary-green text-black rounded-[24px] label-semibold uppercase tracking-widest shadow-xl shadow-primary-green/20 flex items-center justify-center gap-3 transition-all  active:scale-[0.98]"
+                            className="w-full py-6 bg-primary-green text-black rounded-[24px] label-semibold tracking-widest shadow-xl shadow-primary-green/20 flex items-center justify-center gap-3 transition-all  active:scale-[0.98]"
                         >
                             <Play size={20} fill="currentColor" />
                             {isProcessing ? 'Iniciando...' : 'Iniciar Trabalho Agora'}
@@ -418,7 +418,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                         <button
                             onClick={handleRequestFinish}
                             disabled={isProcessing}
-                            className="w-full py-6 bg-feedback-error text-white rounded-[24px] label-semibold uppercase tracking-widest shadow-xl shadow-feedback-error/30 flex items-center justify-center gap-3 transition-all  active:scale-[0.98]"
+                            className="w-full py-6 bg-feedback-error text-white rounded-[24px] label-semibold tracking-widest shadow-xl shadow-feedback-error/30 flex items-center justify-center gap-3 transition-all  active:scale-[0.98]"
                         >
                             <Square size={20} fill="currentColor" />
                             {isProcessing ? 'Processando...' : 'Finalizar Trabalho'}
@@ -430,7 +430,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                             <button
                                 onClick={handleFinishService}
                                 disabled={isProcessing}
-                                className="w-full py-6 bg-primary-green text-black rounded-[24px] label-semibold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3"
+                                className="w-full py-6 bg-primary-green text-black rounded-[24px] label-semibold tracking-widest shadow-xl flex items-center justify-center gap-3"
                             >
                                 <CheckCircle size={20} />
                                 {isProcessing ? 'Enviando...' : 'Confirmar Envio Final'}
@@ -439,7 +439,7 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                             <button
                                 onClick={() => setStatus('in_progress')}
                                 disabled={isProcessing}
-                                className="w-full py-6 bg-neutral-100 dark:bg-neutral-800 text-black rounded-[24px] label-semibold uppercase tracking-widest"
+                                className="w-full py-6 bg-neutral-100 dark:bg-neutral-800 text-black rounded-[24px] label-semibold tracking-widest"
                             >
                                 Voltar ao Trabalho
                             </button>
