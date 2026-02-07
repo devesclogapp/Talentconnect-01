@@ -115,7 +115,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                     </div>
                     <div>
                         <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none">acesso autorizado</p>
-                        <h2 className="heading-md tracking-tight">{userName.split(' ')[0]}</h2>
+                        <h2 className="heading-md">{userName.split(' ')[0]}</h2>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -168,7 +168,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                         <h3 className="heading-2xl text-accent-primary font-black leading-tight">Eleve suas contratações <br />ao Nível Expert.</h3>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-bold text-white uppercase tracking-[0.2em] opacity-90">Acesso Platinum Ativo</p>
+                                        <p className="text-xs font-normal text-white opacity-90">Acesso Platinum Ativo</p>
                                         <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse"></div>
                                     </div>
                                 </div>
@@ -187,7 +187,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                         <h3 className="heading-2xl text-accent-primary font-black leading-tight">Conecte-se com <br />Especialistas Elite.</h3>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-bold text-white uppercase tracking-[0.2em]">Rede 100% Verificada</p>
+                                        <p className="text-xs font-normal text-white">Rede 100% Verificada</p>
                                         <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
                                     </div>
                                 </div>
@@ -206,7 +206,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                         <h3 className="heading-2xl text-accent-primary font-black leading-tight">Serviços de Qualidade <br />Sob Demanda.</h3>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-bold text-white uppercase tracking-[0.2em]">Suporte 24/7 Disponível</p>
+                                        <p className="text-xs font-normal text-white">Suporte 24/7 Disponível</p>
                                         <div className="w-2 h-2 rounded-full bg-info animate-pulse"></div>
                                     </div>
                                 </div>
@@ -234,7 +234,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
             <header className="px-6 pt-6 pb-4 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-primary/5 rounded-full blur-[120px] -z-10"></div>
 
-                <h2 className="text-[14px] font-bold text-text-primary mb-6 uppercase tracking-wider">Categoria</h2>
+                <h2 className="text-[14px] font-bold text-text-primary mb-6">Categoria</h2>
 
                 {/* Market Vectors (Categories) */}
                 <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6">
@@ -255,7 +255,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 <div className="w-16 h-16 rounded-2xl bg-bg-secondary border border-border-subtle flex items-center justify-center text-text-tertiary transition-all shadow-sm">
                                     {React.isValidElement(cat.icon) ? React.cloneElement(cat.icon as React.ReactElement, { size: 28 }) : cat.icon}
                                 </div>
-                                <span className="text-[10px] font-bold text-text-primary uppercase tracking-wide text-center leading-tight max-w-[80px]">{cat.name}</span>
+                                <span className="text-[10px] font-normal text-text-primary text-center leading-tight max-w-[80px]">{cat.name}</span>
                             </button>
                         ))
                     )}
@@ -301,7 +301,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                     <div className="absolute top-2 left-2">
                                         <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-bg-primary/40 backdrop-blur-md border border-white/10">
                                             <Star size={8} className="text-accent-primary" fill="currentColor" />
-                                            <span className="text-[8px] font-bold text-white">4.9</span>
+                                            <span className="text-[8px] font-normal text-white">4.9</span>
                                         </div>
                                     </div>
                                 </div>
@@ -324,9 +324,9 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                             <div className="w-5 h-5 rounded-full border border-border-medium overflow-hidden">
                                                 <img src={`https://i.pravatar.cc/150?u=${service.provider_id}`} alt="provider" className="w-full h-full object-cover" />
                                             </div>
-                                            <p className="text-[9px] font-bold text-text-primary uppercase">Prestador Verificado</p>
+                                            <p className="text-[9px] font-normal text-text-primary">Prestador Verificado</p>
                                         </div>
-                                        <div className="px-2.5 py-1 rounded-full bg-accent-primary text-bg-primary text-[10px] font-black uppercase tracking-widest">
+                                        <div className="px-2.5 py-1 rounded-full bg-accent-primary text-bg-primary text-[10px] font-normal">
                                             R$ {service.base_price}
                                         </div>
                                     </div>
@@ -346,14 +346,14 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                         <h5 className="text-3xl font-black text-text-primary tracking-tighter mb-1">
                             {activeOrdersCount.toString().padStart(2, '0')}
                         </h5>
-                        <p className="text-[9px] font-bold text-text-primary uppercase">Contratos Ativos</p>
+                        <p className="text-[9px] font-normal text-text-primary">Contratos Ativos</p>
                     </div>
                     <div className="bg-bg-secondary p-6 rounded-3xl border border-border-subtle relative overflow-hidden group interactive">
                         <p className="meta !text-[8px] !lowercase text-text-tertiary mb-3">posição no mercado</p>
                         <h5 className="text-3xl font-black text-text-primary tracking-tighter mb-1">
                             {activeOrdersCount > 5 ? 'ELITE' : (activeOrdersCount > 0 ? 'PRO' : 'USER')}
                         </h5>
-                        <p className="text-[9px] font-bold text-text-primary uppercase">Nível de Conta</p>
+                        <p className="text-[9px] font-normal text-text-primary">Nível de Conta</p>
                     </div>
                 </section>
 

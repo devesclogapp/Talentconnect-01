@@ -72,7 +72,7 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
         <button onClick={onBack} className="w-10 h-10 flex items-center justify-center interactive">
           <ArrowLeft size={20} className="text-black dark:text-white" />
         </button>
-        <h1 className="heading-md uppercase tracking-widest text-[12px] flex-1 text-center">Minha Agenda</h1>
+        <h1 className="heading-md tracking-widest text-[12px] flex-1 text-center">Minha Agenda</h1>
         <div className="w-10"></div>
       </header>
 
@@ -115,7 +115,7 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
                   onClick={() => setSelectedDateString(d.dateString)}
                   className={`relative flex flex-col items-center justify-center p-3 min-w-[55px] rounded-2xl transition-all border shadow-sm ${isSelected ? 'bg-primary-black text-white border-primary-black shadow-lg shadow-black/10' : 'bg-bg-secondary border-border-subtle text-text-primary'}`}
                 >
-                  <span className={`meta-bold !text-[9px] uppercase tracking-tighter mb-1 ${isSelected ? 'opacity-70' : 'opacity-40'}`}>{d.name}</span>
+                  <span className={`meta-bold !text-[9px] tracking-tighter mb-1 ${isSelected ? 'opacity-70' : 'opacity-40'}`}>{d.name}</span>
                   <span className="body-bold">{d.date}</span>
                   {dotColor && (
                     <div className={`absolute bottom-1.5 w-1.5 h-1.5 rounded-full ${dotColor}`}></div>
@@ -133,7 +133,7 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
           ) : filteredJobs.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-center opacity-30">
               <Calendar size={60} strokeWidth={1} />
-              <p className="caption-bold mt-4 uppercase">Agenda Vazia</p>
+              <p className="caption-bold mt-4">Agenda Vazia</p>
             </div>
           ) : (
             filteredJobs.map((job) => (
@@ -146,7 +146,7 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
                       <h3 className="heading-md mb-1 text-text-primary">{job.service?.title || 'Serviço'}</h3>
                       <div className="flex items-center gap-2 text-text-secondary">
                         <Clock size={12} className="text-accent-primary" />
-                        <span className="meta-bold uppercase tracking-tight">
+                        <span className="meta-bold tracking-tight">
                           {new Date(job.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
@@ -163,11 +163,11 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
 
                   <div className="mt-6 flex gap-3">
                     {job.status === 'sent' && (
-                      <button onClick={() => handleAction(job.id, 'ACCEPT')} className="flex-1 button--primary !bg-primary-green !text-black !rounded-xl !min-h-[48px] label-semibold uppercase tracking-widest">Aceitar Pedido</button>
+                      <button onClick={() => handleAction(job.id, 'ACCEPT')} className="flex-1 button--primary !bg-primary-green !text-black !rounded-xl !min-h-[48px] label-semibold tracking-widest">Aceitar Pedido</button>
                     )}
                     {job.status === 'accepted' && (
                       <div className="flex-1 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl text-center border border-neutral-100 dark:border-neutral-800">
-                        <p className="meta-bold text-black-green-dark uppercase tracking-wide">Pedido Confirmado</p>
+                        <p className="meta-bold text-black-green-dark tracking-wide">Pedido Confirmado</p>
                       </div>
                     )}
                   </div>
@@ -178,20 +178,7 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
         </section>
       </main>
 
-      <nav className="bottom-nav">
-        <button onClick={() => onNavigate('PROVIDER_DASHBOARD')} className="bottom-nav__item interactive">
-          <Home size={24} />
-        </button>
-        <button onClick={() => onNavigate('EARNINGS')} className="bottom-nav__item interactive">
-          <Wallet size={24} />
-        </button>
-        <button className="bottom-nav__item bottom-nav__item--active interactive">
-          <Calendar size={24} />
-        </button>
-        <button onClick={() => onNavigate('PROFILE')} className="bottom-nav__item interactive">
-          <UserIcon size={24} />
-        </button>
-      </nav>
+
     </div>
   );
 };

@@ -9,11 +9,12 @@ import { supabase } from '../services/supabaseClient';
 interface ReceivedOrdersProps {
     onBack: () => void;
     onSelectOrder: (order: any) => void;
+    initialFilter?: string;
 }
 
-const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }) => {
+const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder, initialFilter = 'all' }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState<string | 'all'>('all');
+    const [filterStatus, setFilterStatus] = useState<string | 'all'>(initialFilter);
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -139,7 +140,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                     <h1 className="heading-2xl tracking-tight text-text-primary mb-1">
                         Pedidos Recebidos
                     </h1>
-                    <p className="text-xs text-text-tertiary font-medium">
+                    <p className="text-xs text-text-tertiary font-normal">
                         {orders.length} pedidos no total
                     </p>
                 </div>
@@ -169,15 +170,17 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                             <button
                                 key={filter.id}
                                 onClick={() => setFilterStatus(filter.id)}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all whitespace-nowrap active:scale-95 ${filterStatus === filter.id
-                                    ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg'
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all whitespace-nowrap active:scale-95 ${filterStatus === filter.id
+                                    ? filter.id === 'pending'
+                                        ? 'bg-warning border-warning text-white shadow-lg shadow-warning/20'
+                                        : 'bg-text-primary border-text-primary text-bg-primary shadow-lg'
                                     : 'bg-bg-primary border-border-subtle text-text-secondary hover:border-text-tertiary'
                                     }`}
                             >
                                 <filter.icon size={14} />
-                                <span className="text-[11px] font-bold uppercase tracking-wider">{filter.label}</span>
+                                <span className="text-[11px] font-normal tracking-normal">{filter.label}</span>
                                 {filter.count > 0 && (
-                                    <span className={`ml-1 px-1.5 py-0.5 rounded-md text-[9px] font-black ${filterStatus === filter.id
+                                    <span className={`ml-1 px-1.5 py-0.5 rounded-md text-[9px] font-normal ${filterStatus === filter.id
                                         ? 'bg-bg-primary/20 text-bg-primary'
                                         : 'bg-bg-secondary text-text-primary'
                                         }`}>
@@ -195,7 +198,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                 {loading ? (
                     <div className="py-20 flex flex-col items-center gap-4">
                         <div className="w-8 h-8 border-2 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin"></div>
-                        <p className="text-[10px] text-text-tertiary uppercase tracking-widest animate-pulse">Atualizando pedidos...</p>
+                        <p className="text-[10px] text-text-tertiary tracking-normal animate-pulse">Atualizando pedidos...</p>
                     </div>
                 ) : filteredOrders.length === 0 ? (
                     <div className="py-20 text-center space-y-4 opacity-50">
@@ -220,7 +223,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                                 {/* Status Badge Top Right */}
                                 <div className={`absolute top-6 right-6 px-2 py-1 rounded-full flex items-center gap-1 border ${status.className}`}>
                                     <StatusIcon size={10} />
-                                    <span className="text-[9px] font-bold uppercase tracking-wider">{status.label}</span>
+                                    <span className="text-[9px] font-normal tracking-normal">{status.label}</span>
                                 </div>
 
                                 {/* Client Header */}
@@ -232,7 +235,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                                     />
                                     <div>
                                         <h3 className="text-lg font-bold text-text-primary leading-tight mb-1">{clientName}</h3>
-                                        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">
+                                        <p className="text-[10px] font-normal text-text-tertiary tracking-normal">
                                             {getTimeAgo(order.created_at)}
                                         </p>
                                     </div>
@@ -240,7 +243,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
 
                                 {/* Service Details Box */}
                                 <div className="bg-neutral-50 dark:bg-neutral-800/50 rounded-[24px] p-5 mb-6">
-                                    <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-2">Serviço Solicitado</p>
+                                    <p className="text-[9px] font-normal text-text-tertiary tracking-normal mb-2">Serviço Solicitado</p>
                                     <h4 className="text-base font-bold text-text-primary mb-3 line-clamp-2">
                                         {order.service_title_snapshot || order.service?.title || 'Serviço Personalizado'}
                                     </h4>
@@ -259,7 +262,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
 
                                 {/* Location Pill if exists */}
                                 {order.location_text && (
-                                    <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300 rounded-2xl text-xs font-medium mb-6">
+                                    <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300 rounded-2xl text-xs font-normal mb-6">
                                         <MapPin size={14} className="shrink-0" />
                                         <span className="line-clamp-1">{order.location_text}</span>
                                     </div>
@@ -268,7 +271,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                                 {/* Footer: Price & Action */}
                                 <div className="flex items-end justify-between border-t border-border-subtle pt-5">
                                     <div>
-                                        <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-1">Valor Total</p>
+                                        <p className="text-[9px] font-normal text-text-tertiary tracking-normal mb-1">Valor Total</p>
                                         <div className="flex items-baseline gap-0.5">
                                             <span className="text-sm font-bold text-text-secondary">R$</span>
                                             <span className="text-2xl font-black text-text-primary tracking-tight">

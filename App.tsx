@@ -407,7 +407,10 @@ const App: React.FC = () => {
 
       // Provider Order Management
       case 'RECEIVED_ORDERS':
+      case 'RECEIVED_ORDERS:pending': {
+        const filter = view.includes(':') ? view.split(':')[1] : 'all';
         return <ReceivedOrders
+          initialFilter={filter}
           onBack={goBack}
           onSelectOrder={(order) => {
             setSelectedOrder(order);
@@ -420,6 +423,7 @@ const App: React.FC = () => {
             }
           }}
         />;
+      }
       case 'ORDER_ACCEPT_REJECT':
         return <OrderAcceptReject
           order={selectedOrder}
@@ -471,9 +475,8 @@ const App: React.FC = () => {
     'AGENDA',
     'TRACKING',
     'ORDER_HISTORY',
-    'RECEIVED_ORDERS',
     'NOTIFICATIONS'
-  ].includes(view);
+  ].includes(view) || view.startsWith('RECEIVED_ORDERS');
 
   const userRole = (user?.role || 'client').toLowerCase();
 
@@ -504,7 +507,7 @@ const App: React.FC = () => {
           ) : (
             <button
               onClick={() => setView('RECEIVED_ORDERS')}
-              className={`bottom-nav__item interactive ${view === 'RECEIVED_ORDERS' ? 'bottom-nav__item--active' : ''}`}
+              className={`bottom-nav__item interactive ${view.startsWith('RECEIVED_ORDERS') ? 'bottom-nav__item--active' : ''}`}
             >
               <ReceiptText size={24} />
               <span className="sr-only">Pedidos</span>
@@ -529,9 +532,9 @@ const App: React.FC = () => {
                   setSelectedServiceId(undefined);
                   setView('SERVICE_REGISTRATION');
                 }}
-                className="bottom-nav__item interactive -mt-6"
+                className="w-14 h-14 flex items-center justify-center -mt-6 interactive rounded-full"
               >
-                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-lg shadow-primary-orange/20">
+                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-lg shadow-primary-black/20">
                   <Plus size={32} />
                 </div>
                 <span className="sr-only">Novo Serviço</span>

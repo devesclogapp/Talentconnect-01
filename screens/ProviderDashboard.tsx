@@ -17,7 +17,8 @@ import {
     Plus,
     Users,
     Award,
-    Target
+    Target,
+    ArrowRight
 } from 'lucide-react';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { getProviderOrders } from '../services/ordersService';
@@ -152,7 +153,7 @@ const ProviderDashboard: React.FC<Props> = ({
                         </div>
                         <div>
                             <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none mb-0.5">provider terminal</p>
-                            <h2 className="heading-lg tracking-tight text-text-primary">{userName}</h2>
+                            <h2 className="heading-lg text-text-primary">{userName}</h2>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
                                 <span className="meta !text-[8px] text-success">Operações Ativas</span>
@@ -176,12 +177,12 @@ const ProviderDashboard: React.FC<Props> = ({
                                     <p className="meta !text-[9px] text-neutral-400">
                                         Valor Líquido do Portfolio
                                     </p>
-                                    <div className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${showFinancialDetails ? 'bg-accent-primary text-white' : 'bg-white/10 text-neutral-300'}`}>
+                                    <div className={`px-1.5 py-0.5 rounded text-[8px] font-normal tracking-normal ${showFinancialDetails ? 'bg-accent-primary text-white' : 'bg-white/10 text-neutral-300'}`}>
                                         {showFinancialDetails ? 'Detalhado' : 'Resumo'}
                                     </div>
                                 </div>
 
-                                <h1 className="heading-4xl tracking-tighter mb-2 text-white">
+                                <h1 className="heading-4xl mb-2 text-white">
                                     R$ {stats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                 </h1>
 
@@ -190,38 +191,40 @@ const ProviderDashboard: React.FC<Props> = ({
                                     <div className="mb-4 space-y-1 animate-slide-down">
                                         <div className="flex items-center gap-2 text-xs text-neutral-300">
                                             <span className="w-16">Total Bruto:</span>
-                                            <span className="font-semibold">R$ {stats.grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                            <span className="font-normal">R$ {stats.grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-xs text-error">
                                             <span className="w-16">Operadora:</span>
-                                            <span className="font-semibold">- R$ {stats.operatorFees.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                            <span className="font-normal">- R$ {stats.operatorFees.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                         </div>
                                         <div className="h-px bg-white/10 w-32 my-1"></div>
                                     </div>
                                 )}
 
                                 <div className="flex items-center gap-3">
-                                    <span className={`flex items-center gap-1.5 text-[11px] font-black ${stats.growth >= 0 ? 'text-success bg-success/10' : 'text-error bg-error/10'} px-3 py-1.5 rounded-full uppercase tracking-wider`}>
+                                    <span className={`flex items-center gap-1.5 text-[11px] font-normal ${stats.growth >= 0 ? 'text-success bg-success/10' : 'text-error bg-error/10'} px-3 py-1.5 rounded-full tracking-normal`}>
                                         {stats.growth >= 0 ? <ArrowUpRight size={14} /> : <TrendingDown size={14} className="rotate-90" />}
                                         {Math.abs(stats.growth).toFixed(1)}%
                                     </span>
-                                    <span className="text-[10px] text-neutral-500 font-medium">vs mês anterior</span>
+                                    <span className="text-[10px] text-neutral-500 font-normal">vs mês anterior</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Revenue Breakdown Pills */}
                         <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 whitespace-nowrap">
-                                <div className="w-2 h-2 rounded-full bg-accent-primary"></div>
-                                <span className="meta !text-[9px] text-neutral-400 uppercase tracking-tighter opacity-80">Ganhos Mensais</span>
-                                <span className="text-[10px] font-bold text-white">R$ {stats.monthlyRevenue.toFixed(0)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 whitespace-nowrap">
-                                <div className="w-2 h-2 rounded-full bg-warning"></div>
-                                <span className="meta !text-[9px] text-neutral-400 uppercase tracking-tighter opacity-80">Pendentes</span>
-                                <span className="text-[10px] font-bold text-white">{stats.pendingCount}</span>
-                            </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onNavigate('RECEIVED_ORDERS:pending');
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 whitespace-nowrap interactive hover:bg-white/10"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-warning animate-pulse"></div>
+                                <span className="meta !text-[9px] text-neutral-400 tracking-normal opacity-80">Pendentes</span>
+                                <span className="text-[10px] font-normal text-white">{stats.pendingCount}</span>
+                                <ArrowRight size={10} className="text-white ml-1 opacity-50" />
+                            </button>
                         </div>
                     </div>
                     {/* Decorative Background Blob inside card */}
@@ -246,7 +249,7 @@ const ProviderDashboard: React.FC<Props> = ({
                             <div className={`w-16 h-16 rounded-2xl ${action.bg} border border-border-subtle shadow-md flex items-center justify-center transition-all group-active:scale-95`}>
                                 <div className={action.color}>{action.icon}</div>
                             </div>
-                            <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">{action.label}</span>
+                            <span className="text-[9px] font-normal text-text-secondary tracking-normal">{action.label}</span>
                         </button>
                     ))}
                 </div>
@@ -255,7 +258,7 @@ const ProviderDashboard: React.FC<Props> = ({
                 <section className="mb-12">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="heading-lg tracking-tight mb-1">Performance</h3>
+                            <h3 className="heading-lg mb-1">Performance</h3>
                             <p className="meta !text-[8px] !lowercase text-text-tertiary">Métricas operacionais reais</p>
                         </div>
                         <button className="w-10 h-10 rounded-xl bg-bg-secondary border border-border-subtle flex items-center justify-center text-accent-primary">
@@ -294,12 +297,12 @@ const ProviderDashboard: React.FC<Props> = ({
                 <section className="pb-10">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="heading-lg tracking-tight mb-1">Novas Solicitações</h3>
+                            <h3 className="heading-lg mb-1">Novas Solicitações</h3>
                             <p className="meta !text-[8px] !lowercase text-text-tertiary">Oportunidades de contrato pendentes</p>
                         </div>
                         <button
                             onClick={() => onNavigate('RECEIVED_ORDERS')}
-                            className="text-accent-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-1"
+                            className="text-accent-primary text-[10px] font-normal tracking-normal flex items-center gap-1"
                         >
                             Ver Todos <ChevronRight size={14} />
                         </button>
@@ -308,7 +311,7 @@ const ProviderDashboard: React.FC<Props> = ({
                     <div className="space-y-3">
                         {recentRequests.length === 0 ? (
                             <div className="p-8 text-center bg-bg-tertiary/20 rounded-[28px] border border-dashed border-border-subtle">
-                                <p className="meta text-text-tertiary uppercase tracking-widest !text-[10px]">Sem solicitações pendentes</p>
+                                <p className="meta text-text-tertiary tracking-normal !text-[10px]">Sem solicitações pendentes</p>
                             </div>
                         ) : (
                             recentRequests.map((req, i) => (
@@ -330,7 +333,7 @@ const ProviderDashboard: React.FC<Props> = ({
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm font-black text-text-primary">R$ {req.total_amount?.toFixed(2)}</p>
-                                        <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md bg-warning/10 text-warning`}>
+                                        <span className={`text-[8px] font-normal px-2 py-1 rounded-md bg-warning/10 text-warning`}>
                                             PENDENTE
                                         </span>
                                     </div>
