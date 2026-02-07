@@ -128,18 +128,24 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                     >
                         {/* Slide 1 - VIP Platinum */}
                         <div className="min-w-full">
-                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer">
-                                <div className="absolute top-0 right-0 p-8">
-                                    <Zap className="text-accent-primary opacity-30" size={32} />
+                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group">
+                                <div className="absolute inset-0 z-0">
+                                    <img src="/banner1.png" className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-110" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                                 </div>
-                                <div className="flex flex-col justify-between h-48 pb-6">
-                                    <div>
-                                        <p className="meta !text-white/60 font-normal mb-2">Exclusivo do mercado</p>
-                                        <h3 className="heading-2xl text-white font-bold leading-tight">Eleve suas contratações <br />ao nível expert.</h3>
+                                <div className="relative z-10">
+                                    <div className="absolute top-0 right-0 p-8">
+                                        <Zap className="text-accent-primary opacity-60" size={32} />
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-xs font-normal text-white opacity-90">Acesso Platinum ativo</p>
-                                        <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                                    <div className="flex flex-col justify-end h-56 pb-2">
+                                        <div>
+                                            <p className="meta !text-white/80 font-normal mb-1 pb-1 uppercase tracking-widest !text-[8px]">Exclusivo do mercado</p>
+                                            <h3 className="heading-xl text-white font-black leading-tight mb-3">Eleve suas contratações <br />ao nível expert.</h3>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse"></div>
+                                            <p className="text-[8px] font-bold text-white uppercase tracking-wider opacity-80">Acesso Platinum ativo</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -147,18 +153,24 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
                         {/* Slide 2 - Expert Network */}
                         <div className="min-w-full">
-                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer">
-                                <div className="absolute top-0 right-0 p-8">
-                                    <ShieldCheck className="text-accent-primary opacity-30" size={32} />
+                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group">
+                                <div className="absolute inset-0 z-0">
+                                    <img src="/banner2.png" className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-110" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                                 </div>
-                                <div className="flex flex-col justify-between h-48 pb-6">
-                                    <div>
-                                        <p className="meta !text-white/60 font-normal mb-2">Profissionais verificados</p>
-                                        <h3 className="heading-2xl text-white font-bold leading-tight">Conecte-se com <br />especialistas elite.</h3>
+                                <div className="relative z-10">
+                                    <div className="absolute top-0 right-0 p-8">
+                                        <ShieldCheck className="text-accent-primary opacity-60" size={32} />
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-xs font-normal text-white">Rede 100% verificada</p>
-                                        <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                                    <div className="flex flex-col justify-end h-56 pb-2">
+                                        <div>
+                                            <p className="meta !text-white/80 font-normal mb-1 pb-1 uppercase tracking-widest !text-[8px]">Profissionais verificados</p>
+                                            <h3 className="heading-xl text-white font-black leading-tight mb-3">Conecte-se com <br />especialistas elite.</h3>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
+                                            <p className="text-[8px] font-bold text-white uppercase tracking-wider opacity-80">Rede 100% verificada</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -166,18 +178,24 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
                         {/* Slide 3 - Premium Services */}
                         <div className="min-w-full">
-                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer">
-                                <div className="absolute top-0 right-0 p-8">
-                                    <TrendingUp className="text-accent-primary opacity-30" size={32} />
+                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group">
+                                <div className="absolute inset-0 z-0">
+                                    <img src="/banner3.png" className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-110" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                                 </div>
-                                <div className="flex flex-col justify-between h-48 pb-6">
-                                    <div>
-                                        <p className="meta !text-white/60 font-normal mb-2">Performance garantida</p>
-                                        <h3 className="heading-2xl text-white font-bold leading-tight">Serviços de qualidade <br />sob demanda.</h3>
+                                <div className="relative z-10">
+                                    <div className="absolute top-0 right-0 p-8">
+                                        <TrendingUp className="text-accent-primary opacity-60" size={32} />
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-xs font-normal text-white">Suporte 24/7 disponível</p>
-                                        <div className="w-2 h-2 rounded-full bg-info animate-pulse"></div>
+                                    <div className="flex flex-col justify-end h-56 pb-2">
+                                        <div>
+                                            <p className="meta !text-white/80 font-normal mb-1 pb-1 uppercase tracking-widest !text-[8px]">Performance garantida</p>
+                                            <h3 className="heading-xl text-white font-black leading-tight mb-3">Serviços de qualidade <br />sob demanda.</h3>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-info animate-pulse"></div>
+                                            <p className="text-[8px] font-bold text-white uppercase tracking-wider opacity-80">Suporte 24/7 disponível</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
