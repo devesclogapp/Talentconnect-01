@@ -255,11 +255,15 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 onClick={() => onSelectService(service)}
                                 className="group relative rounded-[32px] overflow-hidden bg-bg-secondary border border-border-subtle transition-all active:scale-[0.98] cursor-pointer shadow-lg flex items-center pr-5"
                             >
-                                <div className="relative w-32 h-32 shrink-0 overflow-hidden">
+                                <div className="relative w-32 h-32 shrink-0 overflow-hidden bg-bg-tertiary flex items-center justify-center">
                                     <img
                                         src={service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/600/400`}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         alt={service.title}
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).classList.add('opacity-0');
+                                            (e.target as HTMLImageElement).parentElement?.classList.add('bg-bg-tertiary');
+                                        }}
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/80 via-transparent to-transparent"></div>
                                     <div className="absolute top-2 left-2">

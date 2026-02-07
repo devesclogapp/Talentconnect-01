@@ -124,8 +124,15 @@ const ServiceListing: React.FC<Props> = ({ onBack, onSelectService, initialCateg
                 onClick={() => onSelectService(service)}
                 className="group bg-bg-secondary rounded-[32px] border border-border-subtle overflow-hidden shadow-lg active:scale-[0.98] transition-all cursor-pointer "
               >
-                <div className="relative h-60 overflow-hidden">
-                  <img src={service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/600/400`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={service.title} />
+                <div className="relative h-60 overflow-hidden bg-bg-tertiary">
+                  <img
+                    src={service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/600/400`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    alt={service.title}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).classList.add('opacity-0');
+                    }}
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/90 via-transparent to-transparent"></div>
 
                   <div className="absolute top-4 left-4">
