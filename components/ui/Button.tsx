@@ -19,10 +19,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = 'primary', size = 'default', isLoading, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
 
         const variants = {
-            primary: 'bg-brand-primary text-brand-secondary  active:scale-[0.97] shadow-lg shadow-brand-primary/20',
-            secondary: 'bg-gray-200 text-black  active:scale-[0.97]',
-            ghost: 'bg-transparent text-black  active:scale-[0.97]',
-            outline: 'border border-gray-200 bg-transparent text-black  active:scale-[0.97]'
+            primary: 'bg-black text-white dark:bg-white dark:text-black active:scale-[0.97] shadow-lg shadow-black/20',
+            secondary: 'bg-gray-200 text-black dark:bg-neutral-800 dark:text-white active:scale-[0.97]',
+            ghost: 'bg-transparent text-black dark:text-white active:scale-[0.97]',
+            outline: 'border border-gray-200 dark:border-neutral-800 bg-transparent text-black dark:text-white active:scale-[0.97]'
         };
 
         const sizes = {

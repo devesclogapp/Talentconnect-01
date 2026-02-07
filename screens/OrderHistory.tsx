@@ -37,7 +37,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
             .on(
                 'postgres_changes',
                 {
-                    event: 'UPDATE',
+                    event: '*',
                     schema: 'public',
                     table: 'orders',
                 },
@@ -151,8 +151,8 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                             key={tab.id}
                             onClick={() => setFilterStatus(tab.id)}
                             className={`flex items-center gap-2 px-5 py-3 rounded-2xl label-semibold uppercase tracking-widest whitespace-nowrap transition-all border ${filterStatus === tab.id
-                                    ? 'bg-black text-white border-black shadow-lg scale-[1.02]'
-                                    : 'bg-white text-black border-border-subtle hover:border-black/20'
+                                ? 'bg-black text-white border-black shadow-lg scale-[1.02]'
+                                : 'bg-white text-black border-border-subtle hover:border-black/20'
                                 }`}
                         >
                             {tab.icon}

@@ -8,8 +8,8 @@
   --bg-secondary: #F8F9FA;
   --bg-tertiary: #F1F3F5;
 
-  --accent-primary: #C6FF00;
-  --accent-secondary: #8BC34A;
+  --accent-primary: #000000;
+  --accent-secondary: #e48900;
 
   --text-primary: #000000;
   --text-secondary: #000000;
@@ -23,8 +23,8 @@
   --border-subtle: #E9ECEF;
   --border-medium: #DEE2E6;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-2xl: 24px;
@@ -36,7 +36,7 @@
   --glow-accent: 0 0 20px rgba(198, 255, 0, 0.4);
 
   /* Legacy Compatibility (mapped to new system) */
-  --primary-green: var(--accent-primary);
+  --primary-green: var(--success);
   --primary-green-dark: var(--accent-secondary);
   --primary-black: var(--text-primary);
   --app-bg: var(--bg-primary);
@@ -108,7 +108,7 @@
   .btn-primary {
     @apply h-[56px] px-8 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95;
     background: var(--accent-primary);
-    color: #000000;
+    color: #FFFFFF;
   }
 
 

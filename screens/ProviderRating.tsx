@@ -16,6 +16,15 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
     const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+    const handleTagToggle = (tag: string) => {
+        setSelectedTags(prev =>
+            prev.includes(tag)
+                ? prev.filter(t => t !== tag)
+                : [...prev, tag]
+        );
+    };
 
     const ratingLabels = [
         '',
@@ -141,8 +150,8 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                                 <Star
                                     size={48}
                                     className={`transition-colors ${star <= (hoveredRating || rating)
-                                            ? 'text-accent-yellow fill-accent-yellow'
-                                            : 'text-gray-300 dark:text-black'
+                                        ? 'text-accent-yellow fill-accent-yellow'
+                                        : 'text-gray-300 dark:text-black'
                                         }`}
                                 />
                             </button>
@@ -182,12 +191,12 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                 </Card>
 
                 {/* Quick Tags (Optional Enhancement) */}
-                {rating >= 4 && (
-                    <Card className="p-6 animate-fade-in">
-                        <h3 className="font-semibold text-black dark:text-white mb-3">
+                {rating >= 3 && (
+                    <Card className="p-6 animate-fade-in shadow-sm border border-neutral-100 dark:border-neutral-800">
+                        <h3 className="font-semibold text-black dark:text-white mb-4">
                             O que você mais gostou?
                         </h3>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-3">
                             {[
                                 'Pontualidade',
                                 'Qualidade',
@@ -195,24 +204,31 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                                 'Preço Justo',
                                 'Simpatia',
                                 'Limpeza'
-                            ].map((tag) => (
-                                <button
-                                    key={tag}
-                                    className="pill pill--secondary interactive"
-                                >
-                                    {tag}
-                                </button>
-                            ))}
+                            ].map((tag) => {
+                                const isSelected = selectedTags.includes(tag);
+                                return (
+                                    <button
+                                        key={tag}
+                                        onClick={() => handleTagToggle(tag)}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${isSelected
+                                            ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-500 text-emerald-700 dark:text-emerald-400 scale-105 shadow-sm'
+                                            : 'bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:border-emerald-200 dark:hover:border-emerald-800'
+                                            }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </Card>
                 )}
 
                 {rating > 0 && rating < 3 && (
-                    <Card className="p-6 animate-fade-in bg-feedback-warning/5 border-feedback-warning/20">
-                        <h3 className="font-semibold text-black dark:text-white mb-3">
+                    <Card className="p-6 animate-fade-in bg-red-50/50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30">
+                        <h3 className="font-semibold text-red-700 dark:text-red-400 mb-4">
                             O que poderia melhorar?
                         </h3>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-3">
                             {[
                                 'Atraso',
                                 'Qualidade',
@@ -220,14 +236,21 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                                 'Preço',
                                 'Atendimento',
                                 'Limpeza'
-                            ].map((tag) => (
-                                <button
-                                    key={tag}
-                                    className="pill pill--secondary interactive"
-                                >
-                                    {tag}
-                                </button>
-                            ))}
+                            ].map((tag) => {
+                                const isSelected = selectedTags.includes(tag);
+                                return (
+                                    <button
+                                        key={tag}
+                                        onClick={() => handleTagToggle(tag)}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${isSelected
+                                            ? 'bg-red-100 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-400 scale-105 shadow-sm'
+                                            : 'bg-white dark:bg-neutral-900 border-red-200 dark:border-red-800/50 text-neutral-600 dark:text-neutral-300 hover:border-red-300'
+                                            }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </Card>
                 )}

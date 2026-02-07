@@ -77,8 +77,8 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                                 className={cn(
                                     "flex-shrink-0 px-6 py-3 rounded-2xl text-sm font-bold transition-all snap-center border-2",
                                     isSelected
-                                        ? "bg-primary-black text-white border-primary-black shadow-lg shadow-black/20 scale-105"
-                                        : "bg-white dark:bg-neutral-900 text-black dark:text-white border-neutral-100 dark:border-neutral-800  dark:"
+                                        ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white shadow-lg shadow-black/20 scale-105"
+                                        : "bg-white dark:bg-neutral-900 text-black dark:text-white border-neutral-100 dark:border-neutral-800"
                                 )}
                             >
                                 {time}

@@ -19,11 +19,20 @@ export default {
                 'text-secondary': 'var(--text-secondary)',
                 'text-tertiary': 'var(--text-tertiary)',
 
-                // Legacy / Semantic Mapping
-                'primary-green': 'var(--accent-primary)',
-                'primary-black': 'var(--bg-primary)',
+                // Legacy / Semantic Mapping - FIXED
+                'primary-green': 'var(--success)', // Now actually Green
+                'primary-black': 'var(--accent-primary)', // Now actually Black/Accent
                 'app-bg': 'var(--bg-primary)',
                 'app-text': 'var(--text-primary)',
+
+                // Missing Colors Definition
+                'black-green': '#002200',
+                'black-green-dark': '#001100',
+
+                'feedback-success': 'var(--success)',
+                'feedback-warning': 'var(--warning)',
+                'feedback-error': 'var(--error)',
+                'feedback-info': 'var(--info)',
 
                 'border-subtle': 'var(--border-subtle)',
                 'border-medium': 'var(--border-medium)',

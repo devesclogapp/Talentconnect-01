@@ -33,27 +33,27 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
         const newErrors: Record<string, string> = {};
 
         if (!formData.name.trim()) {
-            newErrors.name = 'Name is required';
+            newErrors.name = 'Nome é obrigatório';
         }
 
         if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
+            newErrors.email = 'Email é obrigatório';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Invalid email';
+            newErrors.email = 'Email inválido';
         }
 
         if (!formData.password) {
-            newErrors.password = 'Password is required';
+            newErrors.password = 'Senha é obrigatória';
         } else if (formData.password.length < 6) {
-            newErrors.password = 'Min 6 characters';
+            newErrors.password = 'Mínimo de 6 caracteres';
         }
 
         if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Passwords do not match';
+            newErrors.confirmPassword = 'As senhas não coincidem';
         }
 
         if (!formData.phone.trim()) {
-            newErrors.phone = 'Phone is required';
+            newErrors.phone = 'Telefone é obrigatório';
         }
 
         setErrors(newErrors);
@@ -77,9 +77,9 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
         } catch (error: any) {
             console.error('Registration error:', error);
             if (error.message?.includes('already registered')) {
-                setErrors({ email: 'Email already registered' });
+                setErrors({ email: 'Email já registrado' });
             } else {
-                setErrors({ general: error.message || 'Registration failed' });
+                setErrors({ general: error.message || 'Falha no registro' });
             }
         } finally {
             setIsLoading(false);
@@ -104,8 +104,8 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                     <div className="w-16 h-16 rounded-[22px] bg-bg-secondary border border-border-medium flex items-center justify-center mx-auto mb-8 shadow-glow">
                         <Globe size={32} className="text-accent-primary" />
                     </div>
-                    <h1 className="heading-4xl tracking-tighter mb-3">Join Elite</h1>
-                    <p className="body max-w-[280px] mx-auto">Select your specialized entry point to the network.</p>
+                    <h1 className="heading-4xl tracking-tighter mb-3">Junte-se à Elite</h1>
+                    <p className="body max-w-[280px] mx-auto">Selecione seu perfil de acesso.</p>
                 </div>
 
                 <div className="space-y-4 relative z-10">
@@ -119,8 +119,8 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                                     <User className="text-text-secondary group" size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="heading-lg tracking-tight mb-0.5 group">Contractor</h3>
-                                    <p className="meta !text-[9px] !lowercase text-text-tertiary">Hire top-tier experts</p>
+                                    <h3 className="heading-lg tracking-tight mb-0.5 group">Contratante</h3>
+                                    <p className="meta !text-[9px] !lowercase text-text-tertiary">Contrate especialistas de alto nível</p>
                                 </div>
                             </div>
                             <ChevronRight size={20} className="text-text-tertiary group transition-transform group" />
@@ -137,8 +137,8 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                                     <Zap className="text-text-secondary group" size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="heading-lg tracking-tight mb-0.5 group">Professional</h3>
-                                    <p className="meta !text-[9px] !lowercase text-text-tertiary">Offer your specialized talent</p>
+                                    <h3 className="heading-lg tracking-tight mb-0.5 group">Profissional</h3>
+                                    <p className="meta !text-[9px] !lowercase text-text-tertiary">Ofereça seu talento especializado</p>
                                 </div>
                             </div>
                             <ChevronRight size={20} className="text-text-tertiary group transition-transform group" />
@@ -147,7 +147,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                 </div>
 
                 <div className="mt-auto pt-10 text-center relative z-10 opacity-40">
-                    <p className="meta !text-[8px]">Secured by Blockchain Identity Protocol</p>
+                    <p className="meta !text-[8px]">Segurança garantida pelo Protocolo de Identidade</p>
                 </div>
             </div>
         );
@@ -162,9 +162,9 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
             </button>
 
             <div className="mb-10 relative z-10">
-                <h1 className="heading-3xl tracking-tighter mb-2">Create Portfolio</h1>
+                <h1 className="heading-3xl tracking-tighter mb-2">Criar Conta</h1>
                 <p className="body max-w-[260px]">
-                    Register as <span className="text-accent-primary font-bold">{selectedRole === 'CLIENT' ? 'Contractor' : 'Professional'}</span>
+                    Registrar como <span className="text-accent-primary font-bold">{selectedRole === 'CLIENT' ? 'Contratante' : 'Profissional'}</span>
                 </p>
             </div>
 
@@ -182,7 +182,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                             <User size={18} />
                         </div>
                         <Input
-                            placeholder="Full Name"
+                            placeholder="Nome Completo"
                             className="input pl-12"
                             value={formData.name}
                             onChange={(e) => handleInputChange('name', e.target.value)}
@@ -196,7 +196,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         </div>
                         <Input
                             type="email"
-                            placeholder="Email Portfolio"
+                            placeholder="Email"
                             className="input pl-12"
                             value={formData.email}
                             onChange={(e) => handleInputChange('email', e.target.value)}
@@ -210,7 +210,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         </div>
                         <Input
                             type="tel"
-                            placeholder="Phone Frequency"
+                            placeholder="Telefone"
                             className="input pl-12"
                             value={formData.phone}
                             onChange={(e) => handleInputChange('phone', e.target.value)}
@@ -224,7 +224,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         </div>
                         <Input
                             type="password"
-                            placeholder="Access Key"
+                            placeholder="Senha"
                             className="input pl-12"
                             value={formData.password}
                             onChange={(e) => handleInputChange('password', e.target.value)}
@@ -238,7 +238,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         </div>
                         <Input
                             type="password"
-                            placeholder="Confirm Key"
+                            placeholder="Confirmar Senha"
                             className="input pl-12"
                             value={formData.confirmPassword}
                             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
@@ -252,7 +252,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                                 <MapPin size={18} />
                             </div>
                             <Input
-                                placeholder="Base Location"
+                                placeholder="Endereço Base"
                                 className="input pl-12"
                                 value={formData.address}
                                 onChange={(e) => handleInputChange('address', e.target.value)}
@@ -267,13 +267,13 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         disabled={isLoading}
                         className="btn-primary w-full justify-between group shadow-glow"
                     >
-                        <span className="uppercase tracking-[0.2em]">{isLoading ? 'Initializing...' : 'Confirm Registration'}</span>
+                        <span className="uppercase tracking-[0.2em]">{isLoading ? 'Iniciando...' : 'Confirmar Registro'}</span>
                         <div className="w-8 h-8 rounded-full bg-bg-primary/20 flex items-center justify-center transition-transform group">
                             <ArrowRight size={18} />
                         </div>
                     </button>
                     <p className="text-center meta !text-[8px] mt-6 opacity-40">
-                        By continuing, you agree to the Talent Smart Contracts.
+                        Ao continuar, você concorda com os Termos de Uso.
                     </p>
                 </div>
             </form>

@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { sendCounterOffer, subscribeToOrderUpdates, getOrderById } from '../services/ordersService';
 
 interface Props {
   negotiation: any;
@@ -7,41 +8,90 @@ interface Props {
   onComplete: () => void;
 }
 
-const NegotiationFlow: React.FC<Props> = ({ negotiation, onBack, onComplete }) => {
+const NegotiationFlow: React.FC<Props> = ({ negotiation: initialNegotiation, onBack, onComplete }) => {
+  const [negotiation, setNegotiation] = useState(initialNegotiation);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [counterPrice, setCounterPrice] = useState(negotiation?.price || 'R$ 450');
+  const [counterPrice, setCounterPrice] = useState(initialNegotiation?.total_amount?.toString() || '450');
   const [showCounterInput, setShowCounterInput] = useState(false);
   const [isDisputed, setIsDisputed] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
 
   const steps = [
     { id: 1, title: 'Proposta Recebida', desc: 'Cliente solicitou orçamento', icon: 'mail' },
-    { id: 2, title: 'Ajuste de Proposta', desc: 'Sua contraproposta em análise', icon: 'payments' },
+    { id: 2, title: 'Contraproposta', desc: 'Sua oferta está em análise', icon: 'payments' },
     { id: 3, title: 'Confirmação Final', desc: 'Aguardando aceite do cliente', icon: 'hourglass_empty' },
     { id: 4, title: 'Serviço Agendado', desc: 'Acordo selado e confirmado', icon: 'verified' }
   ];
 
-  const simulateProgress = (nextStep: number) => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setCurrentStep(nextStep);
-      setShowCounterInput(false);
-    }, 1000);
-  };
+  // Sync with database and listen for real-time updates
+  useEffect(() => {
+    if (!initialNegotiation?.id) return;
 
-  const handleAction = (type: 'ACCEPT' | 'COUNTER' | 'SEND_COUNTER' | 'CANCEL' | 'FINISH' | 'OPEN_DISPUTE' | 'CONFIRM_DISPUTE') => {
+    const fetchLatest = async () => {
+      try {
+        const latest = await getOrderById(initialNegotiation.id);
+        setNegotiation(latest);
+        // Determine step based on status
+        if (latest.status === 'awaiting_payment' || latest.status === 'paid_escrow_held' || latest.status === 'accepted') {
+          setCurrentStep(4);
+        } else if (latest.status === 'awaiting_details') {
+          setCurrentStep(2);
+        } else {
+          setCurrentStep(1);
+        }
+      } catch (e) {
+        console.error("Erro ao sincronizar negociação:", e);
+      }
+    };
+
+    fetchLatest();
+
+    // Subscribe to changes (e.g. client accepting the offer)
+    const subscription = subscribeToOrderUpdates(initialNegotiation.id, (updatedOrder) => {
+      console.log("🛠️ NEGOTIATION UPDATE RECEIVED:", updatedOrder.status);
+      setNegotiation(updatedOrder);
+
+      if (updatedOrder.status === 'awaiting_payment' || updatedOrder.status === 'paid_escrow_held' || updatedOrder.status === 'accepted') {
+        setCurrentStep(4);
+      } else if (updatedOrder.status === 'awaiting_details') {
+        setCurrentStep(2);
+      }
+    });
+
+    return () => {
+      if (subscription && typeof (subscription as any).unsubscribe === 'function') {
+        (subscription as any).unsubscribe();
+      }
+    };
+  }, [initialNegotiation?.id]);
+
+  const handleAction = async (type: 'ACCEPT' | 'COUNTER' | 'SEND_COUNTER' | 'CANCEL' | 'FINISH' | 'OPEN_DISPUTE' | 'CONFIRM_DISPUTE') => {
     switch (type) {
       case 'ACCEPT':
-        simulateProgress(4);
+        // No MVP, aceitar sem contraproposta muda para accepted
+        setLoading(true);
+        // Aqui chamaríamos acceptOrder se quiséssemos pular a negociação
+        // Mas o componente foca na negociação
+        setLoading(false);
         break;
       case 'COUNTER':
         setShowCounterInput(true);
         break;
       case 'SEND_COUNTER':
-        simulateProgress(2);
-        setTimeout(() => simulateProgress(3), 3000);
+        setLoading(true);
+        try {
+          const price = parseFloat(counterPrice.replace('R$', '').replace(',', '.').trim());
+          if (isNaN(price)) throw new Error("Preço inválido");
+
+          await sendCounterOffer(negotiation.id, price);
+          setCurrentStep(2);
+          setShowCounterInput(false);
+        } catch (e) {
+          alert("Erro ao enviar contraproposta: " + e);
+        } finally {
+          setLoading(false);
+        }
         break;
       case 'CANCEL':
         onBack();
@@ -222,9 +272,10 @@ const NegotiationFlow: React.FC<Props> = ({ negotiation, onBack, onComplete }) =
               )}
 
               {currentStep === 3 && (
-                <button onClick={() => handleAction('ACCEPT')} className="w-full py-4 bg-brand-primary text-white label-semibold uppercase rounded-2xl shadow-lg shadow-brand-primary/20 active:scale-95 transition-all">
-                  Simular Aprovação do Cliente
-                </button>
+                <div className="w-full py-4 bg-gray-100 dark:bg-zinc-800 text-app-text-muted label-semibold uppercase rounded-2xl flex items-center justify-center gap-2">
+                  <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  Aguardando Cliente...
+                </div>
               )}
 
               {currentStep === 4 && (

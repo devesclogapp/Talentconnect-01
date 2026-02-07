@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createService, updateService, getServiceById } from '../services/servicesService';
+import { useAppStore } from '../store';
 
 interface Props {
   onBack: () => void;
@@ -23,8 +24,6 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
   // Carregar dados do serviço se estiver em modo de edição
   useEffect(() => {
     const loadService = async () => {
-      console.log('ServiceRegistration montado. serviceId:', serviceId);
-
       if (!serviceId) {
         setLoadingService(false);
         return;
@@ -32,7 +31,6 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
 
       try {
         setLoadingService(true);
-        console.log('Carregando serviço:', serviceId);
         const service = await getServiceById(serviceId);
 
         if (!service) {
@@ -44,7 +42,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
           category: service.category || 'Limpeza',
           basePrice: String(service.base_price || 50),
           description: service.description || '',
-          durationHours: String(service.duration_hours || 1),
+          durationHours: String(service.duration_hours || 0),
           pricingMode: service.pricing_mode || 'fixed'
         });
       } catch (error) {
@@ -60,6 +58,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
   }, [serviceId, onBack]);
 
   const handleFinish = async () => {
+    console.log('DEBUG: Iniciando handleFinish');
     if (!formData.title || !formData.basePrice) {
       alert("Por favor, preencha o título e o preço.");
       return;
@@ -73,26 +72,24 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
         base_price: parseFloat(formData.basePrice),
         description: formData.description,
         pricing_mode: formData.pricingMode,
-        duration_hours: parseFloat(formData.durationHours),
+        duration_hours: parseFloat(formData.durationHours) || 0,
         active: true
       };
 
+      console.log('DEBUG: Enviando Payload:', servicePayload);
+
       if (serviceId) {
-        // Modo de edição
-        console.log('Atualizando serviço:', serviceId, servicePayload);
         await updateService(serviceId, servicePayload);
-        alert('Serviço atualizado com sucesso!');
       } else {
-        // Modo de criação
-        console.log('Criando novo serviço:', servicePayload);
         await createService(servicePayload);
-        alert('Serviço criado com sucesso!');
       }
 
+      console.log('DEBUG: Salvo com sucesso. Redirecionando...');
       onComplete();
+
     } catch (error: any) {
-      console.error("Erro ao salvar serviço:", error);
-      alert("Erro ao salvar serviço: " + (error.message || "Tente novamente"));
+      console.error("DEBUG: ERRO CRITICAL NO FINISH:", error);
+      alert(error.message || "Erro ao salvar. Verifique se você está logado corretamente.");
     } finally {
       setLoading(false);
     }
@@ -108,8 +105,8 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
         <button onClick={onBack} className="w-10 h-10 flex items-center justify-center text-app-text">
           <span className="material-symbols-outlined">close</span>
         </button>
-        <h1 className="heading-md uppercase tracking-widest">{serviceId ? 'Editar Serviço' : 'Novo Serviço'}</h1>
-        <div className="w-10 meta-bold text-brand-primary !text-[10px]">{step}/3</div>
+        <h1 className="heading-md uppercase tracking-widest text-text-primary">{serviceId ? 'Editar Serviço' : 'Novo Serviço'}</h1>
+        <div className="w-10 meta-bold text-text-primary !text-[10px]">{step}/3</div>
       </header>
 
       {loadingService ? (
@@ -125,28 +122,28 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-2">
-                <h2 className="heading-xl text-app-text leading-tight">O que você vai oferecer?</h2>
-                <p className="meta-bold text-app-text-muted uppercase tracking-tighter">Escolha um nome atraente e curto</p>
+                <h2 className="heading-xl text-text-primary leading-tight">O que você vai oferecer?</h2>
+                <p className="meta-bold text-text-primary uppercase tracking-tighter opacity-60">Escolha um nome atraente e curto</p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="meta-bold text-app-text-muted uppercase tracking-widest px-1 !text-[10px]">Título do Serviço</label>
+                  <label className="meta-bold text-text-primary uppercase tracking-widest px-1 !text-[10px]">Título do Serviço</label>
                   <input
                     type="text"
                     placeholder="Ex: Limpeza Pesada VIP"
                     value={formData.title}
                     onChange={(e) => updateField('title', e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-zinc-800/50 border-gray-100 dark:border-zinc-700 rounded-2xl p-4 body-bold text-app-text focus:ring-brand-primary focus:border-brand-primary"
+                    className="w-full bg-gray-50 dark:bg-zinc-800/50 border-gray-100 dark:border-zinc-700 rounded-2xl p-4 body-bold text-text-primary focus:ring-black focus:border-black"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="meta-bold text-app-text-muted uppercase tracking-widest px-1 !text-[10px]">Categoria</label>
+                  <label className="meta-bold text-text-primary uppercase tracking-widest px-1 !text-[10px]">Categoria</label>
                   <select
                     value={formData.category}
                     onChange={(e) => updateField('category', e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-zinc-800/50 border-gray-100 dark:border-zinc-700 rounded-2xl p-4 body-bold text-app-text focus:ring-brand-primary"
+                    className="w-full bg-gray-50 dark:bg-zinc-800/50 border-gray-100 dark:border-zinc-700 rounded-2xl p-4 body-bold text-text-primary focus:ring-black"
                   >
                     <option>Limpeza</option>
                     <option>Reparos</option>
@@ -165,37 +162,37 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-2">
-                <h2 className="heading-xl text-app-text leading-tight">Valor e Modo</h2>
-                <p className="meta-bold text-app-text-muted uppercase tracking-tighter">Quanto você cobra?</p>
+                <h2 className="heading-xl text-text-primary leading-tight">Valor e Modo</h2>
+                <p className="meta-bold text-text-primary uppercase tracking-tighter opacity-60">Quanto você cobra?</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => updateField('pricingMode', 'fixed')}
-                  className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${formData.pricingMode === 'fixed' ? 'border-brand-primary bg-brand-primary/5 text-brand-primary' : 'border-gray-100 dark:border-zinc-800 text-app-text-muted'}`}
+                  className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${formData.pricingMode === 'fixed' ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-border-subtle text-black'}`}
                 >
-                  <span className="material-symbols-outlined">payments</span>
+                  <span className="material-symbols-outlined !text-3xl">payments</span>
                   <span className="meta-bold uppercase !text-[10px]">Preço Fixo</span>
                 </button>
                 <button
                   onClick={() => updateField('pricingMode', 'hourly')}
-                  className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${formData.pricingMode === 'hourly' ? 'border-brand-primary bg-brand-primary/5 text-brand-primary' : 'border-gray-100 dark:border-zinc-800 text-app-text-muted'}`}
+                  className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${formData.pricingMode === 'hourly' ? 'bg-black border-black text-white shadow-lg' : 'bg-white border-border-subtle text-black'}`}
                 >
-                  <span className="material-symbols-outlined">schedule</span>
+                  <span className="material-symbols-outlined !text-3xl">schedule</span>
                   <span className="meta-bold uppercase !text-[10px]">Por Hora</span>
                 </button>
               </div>
 
-              <div className="bg-brand-primary/5 border-2 border-brand-primary/20 rounded-3xl p-8 flex items-center justify-center gap-4">
-                <span className="heading-xl text-brand-primary !text-3xl">R$</span>
+              <div className="bg-bg-secondary border-2 border-border-subtle rounded-3xl p-8 flex items-center justify-center gap-4">
+                <span className="heading-xl text-text-primary !text-3xl">R$</span>
                 <input
                   type="number"
                   value={formData.basePrice}
                   onChange={(e) => updateField('basePrice', e.target.value)}
-                  className="bg-transparent border-none heading-xl p-0 focus:ring-0 text-app-text w-32 !text-6xl"
+                  className="bg-transparent border-none heading-xl p-0 focus:ring-0 text-text-primary w-40 !text-6xl"
                 />
               </div>
-              <p className="text-center meta text-app-text-muted uppercase tracking-widest !text-[10px]">Valor base para o serviço</p>
+              <p className="text-center meta text-text-primary opacity-60 uppercase tracking-widest !text-[10px]">Valor base para o serviço</p>
             </div>
           )}
 
@@ -211,7 +208,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                 value={formData.description}
                 onChange={(e) => updateField('description', e.target.value)}
                 placeholder="Descreva o que está incluído no seu serviço e sua experiência..."
-                className="w-full bg-gray-50 dark:bg-zinc-800/50 border-gray-100 dark:border-zinc-700 rounded-2xl p-4 body text-app-text focus:ring-brand-primary"
+                className="w-full bg-gray-50 dark:bg-zinc-800/50 border-gray-100 dark:border-zinc-700 rounded-2xl p-4 body text-text-primary focus:ring-black"
               ></textarea>
             </div>
           )}
@@ -223,7 +220,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
           {step > 1 && (
             <button
               onClick={() => setStep(step - 1)}
-              className="flex-1 py-4 text-app-text-muted label-semibold uppercase tracking-widest !text-[10px]"
+              className="flex-1 py-4 text-text-primary label-semibold uppercase tracking-widest !text-[10px]"
             >
               Voltar
             </button>
@@ -231,7 +228,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
           <button
             onClick={() => step < 3 ? setStep(step + 1) : handleFinish()}
             disabled={loading}
-            className="flex-[2] py-4 bg-brand-primary text-white label-semibold uppercase rounded-2xl shadow-xl shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 !text-[10px]"
+            className="flex-[2] py-4 bg-black text-white label-semibold uppercase rounded-2xl shadow-xl shadow-black/20 active:scale-95 transition-all flex items-center justify-center gap-2 !text-[10px]"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

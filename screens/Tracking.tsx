@@ -127,7 +127,11 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
           <div className="bg-white dark:bg-neutral-900 rounded-[32px] border border-neutral-100 dark:border-neutral-800 p-8 shadow-sm">
             <h3 className="heading-md mb-8">{activeOrder.service?.title || 'Serviço'}</h3>
 
-            <div className="space-y-0">
+            <div className="space-y-0 relative">
+              {/* Line Background - Absolute to ensure continuity, though flex col usually handles it. 
+                  We will stick to component-based lines for simpler logic if adjusted correctly. 
+              */}
+
               <ProgressStep
                 title="Pedido Enviado"
                 desc={`Aguardando confirmação de ${providerName}`}
@@ -135,6 +139,14 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                 active={currentStep >= 1}
                 completed={currentStep > 1}
               />
+
+              <IntermediateStep
+                label="Aguardando profissional aceitar no app"
+                active={currentStep === 1}
+                completed={currentStep > 1}
+                variant="warning"
+              />
+
               <ProgressStep
                 title="Confirmado"
                 desc="Profissional aceitou seu pedido"
@@ -142,6 +154,13 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                 active={currentStep >= 2}
                 completed={currentStep > 2}
               />
+
+              <IntermediateStep
+                label="Pagamento necessário para prosseguir"
+                active={currentStep === 2}
+                completed={currentStep > 2}
+              />
+
               <ProgressStep
                 title="Pagamento Realizado"
                 desc="Valor retido com segurança"
@@ -149,6 +168,14 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                 active={currentStep >= 3}
                 completed={currentStep > 3}
               />
+
+              <IntermediateStep
+                label="Profissional deve iniciar o serviço"
+                active={currentStep === 3}
+                completed={currentStep > 3}
+                variant="warning"
+              />
+
               <ProgressStep
                 title="Confirmação de Início"
                 desc={activeOrder.status === 'awaiting_start_confirmation' ? 'Confirme o início para liberar' : 'Início validado'}
@@ -157,6 +184,13 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                 completed={currentStep > 4}
                 pulse={activeOrder.status === 'awaiting_start_confirmation'}
               />
+
+              <IntermediateStep
+                label="Serviço em andamento"
+                active={currentStep === 4} // Actually this is transition to execution
+                completed={currentStep > 4}
+              />
+
               <ProgressStep
                 title="Em Execução"
                 desc="Serviço sendo realizado agora"
@@ -165,11 +199,19 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                 completed={currentStep > 5}
                 pulse={activeOrder.status === 'in_execution'}
               />
+
+              <IntermediateStep
+                label="Profissional deve marcar como concluído"
+                active={currentStep === 5}
+                completed={currentStep > 5 || activeOrder.status === 'awaiting_finish_confirmation'}
+                variant="warning"
+              />
+
               <ProgressStep
-                title="Concluído"
-                desc="Serviço finalizado com sucesso"
+                title="Conclusão"
+                desc={activeOrder.status === 'awaiting_finish_confirmation' ? 'Confirme a finalização' : 'Serviço finalizado'}
                 icon={<ShieldCheck size={18} />}
-                active={currentStep >= 6}
+                active={currentStep >= 6 || activeOrder.status === 'awaiting_finish_confirmation'}
                 completed={currentStep >= 6}
                 last
               />
@@ -282,19 +324,86 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
   );
 };
 
-const ProgressStep = ({ title, desc, icon, active, completed, pulse, last }: any) => (
-  <div className={`flex gap-8 ${last ? '' : 'min-h-[90px]'}`}>
-    <div className="flex flex-col items-center">
-      <div className={`w-12 h-12 rounded-[20px] flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${active ? 'bg-primary-green text-black' : 'bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 text-black'} ${pulse ? 'animate-pulse scale-105' : ''}`}>
-        {icon}
+const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, variant = 'success' }: any) => {
+  let bgClass = active ? 'bg-accent-primary' : 'bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800';
+  let iconColorClass = active ? 'text-white' : 'text-black';
+  let titleColorClass = active ? 'text-black dark:text-white' : 'text-neutral-500 dark:text-neutral-500';
+
+  if (active || completed) {
+    if (variant === 'warning') {
+      bgClass = 'bg-warning text-black';
+      iconColorClass = 'text-black';
+      titleColorClass = 'text-orange-700 dark:text-warning';
+    }
+    else if (variant === 'info') {
+      bgClass = 'bg-info text-white';
+      iconColorClass = 'text-white';
+      titleColorClass = 'text-info';
+    }
+    else if (variant === 'success') {
+      bgClass = 'bg-success text-white';
+      iconColorClass = 'text-white';
+      titleColorClass = 'text-success';
+    }
+  }
+
+  return (
+    <div className={`flex gap-8 ${last ? '' : 'min-h-[90px]'}`}>
+      <div className="flex flex-col items-center">
+        <div className={`w-12 h-12 rounded-[20px] flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${bgClass} ${iconColorClass} ${pulse ? 'animate-pulse scale-105 shadow-glow' : ''}`}>
+          {icon}
+        </div>
+        <div className={`w-0.5 h-full ${active && completed ? (variant === 'info' ? 'bg-info' : variant === 'warning' ? 'bg-warning' : 'bg-success') : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>
       </div>
-      {!last && <div className={`w-0.5 h-full ${active && completed ? 'bg-primary-green' : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>}
+      <div className="pt-2 flex-1">
+        <p className={`body-bold transition-colors ${titleColorClass}`}>{title}</p>
+        {desc && <p className={`text-[10px] font-bold tracking-wide mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
+      </div>
     </div>
-    <div className="pt-2 flex-1">
-      <p className={`body-bold transition-colors ${active ? 'text-black dark:text-white' : 'text-black dark:text-white'}`}>{title}</p>
-      {desc && <p className={`meta mt-1 leading-relaxed ${active ? 'text-black' : 'text-black opacity-70'}`}>{desc}</p>}
+  );
+};
+
+const IntermediateStep = ({ label, active, completed, variant = 'warning' }: any) => {
+  let dotColor = active ? 'bg-accent-secondary' : 'bg-neutral-200 dark:bg-neutral-800';
+
+  // Define text color logic
+  let textColorClass = 'text-neutral-400 dark:text-neutral-600'; // Default inactive text (readable gray)
+
+  if (completed) {
+    if (variant === 'warning') dotColor = 'bg-[#FF9800]';
+    else if (variant === 'info') dotColor = 'bg-info';
+    else dotColor = 'bg-success';
+
+    textColorClass = 'text-neutral-500 dark:text-neutral-400'; // Completed text (slightly darker gray)
+  } else if (active) {
+    if (variant === 'warning') {
+      dotColor = 'bg-[#FF9800]';
+      textColorClass = 'text-orange-600 dark:text-orange-400 font-medium'; // Readable orange
+    } else if (variant === 'info') {
+      dotColor = 'bg-info';
+      textColorClass = 'text-info font-medium';
+    }
+  }
+
+  return (
+    <div className="flex gap-8 min-h-[40px] -mt-2 -mb-2 relative z-0">
+      <div className="flex flex-col items-center w-12">
+        {/* Line traverses through */}
+        <div className={`w-0.5 h-full absolute top-0 bottom-0 ${completed ? (variant === 'info' ? 'bg-info' : variant === 'warning' ? 'bg-[#FF9800]' : 'bg-success') : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>
+
+        {/* Small Dot */}
+        <div className={`w-3 h-3 rounded-full z-10 my-auto flex items-center justify-center transition-all ${dotColor} ${active ? 'animate-pulse ring-4 ring-opacity-20 ' + (variant === 'warning' ? 'ring-[#FF9800]' : 'ring-info') : 'border-2 border-app-bg'}`}>
+        </div>
+      </div>
+      <div className="py-3 flex-1">
+        <p
+          className={`text-[11px] font-light tracking-[0px] transition-colors ${textColorClass}`}
+        >
+          {label}
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Tracking;

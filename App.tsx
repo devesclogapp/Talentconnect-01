@@ -31,7 +31,7 @@ import MyServices from './screens/MyServices';
 import ReceivedOrders from './screens/ReceivedOrders';
 import OrderAcceptReject from './screens/OrderAcceptReject';
 import ServiceExecution from './screens/ServiceExecution';
-import DevTools from './components/DevTools';
+
 import { useAppStore } from './store';
 import {
   Home,
@@ -142,48 +142,7 @@ const App: React.FC = () => {
     logout();
   };
 
-  const handleQuickLogin = async (role: UserRole) => {
-    try {
-      setLoading(true);
-      const email = role === 'CLIENT' ? 'cliente01@email.com' : 'prestador01@email.com';
-      const password = 'password123';
 
-      await supabaseSignOut();
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        console.warn("Login real falhou, ativando MOCK USER.", error.message);
-        const mockUser = {
-          id: role === 'CLIENT' ? 'mock-client-123' : 'mock-provider-456',
-          email: email,
-          role: role.toUpperCase(),
-          user_metadata: {
-            role: role.toLowerCase(),
-            name: role === 'CLIENT' ? 'Cliente Dev' : 'Prestador Dev',
-            avatar_url: `https://i.pravatar.cc/150?u=${role}`
-          }
-        };
-        setUser(mockUser as any);
-        setView(role === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
-        setLoading(false);
-        return;
-      }
-
-      if (data.user) {
-        const userRole = data.user.user_metadata?.role || role.toLowerCase();
-        setUser({
-          ...data.user,
-          role: userRole.toUpperCase() as any,
-          name: data.user.user_metadata?.name || 'Usuário Teste'
-        } as any);
-        setView(userRole.toLowerCase() === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
-      }
-    } catch (error: any) {
-      console.error("Erro no Login Rápido:", error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const renderView = () => {
     if (loading && view === 'SPLASH') return <SplashScreen />;
@@ -192,10 +151,23 @@ const App: React.FC = () => {
       case 'SPLASH':
         return <SplashScreen />;
       case 'ONBOARDING':
-        return <Onboarding onStart={() => setView('LOGIN')} />;
+        return <Onboarding onNavigate={navigate} />;
       case 'LOGIN':
         return <Login
-          onLoginSuccess={(role) => setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')}
+          onLoginSuccess={(user) => {
+            console.log("Login efetuado com sucesso:", user);
+            const role = user.user_metadata?.role || 'client';
+            const name = user.user_metadata?.name || 'Usuário';
+
+            // Forçar atualização do estado global imediatamente
+            setUser({
+              ...user,
+              role: role.toUpperCase() as any,
+              name: name
+            } as any);
+
+            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+          }}
           onRegister={() => setView('REGISTER')}
           onForgotPassword={() => setView('FORGOT_PASSWORD')}
         />;
@@ -367,15 +339,15 @@ const App: React.FC = () => {
       // --- PROVIDER VIEWS ---
       case 'PROVIDER_DASHBOARD':
         return <ProviderDashboard
-          onNavigate={navigate}
+          user={user}
+          onNavigate={setView}
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
-          onOpenNegotiation={(neg) => {
-            // No MVP, negociações são integradas aos pedidos
+          onOpenNegotiation={(negotiation) => {
+            setSelectedOrder(negotiation);
             setView('NEGOTIATION_FLOW');
           }}
           onAddService={() => setView('SERVICE_REGISTRATION')}
-          user={user}
         />;
 
       case 'MY_SERVICES':
@@ -405,9 +377,9 @@ const App: React.FC = () => {
 
       case 'NEGOTIATION_FLOW':
         return <NegotiationFlow
-          negotiation={null}
-          onBack={() => setView('PROVIDER_DASHBOARD')}
-          onComplete={() => setView('AGENDA')}
+          negotiation={selectedOrder}
+          onBack={() => setView('ORDER_ACCEPT_REJECT')}
+          onComplete={() => setView('RECEIVED_ORDERS')}
         />;
 
       // Provider Order Management
@@ -416,7 +388,7 @@ const App: React.FC = () => {
           onBack={() => setView('PROVIDER_DASHBOARD')}
           onSelectOrder={(order) => {
             setSelectedOrder(order);
-            if (order.status === 'sent') {
+            if (order.status === 'sent' || order.status === 'awaiting_details') {
               setView('ORDER_ACCEPT_REJECT');
             } else if (['accepted', 'paid_escrow_held', 'in_execution'].includes(order.status)) {
               setView('SERVICE_EXECUTION');
@@ -436,6 +408,10 @@ const App: React.FC = () => {
             console.log('Order rejected:', reason);
             setView('RECEIVED_ORDERS');
           }}
+          onNegotiate={(order) => {
+            setSelectedOrder(order);
+            setView('NEGOTIATION_FLOW');
+          }}
         />;
       case 'SERVICE_EXECUTION':
         return <ServiceExecution
@@ -453,7 +429,10 @@ const App: React.FC = () => {
 
       default:
         return <Login
-          onLoginSuccess={(role) => setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')}
+          onLoginSuccess={(user) => {
+            const role = user.user_metadata?.role || 'client';
+            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+          }}
           onRegister={() => setView('REGISTER')}
           onForgotPassword={() => setView('FORGOT_PASSWORD')}
         />;
@@ -529,14 +508,7 @@ const App: React.FC = () => {
         </nav>
       )}
 
-      {/* Developer Tools */}
-      <DevTools
-        currentView={view}
-        currentUser={user}
-        onNavigate={navigate}
-        onQuickLogin={handleQuickLogin}
-        onLogout={handleLogout}
-      />
+
     </div>
   );
 };

@@ -37,7 +37,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
             .on(
                 'postgres_changes',
                 {
-                    event: 'UPDATE',
+                    event: '*',
                     schema: 'public',
                     table: 'orders',
                 },
@@ -67,6 +67,14 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                     icon: AlertCircle,
                     color: 'text-feedback-warning',
                     bgColor: 'bg-feedback-warning/10'
+                };
+            case 'awaiting_details':
+                return {
+                    label: 'Negociando',
+                    variant: 'info' as const,
+                    icon: Clock,
+                    color: 'text-primary-green',
+                    bgColor: 'bg-primary-green/10'
                 };
             case 'accepted':
             case 'paid_escrow_held':
@@ -193,17 +201,17 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                 </div>
 
                 {/* Enhanced Filters */}
-                <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                     <button
                         onClick={() => setFilterStatus('all')}
                         className={`flex items-center gap-2 px-5 py-3 rounded-[16px] label-semibold uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === 'all'
-                            ? 'bg-primary-black text-white shadow-lg'
-                            : 'bg-white dark:bg-neutral-900 text-black dark:text-black border border-neutral-200 dark:border-neutral-800'
+                            ? 'bg-black text-white shadow-lg dark:bg-white dark:text-black'
+                            : 'bg-white dark:bg-neutral-900 text-black dark:text-white border border-neutral-200 dark:border-neutral-800'
                             }`}
                     >
                         <Filter size={16} />
                         <span className="text-xs">Todos</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'all' ? 'bg-white/20' : 'bg-neutral-100 dark:bg-neutral-800'
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'all' ? 'bg-white/20 dark:bg-black/20' : 'bg-neutral-100 dark:bg-neutral-800'
                             }`}>
                             {orders.length}
                         </span>
@@ -212,14 +220,14 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                     <button
                         onClick={() => setFilterStatus('pending')}
                         className={`flex items-center gap-2 px-5 py-3 rounded-[16px] label-semibold uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === 'pending'
-                            ? 'bg-warning text-black shadow-lg'
-                            : 'bg-white dark:bg-neutral-900 text-black dark:text-black border border-neutral-200 dark:border-neutral-800'
+                            ? 'bg-amber-500 text-black shadow-lg'
+                            : 'bg-white dark:bg-neutral-900 text-black dark:text-white border border-neutral-200 dark:border-neutral-800'
                             }`}
                     >
                         <AlertCircle size={16} />
                         <span className="text-xs">Pendentes</span>
                         {pendingCount > 0 && (
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'pending' ? 'bg-black/20' : 'bg-warning/10 text-warning'
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'pending' ? 'bg-black/20' : 'bg-amber-500/10 text-amber-600'
                                 }`}>
                                 {pendingCount}
                             </span>
@@ -229,14 +237,14 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                     <button
                         onClick={() => setFilterStatus('accepted')}
                         className={`flex items-center gap-2 px-5 py-3 rounded-[16px] label-semibold uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === 'accepted'
-                            ? 'bg-primary-green text-black shadow-lg'
-                            : 'bg-white dark:bg-neutral-900 text-black dark:text-black border border-neutral-200 dark:border-neutral-800'
+                            ? 'bg-emerald-500 text-white shadow-lg'
+                            : 'bg-white dark:bg-neutral-900 text-black dark:text-white border border-neutral-200 dark:border-neutral-800'
                             }`}
                     >
                         <CheckCircle size={16} />
                         <span className="text-xs">Confirmados</span>
                         {acceptedCount > 0 && (
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'accepted' ? 'bg-black/20' : 'bg-primary-green/10 text-black-green'
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'accepted' ? 'bg-white/20' : 'bg-emerald-500/10 text-emerald-600'
                                 }`}>
                                 {acceptedCount}
                             </span>
@@ -246,14 +254,14 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                     <button
                         onClick={() => setFilterStatus('in_progress')}
                         className={`flex items-center gap-2 px-5 py-3 rounded-[16px] label-semibold uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === 'in_progress'
-                            ? 'bg-blue-500 text-white shadow-lg'
-                            : 'bg-white dark:bg-neutral-900 text-black dark:text-black border border-neutral-200 dark:border-neutral-800'
+                            ? 'bg-blue-600 text-white shadow-lg'
+                            : 'bg-white dark:bg-neutral-900 text-black dark:text-white border border-neutral-200 dark:border-neutral-800'
                             }`}
                     >
                         <Clock size={16} />
                         <span className="text-xs">Em Execução</span>
                         {inProgressCount > 0 && (
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'in_progress' ? 'bg-white/20' : 'bg-blue-500/10 text-blue-500'
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'in_progress' ? 'bg-white/20' : 'bg-blue-600/10 text-blue-600'
                                 }`}>
                                 {inProgressCount}
                             </span>
@@ -263,14 +271,14 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder }
                     <button
                         onClick={() => setFilterStatus('completed')}
                         className={`flex items-center gap-2 px-5 py-3 rounded-[16px] label-semibold uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === 'completed'
-                            ? 'bg-primary-green text-black shadow-lg'
-                            : 'bg-white dark:bg-neutral-900 text-text-primary dark:text-gray-400 border border-neutral-200 dark:border-neutral-800'
+                            ? 'bg-emerald-600 text-white shadow-lg'
+                            : 'bg-white dark:bg-neutral-900 text-black dark:text-white border border-neutral-200 dark:border-neutral-800'
                             }`}
                     >
                         <CheckCircle size={16} />
                         <span className="text-xs">Concluídos</span>
                         {completedCount > 0 && (
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'completed' ? 'bg-black/20' : 'bg-primary-green/10 text-black-green'
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${filterStatus === 'completed' ? 'bg-white/20' : 'bg-emerald-600/10 text-emerald-600'
                                 }`}>
                                 {completedCount}
                             </span>

@@ -1,10 +1,93 @@
 import React, { useState, useEffect } from 'react';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
-import { ArrowLeft, Calendar, Clock, MapPin, User, FileText, CreditCard, MessageCircle, Phone, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle2, CreditCard, MessageCircle, Phone, CheckCircle, XCircle, AlertCircle, ClipboardList, Sparkles, ShieldCheck, LifeBuoy } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { subscribeToOrderUpdates } from '../services/ordersService';
+
+// --- Shared Components (Copied from Tracking.tsx for consistency) ---
+const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, variant = 'success' }: any) => {
+    let bgClass = active ? 'bg-accent-primary' : 'bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800';
+    let iconColorClass = active ? 'text-white' : 'text-black';
+    let titleColorClass = active ? 'text-black dark:text-white' : 'text-neutral-500 dark:text-neutral-500';
+
+    if (active || completed) {
+        if (variant === 'warning') {
+            bgClass = 'bg-warning text-black';
+            iconColorClass = 'text-black';
+            titleColorClass = 'text-orange-700 dark:text-warning';
+        }
+        else if (variant === 'info') {
+            bgClass = 'bg-info text-white';
+            iconColorClass = 'text-white';
+            titleColorClass = 'text-info';
+        }
+        else if (variant === 'success') {
+            bgClass = 'bg-success text-white';
+            iconColorClass = 'text-white';
+            titleColorClass = 'text-success';
+        }
+    }
+
+    return (
+        <div className={`flex gap-8 ${last ? '' : 'min-h-[90px]'}`}>
+            <div className="flex flex-col items-center">
+                <div className={`w-12 h-12 rounded-[20px] flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${bgClass} ${iconColorClass} ${pulse ? 'animate-pulse scale-105 shadow-glow' : ''}`}>
+                    {icon}
+                </div>
+                <div className={`w-0.5 h-full ${active && completed ? (variant === 'info' ? 'bg-info' : variant === 'warning' ? 'bg-warning' : 'bg-success') : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>
+            </div>
+            <div className="pt-2 flex-1">
+                <p className={`body-bold transition-colors ${titleColorClass}`}>{title}</p>
+                {desc && <p className={`text-[10px] font-bold tracking-wide mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
+            </div>
+        </div>
+    );
+};
+
+const IntermediateStep = ({ label, active, completed, variant = 'warning' }: any) => {
+    let dotColor = active ? 'bg-accent-secondary' : 'bg-neutral-200 dark:bg-neutral-800';
+
+    // Define text color logic
+    let textColorClass = 'text-neutral-400 dark:text-neutral-600'; // Default inactive text (readable gray)
+
+    if (completed) {
+        if (variant === 'warning') dotColor = 'bg-[#FF9800]';
+        else if (variant === 'info') dotColor = 'bg-info';
+        else dotColor = 'bg-success';
+
+        textColorClass = 'text-neutral-500 dark:text-neutral-400'; // Completed text (slightly darker gray)
+    } else if (active) {
+        if (variant === 'warning') {
+            dotColor = 'bg-[#FF9800]';
+            textColorClass = 'text-orange-600 dark:text-orange-400 font-medium'; // Readable orange
+        } else if (variant === 'info') {
+            dotColor = 'bg-info';
+            textColorClass = 'text-info font-medium';
+        }
+    }
+
+    return (
+        <div className="flex gap-8 min-h-[40px] -mt-2 -mb-2 relative z-0">
+            <div className="flex flex-col items-center w-12">
+                {/* Line traverses through */}
+                <div className={`w-0.5 h-full absolute top-0 bottom-0 ${completed ? (variant === 'info' ? 'bg-info' : variant === 'warning' ? 'bg-[#FF9800]' : 'bg-success') : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>
+
+                {/* Small Dot */}
+                <div className={`w-3 h-3 rounded-full z-10 my-auto flex items-center justify-center transition-all ${dotColor} ${active ? 'animate-pulse ring-4 ring-opacity-20 ' + (variant === 'warning' ? 'ring-[#FF9800]' : 'ring-info') : 'border-2 border-app-bg'}`}>
+                </div>
+            </div>
+            <div className="py-3 flex-1">
+                <p
+                    className={`text-[11px] font-light tracking-[0px] transition-colors ${textColorClass}`}
+                >
+                    {label}
+                </p>
+            </div>
+        </div>
+    );
+};
 
 interface OrderDetailProps {
     order: any;
@@ -14,7 +97,7 @@ interface OrderDetailProps {
     onRate?: () => void;
     onConfirmCompletion?: () => void;
     onPay?: (order: any) => void;
-    onConfirmStart?: () => void; // New prop if passed from parent, or we handle internally
+    onConfirmStart?: () => void;
 }
 
 const OrderDetail: React.FC<OrderDetailProps> = ({
@@ -45,71 +128,14 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
 
     const getStatusConfig = (status: string) => {
         switch (status) {
-            case 'completed':
-                return {
-                    label: 'Concluído',
-                    variant: 'success' as const,
-                    icon: CheckCircle,
-                    color: 'text-feedback-success',
-                    bgColor: 'bg-feedback-success/10'
-                };
-            case 'awaiting_start_confirmation':
-                return {
-                    label: 'Confirmar Início',
-                    variant: 'warning' as const,
-                    icon: AlertCircle,
-                    color: 'text-feedback-warning',
-                    bgColor: 'bg-feedback-warning/10'
-                };
-            case 'awaiting_finish_confirmation':
-                return {
-                    label: 'Confirmar Conclusão',
-                    variant: 'warning' as const,
-                    icon: CheckCircle,
-                    color: 'text-feedback-warning',
-                    bgColor: 'bg-feedback-warning/10'
-                };
-            case 'in_execution':
-                return {
-                    label: 'Em Execução',
-                    variant: 'success' as const, // Green for active execution
-                    icon: Clock,
-                    color: 'text-feedback-info',
-                    bgColor: 'bg-feedback-info/10'
-                };
-            case 'sent':
-                return {
-                    label: 'Aguardando Resposta',
-                    variant: 'secondary' as const,
-                    icon: AlertCircle,
-                    color: 'text-black',
-                    bgColor: 'bg-gray-100 dark:bg-gray-800'
-                };
-            case 'accepted':
-                return {
-                    label: 'Aguardando Pagamento',
-                    variant: 'warning' as const,
-                    icon: Clock,
-                    color: 'text-feedback-warning',
-                    bgColor: 'bg-feedback-warning/10'
-                };
-            case 'rejected':
-            case 'cancelled':
-                return {
-                    label: 'Cancelado',
-                    variant: 'error' as const,
-                    icon: XCircle,
-                    color: 'text-feedback-error',
-                    bgColor: 'bg-feedback-error/10'
-                };
-            default: // paid_escrow_held, etc.
-                return {
-                    label: 'Em Andamento',
-                    variant: 'warning' as const,
-                    icon: Clock,
-                    color: 'text-feedback-warning',
-                    bgColor: 'bg-feedback-warning/10'
-                };
+            case 'completed': return { label: 'Concluído', variant: 'success' as const, icon: CheckCircle };
+            case 'awaiting_start_confirmation': return { label: 'Confirmar Início', variant: 'warning' as const, icon: AlertCircle };
+            case 'awaiting_finish_confirmation': return { label: 'Confirmar Conclusão', variant: 'warning' as const, icon: CheckCircle };
+            case 'in_execution': return { label: 'Em Execução', variant: 'success' as const, icon: Clock };
+            case 'sent': return { label: 'Aguardando Resposta', variant: 'secondary' as const, icon: AlertCircle };
+            case 'accepted': return { label: 'Aguardando Pagamento', variant: 'warning' as const, icon: Clock };
+            case 'rejected': case 'cancelled': return { label: 'Cancelado', variant: 'error' as const, icon: XCircle };
+            default: return { label: 'Em Andamento', variant: 'warning' as const, icon: Clock };
         }
     };
 
@@ -119,12 +145,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
     const formatDate = (dateString: string) => {
         if (!dateString) return 'Data não definida';
         const date = new Date(dateString);
-        return date.toLocaleDateString('pt-BR', {
-            weekday: 'long',
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
+        return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
     };
 
     const formatTime = (dateString: string) => {
@@ -132,81 +153,42 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Timeline logic
-    // Timeline logic
-    const getTimeline = () => {
-        const isPaid = !['sent', 'accepted', 'rejected', 'cancelled'].includes(order.status);
-        const isStartRequested = ['awaiting_start_confirmation', 'in_execution', 'awaiting_finish_confirmation', 'completed'].includes(order.status);
-        const isStarted = ['in_execution', 'awaiting_finish_confirmation', 'completed'].includes(order.status);
-        const isFinishedRequested = ['awaiting_finish_confirmation', 'completed'].includes(order.status);
-        const isFinished = order.status === 'completed';
-
-        const steps = [
-            {
-                label: 'Pedido Criado',
-                completed: true,
-                date: new Date(order.created_at).toLocaleString(),
-                description: 'Aguardando confirmação do profissional'
-            },
-            {
-                label: 'Confirmado pelo Prestador',
-                completed: order.status !== 'sent' && order.status !== 'rejected',
-                description: order.status === 'accepted' ? 'Aguardando pagamento' : 'Profissional aceitou o pedido'
-            },
-            {
-                label: 'Pagamento Realizado',
-                completed: isPaid,
-                description: isPaid && !isStartRequested ? 'Aguardando prestador iniciar o serviço' : 'Pagamento retido com segurança'
-            },
-            {
-                label: 'Confirmação de Início',
-                completed: isStarted || isFinished, // Mark completed if started or finished
-                description: order.status === 'awaiting_start_confirmation'
-                    ? 'Profissional aguardando sua confirmação'
-                    : (isStarted || isFinished) ? 'Início confirmado com sucesso' : 'Aguardando início do profissional'
-            },
-            {
-                label: 'Em Execução',
-                completed: (isStarted || isFinished) && order.status !== 'awaiting_start_confirmation',
-                description: (isStarted && !isFinished) ? 'Serviço em andamento' : 'Execução finalizada'
-            },
-            {
-                label: 'Confirmação de Conclusão',
-                completed: isFinished || order.status === 'awaiting_finish_confirmation', // Mark complected if finished OR if we are currently at this step (to show progress)
-                description: order.status === 'awaiting_finish_confirmation'
-                    ? 'Profissional sinalizou conclusão. Confirme.'
-                    : isFinished ? 'Conclusão confirmada' : 'Aguardando finalização'
-            },
-            {
-                label: 'Serviço Concluído',
-                completed: isFinished,
-                description: isFinished ? 'Serviço finalizado com sucesso' : ''
-            }
-        ];
-        return steps;
+    const getStatusStep = (status: string) => {
+        switch (status) {
+            case 'sent': return 1;
+            case 'accepted': return 2;
+            case 'paid_escrow_held': return 3;
+            case 'awaiting_start_confirmation': return 4;
+            case 'in_execution': case 'awaiting_finish_confirmation': return 5;
+            case 'completed': return 6;
+            default: return 1;
+        }
     };
 
-    const timeline = getTimeline();
+    const currentStep = getStatusStep(order.status);
     const providerName = resolveUserName(order.provider);
     const clientName = resolveUserName(order.client);
     const counterpartAvatar = resolveUserAvatar(order.provider?.name ? order.provider : order.client);
 
     return (
-        <div className="screen-container pb-6">
+        <div className="screen-container pb-6 bg-app-bg transition-colors">
             {/* Header */}
-            <div className="sticky top-0 bg-app-bg dark:bg-gray-900 z-10 px-4 pt-6 pb-4">
-                <button
-                    onClick={onBack}
-                    className="interactive flex items-center gap-2 text-black mb-4"
-                >
-                    <ArrowLeft size={20} />
-                    <span>Voltar</span>
-                </button>
+            <div className="sticky top-0 bg-app-bg dark:bg-gray-900 z-50 px-4 pt-6 pb-4 border-b border-neutral-100 dark:border-neutral-800 backdrop-blur-md bg-opacity-90">
+                <div className="flex items-center justify-between mb-4">
+                    <button onClick={onBack} className="interactive flex items-center gap-2 text-black dark:text-white">
+                        <ArrowLeft size={20} />
+                        <span>Voltar</span>
+                    </button>
+                    <button onClick={onSupport} className="interactive text-black dark:text-white">
+                        <LifeBuoy size={20} />
+                    </button>
+                </div>
 
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-black dark:text-white">
-                        Pedido #{order.id.slice(0, 8)}
-                    </h1>
+                    <div>
+                        <h1 className="text-xl font-bold text-black dark:text-white">Pedido #{order.id.slice(0, 8)}</h1>
+                        <p className="text-xs text-neutral-500 uppercase tracking-widest mt-1">Detalhes e Rastreio</p>
+                    </div>
                     <Badge variant={statusConfig.variant}>
                         <StatusIcon size={14} className="mr-1" />
                         {statusConfig.label}
@@ -214,38 +196,179 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                 </div>
             </div>
 
-            <div className="px-4 space-y-4">
-                {/* Service Info */}
+            <div className="px-4 space-y-6 mt-6">
+
+                {/* Agendamento Card */}
                 <Card className="p-6">
-                    <p className="meta-bold text-black-green-dark uppercase tracking-[0.2em] mb-2">{order.service_category_snapshot || order.service?.category || 'Serviço'}</p>
-                    <h2 className="text-xl font-bold text-black dark:text-white mb-4">
-                        {order.service_title_snapshot || order.service?.title || 'Detalhes do Serviço'}
-                    </h2>
-                    <div className="flex items-baseline gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
-                        <span className="text-3xl font-bold text-black dark:text-white">
-                            R$ {order.total_amount?.toFixed(2)}
-                        </span>
-                        <span className="meta text-black">Total do pedido</span>
+                    <h3 className="font-semibold text-black dark:text-white mb-4 border-b border-neutral-100 dark:border-neutral-800 pb-2">Agendamento</h3>
+                    <div className="space-y-4">
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-black">
+                                <Calendar size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Data</p>
+                                <p className="font-semibold text-black dark:text-white capitalize">{formatDate(order.scheduled_at)}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-black">
+                                <Clock size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Horário</p>
+                                <p className="font-semibold text-black dark:text-white">{formatTime(order.scheduled_at)}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-black">
+                                <MapPin size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Local</p>
+                                <p className="font-semibold text-black dark:text-white">{order.location_text || 'Endereço não informado'}</p>
+                            </div>
+                        </div>
                     </div>
                 </Card>
 
-                {/* Counterpart Info */}
+                {/* Service Info */}
+                <Card className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-1">{order.service_category_snapshot || order.service?.category || 'Serviço'}</p>
+                            <h2 className="text-lg font-bold text-black dark:text-white leading-tight">
+                                {order.service_title_snapshot || order.service?.title || 'Detalhes do Serviço'}
+                            </h2>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-1">Total</p>
+                            <span className="text-xl font-black text-black dark:text-white">
+                                R$ {order.total_amount?.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
+                </Card>
+
+
+                {/* Timeline / Status Tracking */}
+                <Card className="p-6">
+                    <h3 className="font-semibold text-black dark:text-white mb-6">Status do Pedido</h3>
+
+                    <div className="space-y-0 relative">
+                        <ProgressStep
+                            title="Pedido Enviado"
+                            desc="Aguardando confirmação do Profissional"
+                            icon={<ClipboardList size={18} />}
+                            active={currentStep >= 1}
+                            completed={currentStep > 1}
+                            variant="success"
+                        />
+
+                        <IntermediateStep
+                            label="Aguardando profissional aceitar no app"
+                            active={currentStep === 1}
+                            completed={currentStep > 1}
+                            variant="warning"
+                        />
+
+                        <ProgressStep
+                            title="Confirmado"
+                            desc="Profissional aceitou seu pedido"
+                            icon={<CheckCircle2 size={18} />}
+                            active={currentStep >= 2}
+                            completed={currentStep > 2}
+                            variant="success"
+                        />
+
+                        <IntermediateStep
+                            label="Pagamento necessário para prosseguir"
+                            active={currentStep === 2}
+                            completed={currentStep > 2}
+                            variant="warning"
+                        />
+
+                        <ProgressStep
+                            title="Pagamento Realizado"
+                            desc="Valor retido com segurança"
+                            icon={<CreditCard size={18} />}
+                            active={currentStep >= 3}
+                            completed={currentStep > 3}
+                            variant="success"
+                        />
+
+                        <IntermediateStep
+                            label="Profissional deve iniciar o serviço"
+                            active={currentStep === 3}
+                            completed={currentStep > 3}
+                            variant="warning"
+                        />
+
+                        <ProgressStep
+                            title="Confirmação de Início"
+                            desc={order.status === 'awaiting_start_confirmation' ? 'Confirme o início para liberar' : 'Início validado'}
+                            icon={<AlertCircle size={18} />}
+                            active={currentStep >= 4}
+                            completed={currentStep > 4}
+                            pulse={order.status === 'awaiting_start_confirmation'}
+                            variant="info"
+                        />
+
+                        <IntermediateStep
+                            label="Serviço em andamento"
+                            active={currentStep === 4}
+                            completed={currentStep > 4}
+                            variant="info"
+                        />
+
+                        <ProgressStep
+                            title="Em Execução"
+                            desc="Serviço sendo realizado agora"
+                            icon={<Sparkles size={18} />}
+                            active={currentStep >= 5}
+                            completed={currentStep > 5}
+                            pulse={order.status === 'in_execution'}
+                            variant="info"
+                        />
+
+                        <IntermediateStep
+                            label="Profissional deve marcar como concluído"
+                            active={currentStep === 5}
+                            completed={currentStep > 5 || order.status === 'awaiting_finish_confirmation'}
+                            variant="warning"
+                        />
+
+                        <ProgressStep
+                            title="Conclusão"
+                            desc={order.status === 'awaiting_finish_confirmation' ? 'Confirme a finalização' : 'Serviço finalizado'}
+                            icon={<ShieldCheck size={18} />}
+                            active={currentStep >= 6 || order.status === 'awaiting_finish_confirmation'}
+                            completed={currentStep >= 6}
+                            variant="success"
+                            last
+                        />
+                    </div>
+                </Card>
+
+                {/* Counterpart / Contact */}
                 <Card className="p-6">
                     <h3 className="font-semibold text-black dark:text-white mb-4 flex items-center gap-2">
-                        <User size={18} className="text-black-green" />
+                        <User size={18} className="text-black" />
                         {order.provider?.name ? 'Profissional' : 'Cliente'}
                     </h3>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-14 h-14 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden border">
+                            <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden border">
                                 <img src={counterpartAvatar} className="w-full h-full object-cover" />
                             </div>
                             <div>
-                                <p className="font-bold text-black dark:text-white">
+                                <p className="font-bold text-black dark:text-white text-sm">
                                     {order.provider?.name ? providerName : clientName}
                                 </p>
-                                <p className="text-sm text-black">
-                                    ⭐ 5.0 • Talent Connect
+                                <p className="text-xs text-neutral-500">
+                                    Talent Connect
                                 </p>
                             </div>
                         </div>
@@ -253,108 +376,21 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                         <div className="flex gap-2">
                             <button
                                 onClick={() => window.open(`https://wa.me/55${(order.provider?.phone || order.client?.phone || '').replace(/\D/g, '')}?text=Olá,%20estou%20entrando%20em%20contato%20sobre%20o%20pedido%20${order.id.slice(0, 8)}`, '_blank')}
-                                className="w-12 h-12 rounded-2xl bg-primary-green text-black flex items-center justify-center interactive shadow-lg"
+                                className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white flex items-center justify-center interactive"
                             >
-                                <MessageCircle size={20} />
+                                <MessageCircle size={18} />
+                            </button>
+                            <button
+                                className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white flex items-center justify-center interactive"
+                            >
+                                <Phone size={18} />
                             </button>
                         </div>
                     </div>
                 </Card>
 
-                {/* Scheduling Details */}
-                <Card className="p-6">
-                    <h3 className="font-semibold text-black dark:text-white mb-4">Agendamento</h3>
-                    <div className="space-y-4">
-                        <div className="flex items-start gap-3">
-                            <Calendar size={18} className="text-black-green mt-0.5" />
-                            <div>
-                                <p className="text-xs text-black dark:text-black uppercase font-bold tracking-widest">Data</p>
-                                <p className="font-semibold text-black dark:text-white capitalize">
-                                    {formatDate(order.scheduled_at)}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                            <Clock size={18} className="text-black-green mt-0.5" />
-                            <div>
-                                <p className="text-xs text-black uppercase font-bold tracking-widest">Horário</p>
-                                <p className="font-semibold text-black dark:text-white">
-                                    {formatTime(order.scheduled_at)}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                            <MapPin size={18} className="text-black-green mt-0.5" />
-                            <div>
-                                <p className="text-xs text-black uppercase font-bold tracking-widest">Local</p>
-                                <p className="font-semibold text-black dark:text-white">
-                                    {order.location_text || 'Endereço não informado'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-
-                {/* Timeline */}
-                <Card className="p-6">
-                    <h3 className="font-semibold text-black dark:text-white mb-6">Status do Pedido</h3>
-                    <div className="space-y-6">
-                        {timeline.map((step, index) => (
-                            <div key={index} className="relative pb-8 last:pb-0">
-                                <div className="flex gap-4 relative z-10">
-                                    <div className="flex flex-col items-center">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${step.completed
-                                            ? 'bg-primary-green border-primary-green text-black'
-                                            : 'bg-transparent border-neutral-200 dark:border-neutral-800 text-black'
-                                            }`}>
-                                            {step.completed ? <CheckCircle size={14} strokeWidth={3} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 pt-1">
-                                        <div className="flex justify-between items-start">
-                                            <p className={`font-bold ${step.completed
-                                                ? 'text-black'
-                                                : 'text-black'
-                                                }`}>
-                                                {step.label}
-                                            </p>
-                                            {step.date && (
-                                                <p className="text-[10px] text-black mt-1 uppercase tracking-widest">
-                                                    {step.date}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Connecting Line & Sub-status */}
-                                {index < timeline.length - 1 && (
-                                    <div className="absolute top-8 left-4 bottom-0 w-px -ml-px bg-neutral-200 dark:bg-neutral-800">
-                                        {step.completed && (
-                                            <div className="absolute top-0 bottom-0 left-0 right-0 bg-primary-green" />
-                                        )}
-                                        {step.description && (
-                                            <div className="absolute top-1/2 -translate-y-1/2 left-0 flex items-center pl-6 w-[200px]">
-                                                {/* Dot on the line */}
-                                                <div className={`absolute left-[-4px] w-2 h-2 rounded-full border-2 ${step.completed ? 'bg-primary-green border-white dark:border-black' : 'bg-neutral-300 border-white dark:border-black'}`} />
-
-                                                {/* Description Text */}
-                                                <p className="text-xs text-black whitespace-nowrap">
-                                                    {step.description}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-
                 {/* Actions */}
-                <div className="pt-4 space-y-3">
+                <div className="pt-2 space-y-3 pb-8">
                     {order.status === 'accepted' && onPay && (
                         <Button variant="primary" onClick={() => onPay(order)} className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none">
                             Pagar Agora e Confirmar
@@ -367,7 +403,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                                 const { confirmExecutionStart } = await import('../services/ordersService');
                                 try {
                                     await confirmExecutionStart(order.id);
-                                    if (onBack) onBack(); // Refresh or rely on subscription
+                                    if (onBack) onBack();
                                     alert("Início confirmado!");
                                 } catch (e) {
                                     alert("Erro ao confirmar: " + e);
@@ -375,30 +411,18 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                             }}
                             className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
                         >
-                            Confirmar Que o Profissional Começou
+                            Confirmar Início
                         </Button>
                     )}
                     {order.status === 'awaiting_finish_confirmation' && onConfirmCompletion && (
-                        <div className="space-y-3">
-                            <div className="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 text-center">
-                                <p className="text-xs text-black uppercase tracking-widest font-bold mb-1">Registro de Finalização</p>
-                                <p className="text-sm text-black dark:text-gray-300">
-                                    O prestador marcou como concluído em: <br />
-                                    <span className="font-mono font-bold text-black">{new Date(order.updated_at).toLocaleString('pt-BR')}</span>
-                                </p>
-                            </div>
-                            <Button
-                                variant="primary"
-                                onClick={onConfirmCompletion}
-                                className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
-                            >
-                                Confirmar Conclusão
-                            </Button>
-                        </div>
+                        <Button
+                            variant="primary"
+                            onClick={onConfirmCompletion}
+                            className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
+                        >
+                            Confirmar Conclusão
+                        </Button>
                     )}
-                    <Button variant="secondary" onClick={onSupport} className="w-full !rounded-[20px] !py-5">
-                        Preciso de Ajuda
-                    </Button>
 
                     {['sent', 'accepted', 'awaiting_payment'].includes(order.status) && (
                         <button
@@ -414,9 +438,9 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                                     }
                                 }
                             }}
-                            className="w-full py-4 text-feedback-error label-semibold uppercase tracking-widest flex items-center justify-center gap-2  rounded-[20px] transition-colors"
+                            className="w-full py-4 text-feedback-error text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 rounded-[20px] transition-colors hover:bg-feedback-error/5"
                         >
-                            <XCircle size={18} />
+                            <XCircle size={16} />
                             Cancelar Pedido
                         </button>
                     )}

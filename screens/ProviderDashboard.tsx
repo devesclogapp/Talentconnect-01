@@ -24,10 +24,21 @@ import { getProviderOrders } from '../services/ordersService';
 
 interface Props {
     onNavigate: (v: string) => void;
+    onOpenNegotiation?: (negotiation: any) => void;
     user?: any;
+    isDarkMode?: boolean;
+    onToggleDarkMode?: () => void;
+    onAddService?: () => void;
 }
 
-const ProviderDashboard: React.FC<Props> = ({ onNavigate, user }) => {
+const ProviderDashboard: React.FC<Props> = ({
+    onNavigate,
+    onOpenNegotiation,
+    user,
+    isDarkMode,
+    onToggleDarkMode,
+    onAddService
+}) => {
     const userName = resolveUserName(user);
     const userAvatar = resolveUserAvatar(user);
 

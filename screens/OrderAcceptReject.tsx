@@ -9,9 +9,10 @@ interface OrderAcceptRejectProps {
     onBack: () => void;
     onAccept: () => void;
     onReject: (reason: string) => void;
+    onNegotiate: (order: any) => void;
 }
 
-const OrderAcceptReject: React.FC<OrderAcceptRejectProps> = ({ order, onBack, onAccept, onReject }) => {
+const OrderAcceptReject: React.FC<OrderAcceptRejectProps> = ({ order, onBack, onAccept, onReject, onNegotiate }) => {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
     const [selectedRejectReason, setSelectedRejectReason] = useState('');
@@ -252,6 +253,14 @@ const OrderAcceptReject: React.FC<OrderAcceptRejectProps> = ({ order, onBack, on
 
                 {/* Final Actions */}
                 <div className="pt-6 space-y-4">
+                    <button
+                        onClick={() => onNegotiate(order)}
+                        disabled={isProcessing}
+                        className="w-full py-5 border-2 border-neutral-100 dark:border-neutral-800 rounded-[24px] label-semibold uppercase tracking-widest text-black  transition-all active:bg-neutral-50"
+                    >
+                        Negociar Valor
+                    </button>
+
                     <button
                         onClick={handleAccept}
                         disabled={isProcessing}

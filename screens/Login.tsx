@@ -20,11 +20,14 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
         setLoading(true);
         setError(null);
         try {
-            const { user, error: signInError } = await signIn(email, password);
+            const { user, error: signInError } = await signIn({ email, password });
             if (signInError) throw signInError;
             if (user) onLoginSuccess(user);
         } catch (err: any) {
-            setError(err.message || 'Authentication failed');
+            console.error("Erro no login:", err);
+            const msg = err.message || 'Falha na autenticação';
+            setError(msg);
+            alert(`Erro ao entrar: ${msg}`);
         } finally {
             setLoading(false);
         }
@@ -40,8 +43,8 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                 <div className="w-16 h-16 rounded-[22px] bg-bg-secondary border border-border-medium flex items-center justify-center mb-8 shadow-glow-accent">
                     <ShieldCheck size={32} className="text-accent-primary" />
                 </div>
-                <h1 className="heading-4xl tracking-tighter mb-3">Secure Access</h1>
-                <p className="body max-w-[260px]">Enter your credentials to manage your talent profile.</p>
+                <h1 className="heading-4xl tracking-tighter mb-3">Acesso Seguro</h1>
+                <p className="body max-w-[260px]">Insira suas credenciais para gerenciar seu perfil.</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6 relative z-10">
@@ -55,14 +58,14 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                         onClick={() => setRole('client')}
                         className={`relative z-10 flex-1 py-3 text-xs font-black uppercase tracking-widest transition-colors ${role === 'client' ? 'text-text-black' : 'text-text-tertiary'}`}
                     >
-                        Client
+                        Cliente
                     </button>
                     <button
                         type="button"
                         onClick={() => setRole('provider')}
                         className={`relative z-10 flex-1 py-3 text-xs font-black uppercase tracking-widest transition-colors ${role === 'provider' ? 'text-text-black' : 'text-text-tertiary'}`}
                     >
-                        Professional
+                        Profissional
                     </button>
                 </div>
 
@@ -73,7 +76,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                         </div>
                         <input
                             type="email"
-                            placeholder="Email Portfolio"
+                            placeholder="Email"
                             className="input pl-12"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -87,7 +90,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                         </div>
                         <input
                             type={showPassword ? 'text' : 'password'}
-                            placeholder="Private Key"
+                            placeholder="Senha"
                             className="input pl-12 pr-12"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -116,7 +119,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                         disabled={loading}
                         className="btn-primary w-full justify-between group shadow-glow"
                     >
-                        <span className="uppercase tracking-[0.2em]">{loading ? 'Verifying...' : 'Unlock Account'}</span>
+                        <span className="uppercase tracking-[0.2em]">{loading ? 'Verificando...' : 'Entrar'}</span>
                         <div className="w-8 h-8 rounded-full bg-bg-primary/20 flex items-center justify-center transition-transform group">
                             <ArrowRight size={18} />
                         </div>
@@ -129,14 +132,14 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                     onClick={() => onNavigate('onboarding')}
                     className="meta !text-[10px]  transition-colors"
                 >
-                    Forgot access code?
+                    Esqueceu a senha?
                 </button>
                 <div className="mt-6">
                     <button
                         onClick={() => onNavigate('register')}
                         className="heading-md text-text-black border-b border-accent-primary pb-1"
                     >
-                        Create New Portfolio
+                        Criar Nova Conta
                     </button>
                 </div>
             </div>

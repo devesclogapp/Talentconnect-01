@@ -1,15 +1,17 @@
 import { supabase } from './supabaseClient'
 import { Service } from '../types'
 import type { Database } from '../types/database.types'
+import { useAppStore } from '../store'
 
 type ServiceInsert = Database['public']['Tables']['services']['Insert']
 type ServiceUpdate = Database['public']['Tables']['services']['Update']
+
 
 /**
  * Buscar todos os serviços ativos
  */
 export const getActiveServices = async (category?: string) => {
-    let query = (supabase
+    const query = (supabase
         .from('services') as any)
         .select(`
       *,
@@ -29,12 +31,12 @@ export const getActiveServices = async (category?: string) => {
         .eq('active', true)
 
     if (category) {
-        query = query.eq('category', category)
+        query.eq('category', category)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) throw error;
     return data as Service[]
 }
 
@@ -42,6 +44,7 @@ export const getActiveServices = async (category?: string) => {
  * Buscar serviço por ID
  */
 export const getServiceById = async (serviceId: string) => {
+
     const { data, error } = await (supabase
         .from('services') as any)
         .select('*')
@@ -56,6 +59,7 @@ export const getServiceById = async (serviceId: string) => {
  * Buscar serviços de um prestador
  */
 export const getProviderServices = async (providerId: string) => {
+
     const { data, error } = await (supabase
         .from('services') as any)
         .select('*')
@@ -77,8 +81,18 @@ export const createService = async (serviceData: Omit<ServiceInsert, 'provider_i
         throw new Error('O preço base deve ser um valor válido.');
     }
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+    // Obtém o ID do usuário (Prestador)
+    let userId: string | null = null;
+
+    // 1. Tenta via sessão real do Supabase
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) userId = session.user.id;
+    } catch (e) { }
+
+    if (!userId) {
+        throw new Error('Sessão não encontrada. Por favor, faça login.');
+    }
 
     const { data, error } = await (supabase
         .from('services') as any)
@@ -88,14 +102,18 @@ export const createService = async (serviceData: Omit<ServiceInsert, 'provider_i
             category: serviceData.category,
             base_price: serviceData.base_price,
             pricing_mode: serviceData.pricing_mode || 'fixed',
+            duration_hours: serviceData.duration_hours || 0,
             image_url: serviceData.image_url,
-            provider_id: user.id,
+            provider_id: userId,
             active: true,
         })
         .select()
         .single()
 
-    if (error) throw error
+    if (error) {
+        console.error("Erro Supabase (createService):", error);
+        throw new Error(error.message);
+    }
     return data as Service
 }
 
@@ -105,12 +123,15 @@ export const createService = async (serviceData: Omit<ServiceInsert, 'provider_i
 export const updateService = async (serviceId: string, updates: ServiceUpdate) => {
     if (!serviceId) throw new Error('ID do serviço não fornecido.');
 
-    // Validação de campos se presentes
-    if (updates.title !== undefined && !updates.title.trim()) {
-        throw new Error('O título não pode ser vazio.');
-    }
-    if (updates.base_price !== undefined && updates.base_price < 0) {
-        throw new Error('O preço deve ser um valor válido.');
+    // Obtém ID do usuário para verificar se é MOCK
+    let userId: string | null = null;
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) userId = session.user.id;
+    } catch (e) { }
+
+    if (!userId) {
+        throw new Error('Sessão não encontrada.');
     }
 
     const { data, error } = await (supabase
@@ -120,7 +141,10 @@ export const updateService = async (serviceId: string, updates: ServiceUpdate) =
         .select()
         .single()
 
-    if (error) throw error
+    if (error) {
+        console.error("Erro Supabase (updateService):", error);
+        throw new Error(error.message);
+    }
     return data as Service
 }
 

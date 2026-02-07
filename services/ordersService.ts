@@ -6,6 +6,7 @@ import { Order, Service } from '../types'
 type OrderInsert = Database['public']['Tables']['orders']['Insert']
 type OrderUpdate = Database['public']['Tables']['orders']['Update']
 
+
 /**
  * Criar novo pedido (Client)
  */
@@ -41,6 +42,7 @@ export const createOrder = async (orderData: Omit<OrderInsert, 'client_id'> & {
  * Buscar pedidos do cliente
  */
 export const getClientOrders = async () => {
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
@@ -64,6 +66,7 @@ export const getClientOrders = async () => {
  * Buscar pedidos recebidos pelo prestador
  */
 export const getProviderOrders = async () => {
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
@@ -87,6 +90,7 @@ export const getProviderOrders = async () => {
  * Buscar pedido por ID
  */
 export const getOrderById = async (orderId: string) => {
+
     const { data, error } = await (supabase
         .from('orders') as any)
         .select(`
@@ -128,6 +132,28 @@ export const rejectOrder = async (orderId: string) => {
     const { data, error } = await (supabase
         .from('orders') as any)
         .update({ status: 'rejected' })
+        .eq('id', orderId)
+        .select()
+        .single()
+
+    if (error) throw error
+    return data as Order
+}
+
+/**
+ * Enviar contraproposta (Provider)
+ */
+export const sendCounterOffer = async (orderId: string, newAmount: number) => {
+    if (!orderId) throw new Error('ID do pedido não fornecido.');
+
+    // Usamos 'awaiting_details' como estado de negociação no MVP 
+    // para evitar alterações agressivas no esquema do banco
+    const { data, error } = await (supabase
+        .from('orders') as any)
+        .update({
+            total_amount: newAmount,
+            status: 'awaiting_details'
+        })
         .eq('id', orderId)
         .select()
         .single()
@@ -341,7 +367,7 @@ export const subscribeToOrderUpdates = (
                 table: 'orders',
                 filter: `id=eq.${orderId}`,
             },
-            (payload) => {
+            (payload: any) => {
                 callback(payload.new as Order)
             }
         )
