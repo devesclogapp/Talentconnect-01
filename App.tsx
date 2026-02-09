@@ -485,85 +485,89 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-app-bg font-sans">
-      <div className={`animate-fade-in ${showBottomNav ? 'pb-24' : ''}`}>
-        {renderView()}
-      </div>
+      {(loading || view === 'SPLASH') ? (
+        <SplashScreen />
+      ) : (
+        <>
+          <div className={`animate-fade-in ${showBottomNav ? 'pb-24' : ''}`}>
+            {renderView()}
+          </div>
 
-      {showBottomNav && (
-        <nav className="bottom-nav">
-          <button
-            onClick={() => setView(userRole === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')}
-            className={`bottom-nav__item interactive ${(view === 'CLIENT_DASHBOARD' || view === 'PROVIDER_DASHBOARD') ? 'bottom-nav__item--active' : ''}`}
-          >
-            <Home size={24} />
-            <span className="sr-only">Início</span>
-          </button>
-
-          {userRole === 'client' ? (
-            <button
-              onClick={() => setView('ORDER_HISTORY')}
-              className={`bottom-nav__item interactive ${(view === 'ORDER_HISTORY' || view === 'TRACKING') ? 'bottom-nav__item--active' : ''}`}
-            >
-              <ReceiptText size={24} />
-              <span className="sr-only">Pedidos</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setView('RECEIVED_ORDERS')}
-              className={`bottom-nav__item interactive ${view.startsWith('RECEIVED_ORDERS') ? 'bottom-nav__item--active' : ''}`}
-            >
-              <ReceiptText size={24} />
-              <span className="sr-only">Pedidos</span>
-            </button>
-          )}
-
-          {userRole === 'client' ? (
-            <button
-              onClick={() => {
-                if (userRole === 'client') setSelectedCategory(undefined);
-                setView('SERVICE_LISTING');
-              }}
-              className={`bottom-nav__item interactive ${view === 'SERVICE_LISTING' ? 'bottom-nav__item--active' : ''}`}
-            >
-              <Bell size={24} />
-              <span className="sr-only">Descobrir</span>
-            </button>
-          ) : (
-            <>
+          {showBottomNav && (
+            <nav className="bottom-nav">
               <button
-                onClick={() => {
-                  setSelectedServiceId(undefined);
-                  setView('SERVICE_REGISTRATION');
-                }}
-                className="w-14 h-14 flex items-center justify-center -mt-6 interactive rounded-full"
+                onClick={() => setView(userRole === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')}
+                className={`bottom-nav__item interactive ${(view === 'CLIENT_DASHBOARD' || view === 'PROVIDER_DASHBOARD') ? 'bottom-nav__item--active' : ''}`}
               >
-                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-lg shadow-primary-black/20">
-                  <Plus size={32} />
-                </div>
-                <span className="sr-only">Novo Serviço</span>
+                <Home size={24} />
+                <span className="sr-only">Início</span>
               </button>
 
-              <button
-                onClick={() => setView('AGENDA')}
-                className={`bottom-nav__item interactive ${view === 'AGENDA' ? 'bottom-nav__item--active' : ''}`}
-              >
-                <Calendar size={24} />
-                <span className="sr-only">Agenda</span>
-              </button>
-            </>
-          )}
+              {userRole === 'client' ? (
+                <button
+                  onClick={() => setView('ORDER_HISTORY')}
+                  className={`bottom-nav__item interactive ${(view === 'ORDER_HISTORY' || view === 'TRACKING') ? 'bottom-nav__item--active' : ''}`}
+                >
+                  <ReceiptText size={24} />
+                  <span className="sr-only">Pedidos</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setView('RECEIVED_ORDERS')}
+                  className={`bottom-nav__item interactive ${view.startsWith('RECEIVED_ORDERS') ? 'bottom-nav__item--active' : ''}`}
+                >
+                  <ReceiptText size={24} />
+                  <span className="sr-only">Pedidos</span>
+                </button>
+              )}
 
-          <button
-            onClick={() => setView('PROFILE')}
-            className={`bottom-nav__item interactive ${view === 'PROFILE' ? 'bottom-nav__item--active' : ''}`}
-          >
-            <UserIcon size={24} />
-            <span className="sr-only">Perfil</span>
-          </button>
-        </nav>
+              {userRole === 'client' ? (
+                <button
+                  onClick={() => {
+                    if (userRole === 'client') setSelectedCategory(undefined);
+                    setView('SERVICE_LISTING');
+                  }}
+                  className={`bottom-nav__item interactive ${view === 'SERVICE_LISTING' ? 'bottom-nav__item--active' : ''}`}
+                >
+                  <Bell size={24} />
+                  <span className="sr-only">Descobrir</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setSelectedServiceId(undefined);
+                      setView('SERVICE_REGISTRATION');
+                    }}
+                    className="w-14 h-14 flex items-center justify-center -mt-6 interactive rounded-full"
+                  >
+                    <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-lg shadow-primary-black/20">
+                      <Plus size={32} />
+                    </div>
+                    <span className="sr-only">Novo Serviço</span>
+                  </button>
+
+                  <button
+                    onClick={() => setView('AGENDA')}
+                    className={`bottom-nav__item interactive ${view === 'AGENDA' ? 'bottom-nav__item--active' : ''}`}
+                  >
+                    <Calendar size={24} />
+                    <span className="sr-only">Agenda</span>
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={() => setView('PROFILE')}
+                className={`bottom-nav__item interactive ${view === 'PROFILE' ? 'bottom-nav__item--active' : ''}`}
+              >
+                <UserIcon size={24} />
+                <span className="sr-only">Perfil</span>
+              </button>
+            </nav>
+          )}
+        </>
       )}
-
-
     </div>
   );
 };

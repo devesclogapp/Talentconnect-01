@@ -241,27 +241,27 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => updateField('pricingMode', 'fixed')}
-                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group ${formData.pricingMode === 'fixed' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-secondary hover:border-text-tertiary'}`}
+                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group ${formData.pricingMode === 'fixed' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-primary hover:border-text-tertiary'}`}
                 >
-                  <div className={`p-3 rounded-full ${formData.pricingMode === 'fixed' ? 'bg-bg-primary/20' : 'bg-bg-tertiary'}`}>
-                    <DollarSign size={24} />
+                  <div className={`p-3 rounded-full transition-colors ${formData.pricingMode === 'fixed' ? 'bg-bg-primary/20' : 'bg-bg-tertiary group-hover:bg-accent-primary/10'}`}>
+                    <DollarSign size={32} className={formData.pricingMode === 'fixed' ? 'text-bg-primary' : 'text-text-primary'} />
                   </div>
                   <div className="text-center">
-                    <span className="block text-xs font-black tracking-widest mb-1">Preço Fixo</span>
-                    <span className="text-[10px] opacity-70">Valor único por serviço</span>
+                    <span className="block text-base font-black tracking-wider mb-1">Preço Fixo</span>
+                    <span className="text-xs opacity-70 block">Valor único por serviço</span>
                   </div>
                 </button>
 
                 <button
                   onClick={() => updateField('pricingMode', 'hourly')}
-                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group ${formData.pricingMode === 'hourly' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-secondary hover:border-text-tertiary'}`}
+                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group ${formData.pricingMode === 'hourly' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-primary hover:border-text-tertiary'}`}
                 >
-                  <div className={`p-3 rounded-full ${formData.pricingMode === 'hourly' ? 'bg-bg-primary/20' : 'bg-bg-tertiary'}`}>
-                    <Clock size={24} />
+                  <div className={`p-3 rounded-full transition-colors ${formData.pricingMode === 'hourly' ? 'bg-bg-primary/20' : 'bg-bg-tertiary group-hover:bg-accent-primary/10'}`}>
+                    <Clock size={32} className={formData.pricingMode === 'hourly' ? 'text-bg-primary' : 'text-text-primary'} />
                   </div>
                   <div className="text-center">
-                    <span className="block text-xs font-black tracking-widest mb-1">Por Hora</span>
-                    <span className="text-[10px] opacity-70">Cobrança por tempo</span>
+                    <span className="block text-base font-black tracking-wider mb-1">Por Hora</span>
+                    <span className="text-xs opacity-70 block">Cobrança por tempo</span>
                   </div>
                 </button>
               </div>

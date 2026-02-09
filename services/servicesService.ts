@@ -206,3 +206,21 @@ export const getServiceCategories = async () => {
     const categories = [...new Set((data as any[]).map(item => item.category).filter(Boolean))]
     return categories as string[]
 }
+
+/**
+ * Verificar se o serviço tem pedidos vinculados
+ */
+export const checkServiceHasOrders = async (serviceId: string) => {
+    const { count, error } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('service_id', serviceId)
+
+    if (error) {
+        console.error("Erro ao verificar pedidos do serviço:", error);
+        // Em caso de erro, assumimos que tem pedidos por segurança
+        return true;
+    }
+
+    return count !== null && count > 0;
+}
