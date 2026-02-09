@@ -15,7 +15,11 @@ interface Props {
 const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
     const [name, setName] = useState(user?.user_metadata?.name || '');
     const [phone, setPhone] = useState(user?.user_metadata?.phone || '');
+    const [category, setCategory] = useState<'pf' | 'mei'>(user?.user_metadata?.category || 'pf');
+    const [document, setDocument] = useState(user?.user_metadata?.document || '');
     const [loading, setLoading] = useState(false);
+
+    const isProvider = user?.user_metadata?.role === 'provider';
 
     const handleSave = async () => {
         try {
@@ -24,7 +28,9 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
             const { data, error } = await supabase.auth.updateUser({
                 data: {
                     name,
-                    phone
+                    phone,
+                    category,
+                    document
                 }
             });
 
@@ -32,7 +38,16 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
 
             if (data.user) {
                 // Update local user state via callback
-                onUpdate({ ...user, user_metadata: { ...user.user_metadata, name, phone } });
+                onUpdate({
+                    ...user,
+                    user_metadata: {
+                        ...user.user_metadata,
+                        name,
+                        phone,
+                        category,
+                        document
+                    }
+                });
                 onBack();
             }
 
@@ -107,6 +122,47 @@ const EditProfile: React.FC<Props> = ({ user, onBack, onUpdate }) => {
                             onChange={(e) => setPhone(e.target.value)}
                         />
                     </div>
+
+                    {isProvider && (
+                        <>
+                            <div className="space-y-2">
+                                <label className="text-xs font-normal text-text-secondary ml-1">Tipo de Cadastro</label>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCategory('pf')}
+                                        className={`flex-1 p-2 rounded-lg border text-xs font-medium transition-all ${category === 'pf'
+                                                ? 'bg-black text-white border-black dark:bg-white dark:text-black'
+                                                : 'bg-neutral-50 text-neutral-500 border-neutral-200'
+                                            }`}
+                                    >
+                                        Pessoa Física (CPF)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCategory('mei')}
+                                        className={`flex-1 p-2 rounded-lg border text-xs font-medium transition-all ${category === 'mei'
+                                                ? 'bg-black text-white border-black dark:bg-white dark:text-black'
+                                                : 'bg-neutral-50 text-neutral-500 border-neutral-200'
+                                            }`}
+                                    >
+                                        MEI (CNPJ)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-xs font-normal text-text-secondary ml-1">
+                                    {category === 'mei' ? 'CNPJ' : 'CPF'}
+                                </label>
+                                <Input
+                                    placeholder={category === 'mei' ? "00.000.000/0000-00" : "000.000.000-00"}
+                                    value={document}
+                                    onChange={(e) => setDocument(e.target.value)}
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <div className="space-y-1 opacity-50 pointer-events-none">
                         <label className="text-xs font-normal text-text-secondary ml-1">Email (Não editável)</label>

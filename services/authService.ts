@@ -6,6 +6,8 @@ export interface SignUpData {
     name: string
     role: 'client' | 'provider'
     phone?: string
+    category?: 'mei' | 'pf'
+    document?: string
 }
 
 export interface SignInData {
@@ -17,7 +19,7 @@ export interface SignInData {
  * Cadastro de novo usuário
  */
 export const signUp = async (data: SignUpData) => {
-    const { email, password, name, role, phone } = data
+    const { email, password, name, role, phone, category, document } = data
 
     const { data: authData, error } = await supabase.auth.signUp({
         email,
@@ -27,6 +29,8 @@ export const signUp = async (data: SignUpData) => {
                 name,
                 role,
                 phone,
+                category, // 'mei' | 'pf'
+                document  // CPF or CNPJ
             },
         },
     })
@@ -54,16 +58,28 @@ export const signUp = async (data: SignUpData) => {
     // Se for prestador, cria o perfil inicial
     if (role === 'provider' && authData.user) {
         try {
+            const profileData: any = {
+                user_id: authData.user.id,
+                professional_title: 'Novo Prestador',
+                active: true,
+                rating_average: 5.0,
+                total_ratings: 0,
+                total_services_completed: 0
+            };
+
+            // Map document to provider_profiles columns if possible
+            if (document) {
+                // We use document_cpf for both for now, or just CPF if PF.
+                // Since we don't have document_cnpj column in types yet, we rely on metadata.
+                // But if it's PF, we can try to save to document_cpf.
+                if (category === 'pf') {
+                    profileData.document_cpf = document;
+                }
+            }
+
             await (supabase as any)
                 .from('provider_profiles')
-                .insert({
-                    user_id: authData.user.id,
-                    professional_title: 'Novo Prestador',
-                    active: true,
-                    rating_average: 5.0,
-                    total_ratings: 0,
-                    total_services_completed: 0
-                });
+                .insert(profileData);
         } catch (profileError) {
             console.error("Erro ao criar perfil de prestador:", profileError);
         }

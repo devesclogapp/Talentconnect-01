@@ -19,7 +19,9 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
         password: '',
         confirmPassword: '',
         phone: '',
-        address: ''
+        address: '',
+        providerCategory: 'pf', // 'pf' | 'mei'
+        document: ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +58,19 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
             newErrors.phone = 'Telefone é obrigatório';
         }
 
+        if (selectedRole === 'PROVIDER') {
+            if (!formData.document.trim()) {
+                newErrors.document = 'Documento é obrigatório';
+            }
+            // Basic length check (CPF 11, CNPJ 14 - usually more with formatting, but simple check for now)
+            if (formData.providerCategory === 'pf' && formData.document.replace(/\D/g, '').length < 11) {
+                newErrors.document = 'CPF inválido';
+            }
+            if (formData.providerCategory === 'mei' && formData.document.replace(/\D/g, '').length < 14) {
+                newErrors.document = 'CNPJ inválido';
+            }
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -72,6 +87,8 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                 name: formData.name,
                 role: selectedRole.toLowerCase() as 'client' | 'provider',
                 phone: formData.phone || undefined,
+                category: selectedRole === 'PROVIDER' ? (formData.providerCategory as 'mei' | 'pf') : undefined,
+                document: selectedRole === 'PROVIDER' ? formData.document : undefined
             });
             onRegisterSuccess(selectedRole);
         } catch (error: any) {
@@ -247,17 +264,66 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                     </div>
 
                     {selectedRole === 'PROVIDER' && (
-                        <div className="relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary groupfocus-within:text-accent-primary transition-colors">
-                                <MapPin size={18} />
+                        <>
+                            <div className="space-y-2">
+                                <label className="text-xs font-medium text-text-secondary ml-1">Tipo de Cadastro</label>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleInputChange('providerCategory', 'pf')}
+                                        className={`flex-1 p-3 rounded-xl border text-sm font-medium transition-all ${
+                                            // @ts-ignore
+                                            formData.providerCategory === 'pf'
+                                                ? 'bg-accent-primary text-white border-accent-primary'
+                                                : 'bg-bg-tertiary text-text-secondary border-border-medium hover:bg-bg-secondary'
+                                            }`}
+                                    >
+                                        Pessoa Física (CPF)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleInputChange('providerCategory', 'mei')}
+                                        className={`flex-1 p-3 rounded-xl border text-sm font-medium transition-all ${
+                                            // @ts-ignore
+                                            formData.providerCategory === 'mei'
+                                                ? 'bg-accent-primary text-white border-accent-primary'
+                                                : 'bg-bg-tertiary text-text-secondary border-border-medium hover:bg-bg-secondary'
+                                            }`}
+                                    >
+                                        MEI (CNPJ)
+                                    </button>
+                                </div>
                             </div>
-                            <Input
-                                placeholder="Endereço Base"
-                                className="input pl-12 font-normal"
-                                value={formData.address}
-                                onChange={(e) => handleInputChange('address', e.target.value)}
-                            />
-                        </div>
+
+                            <div className="relative group">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-accent-primary transition-colors">
+                                    <User size={18} />
+                                </div>
+                                <Input
+                                    // @ts-ignore
+                                    placeholder={formData.providerCategory === 'mei' ? "CNPJ" : "CPF"}
+                                    className="input pl-12 font-normal"
+                                    // @ts-ignore
+                                    value={formData.document || ''}
+                                    // @ts-ignore
+                                    onChange={(e) => handleInputChange('document', e.target.value)}
+                                    // @ts-ignore
+                                    error={!!errors.document}
+                                />
+                            </div>
+
+                            <div className="relative group">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-accent-primary transition-colors">
+                                    <MapPin size={18} />
+                                </div>
+                                <Input
+                                    placeholder="Endereço Base"
+                                    className="input pl-12 font-normal"
+                                    value={formData.address}
+                                    onChange={(e) => handleInputChange('address', e.target.value)}
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
 

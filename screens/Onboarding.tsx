@@ -10,6 +10,7 @@ import {
   Network,
   Lock
 } from 'lucide-react';
+import onboardingBg from '../assets/onboarding_bg.png';
 
 interface Props {
   onNavigate: (v: string) => void;
@@ -22,104 +23,109 @@ const Onboarding: React.FC<Props> = ({ onNavigate }) => {
     {
       title: "Conecte-se com a Elite",
       desc: "Acesse os melhores profissionais do mercado através do nosso ecossistema verificado.",
-      icon: <Network size={48} className="text-accent-primary" />
+      icon: <Network size={48} className="text-white" />
     },
     {
       title: "Contratos Seguros",
       desc: "Transações protegidas por sistema de custódia financeira e verificação em tempo real.",
-      icon: <Lock size={48} className="text-accent-primary" />
+      icon: <Lock size={48} className="text-white" />
     },
     {
       title: "Monitoramento de Performance",
       desc: "Acompanhe a qualidade, avaliações e análises com precisão institucional.",
-      icon: <TrendingUp size={48} className="text-accent-primary" />
+      icon: <TrendingUp size={48} className="text-white" />
     }
   ];
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col relative overflow-hidden">
-      {/* Technical Grid Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-full h-full bg-accent-primary/5 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute top-[20%] right-[-10%] w-[80%] h-[80%] bg-blue-500/5 rounded-full blur-[150px]"></div>
-
-        {/* Precision Grid */}
-        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#C6FF00_1px,transparent_1px),linear-gradient(to_bottom,#C6FF00_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-
-        {/* Floating Particles */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-accent-primary rounded-full opacity-20 animate-pulse"></div>
-        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-accent-primary rounded-full opacity-30 animate-pulse delay-100"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-accent-primary rounded-full opacity-25 animate-pulse delay-200"></div>
+    <div className="min-h-screen relative overflow-hidden flex flex-col">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src={onboardingBg}
+          alt="Professional Worker"
+          className="w-full h-full object-cover object-center scale-125 transition-transform duration-700"
+          style={{ transform: 'translateY(-50px) scale(1.25)' }}
+        />
+        {/* Dark Gradient Overlay - Clearer top for face visibility, Darker bottom for text */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
       </div>
 
-      <div className="flex-1 flex flex-col pt-20 px-8 relative z-10">
-        {/* Brand Header */}
-        <div className="flex items-center gap-3 mb-16">
-          <div className="w-10 h-10 rounded-2xl bg-bg-secondary border border-border-medium flex items-center justify-center shadow-glow">
-            <Sparkles size={18} className="text-accent-primary" />
+      <div className="flex-1 flex flex-col pt-16 px-6 relative z-10">
+        {/* Brand Header - Top Left */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-glow">
+            <Sparkles size={18} className="text-white" />
           </div>
           <div>
-            <p className="meta !text-[8px] text-text-tertiary leading-none font-normal">Protocolo de mercado</p>
-            <h2 className="heading-md">Talent Connect</h2>
+            <p className="meta !text-[8px] text-white/80 leading-none font-normal">Protocolo de mercado</p>
+            <h2 className="heading-md text-white">Talent Connect</h2>
           </div>
         </div>
 
-        {/* Content Carousel */}
-        <div className="space-y-6 mb-20 flex-1">
-          <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-bg-secondary to-bg-tertiary border border-border-medium flex items-center justify-center mb-12 shadow-2xl animate-bounce-slow">
-            {steps[activeTab].icon}
-          </div>
+        {/* Spacer to push content down */}
+        <div className="flex-1"></div>
 
-          <h1 className="heading-4xl whitespace-pre-line animate-fade-in leading-[1.05]">
-            {steps[activeTab].title}
-          </h1>
+        {/* Bottom Content Area */}
+        <div className="flex flex-col gap-8 pb-10">
 
-          <p className="body !text-base max-w-[300px] animate-fade-in !leading-relaxed" key={activeTab}>
-            {steps[activeTab].desc}
-          </p>
-        </div>
-
-        {/* Progress Indicator */}
-        <div className="flex gap-2 mb-14">
-          {steps.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveTab(i)}
-              className={`h-1.5 rounded-full transition-all duration-500 ${activeTab === i
-                ? 'w-12 bg-accent-primary shadow-glow'
-                : 'w-5 bg-bg-tertiary'
-                }`}
-            />
-          ))}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="space-y-4 mb-8">
-          <button
-            onClick={() => onNavigate('LOGIN')}
-            className="btn-primary w-full justify-between group !h-[60px]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-bg-primary/20 flex items-center justify-center">
-                <Play size={16} fill="currentColor" />
-              </div>
-              <span className="font-normal text-[12px]">Entrar</span>
+          {/* Content Carousel */}
+          <div className="space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-6 shadow-2xl animate-bounce-slow">
+              {React.cloneElement(steps[activeTab].icon as React.ReactElement, { size: 32 })}
             </div>
-            <ArrowRight size={22} className="transition-transform group" />
-          </button>
 
-          <button
-            onClick={() => onNavigate('REGISTER')}
-            className="w-full h-[56px] rounded-2xl bg-bg-secondary border border-border-medium flex items-center justify-center gap-2 text-text-secondary   transition-all group"
-          >
-            <span className="text-xs font-normal">Criar conta</span>
-            <ArrowRight size={16} className="opacity-0 group transition-opacity" />
-          </button>
-        </div>
+            <h1 className="heading-3xl whitespace-pre-line animate-fade-in leading-tight text-white">
+              {steps[activeTab].title}
+            </h1>
 
-        {/* Footer */}
-        <div className="pt-6 pb-10 text-center border-t border-border-subtle/30">
-          <p className="meta !text-[8px] opacity-40 font-normal">Talent Connect v3.0 • Infraestrutura segura</p>
+            <p className="body !text-sm max-w-[320px] animate-fade-in !leading-relaxed text-white/80" key={activeTab}>
+              {steps[activeTab].desc}
+            </p>
+          </div>
+
+          {/* Progress Indicator */}
+          <div className="flex gap-2">
+            {steps.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveTab(i)}
+                className={`h-1.5 rounded-full transition-all duration-500 ${activeTab === i
+                  ? 'w-12 bg-white shadow-glow'
+                  : 'w-5 bg-white/20'
+                  }`}
+              />
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-4">
+            <button
+              onClick={() => onNavigate('LOGIN')}
+              className="w-full h-[56px] px-6 rounded-xl font-bold flex items-center justify-between gap-2 transition-all duration-200 active:scale-95 bg-white text-black hover:bg-white/90 group shadow-lg shadow-white/10"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
+                  <Play size={14} fill="currentColor" />
+                </div>
+                <span className="font-medium text-sm">Entrar na minha conta</span>
+              </div>
+              <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+            </button>
+
+            <button
+              onClick={() => onNavigate('REGISTER')}
+              className="w-full h-[56px] rounded-xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center gap-2 text-white transition-all group hover:bg-white/10"
+            >
+              <span className="text-sm font-medium">Criar nova conta</span>
+              <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+          </div>
+
+          {/* Minimal Footer */}
+          <div className="text-center pt-2">
+            <p className="meta !text-[10px] opacity-40 font-normal text-white">Talent Connect v3.0</p>
+          </div>
         </div>
       </div>
     </div>

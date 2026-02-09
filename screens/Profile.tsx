@@ -12,7 +12,8 @@ import {
     Bell,
     Star,
     Activity,
-    ArrowUpRight
+    ArrowUpRight,
+    LifeBuoy
 } from 'lucide-react';
 import { signOut } from '../services/authService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
@@ -223,6 +224,12 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                             label: 'Atividade na Plataforma',
                             sub: 'Histórico de operações',
                             action: () => onNavigate(user?.role === 'provider' ? 'RECEIVED_ORDERS' : 'ORDER_HISTORY')
+                        },
+                        {
+                            icon: <LifeBuoy size={20} />,
+                            label: 'Suporte & Ajuda',
+                            sub: 'Fale Conosco e Denúncias',
+                            action: () => onNavigate('SUPPORT')
                         },
                     ].map((item, i) => (
                         <button

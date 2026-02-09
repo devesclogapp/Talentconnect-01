@@ -241,27 +241,35 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => updateField('pricingMode', 'fixed')}
-                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group ${formData.pricingMode === 'fixed' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-primary hover:border-text-tertiary'}`}
+                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group h-full ${formData.pricingMode === 'fixed' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-primary hover:border-text-tertiary'}`}
                 >
                   <div className={`p-3 rounded-full transition-colors ${formData.pricingMode === 'fixed' ? 'bg-bg-primary/20' : 'bg-bg-tertiary group-hover:bg-accent-primary/10'}`}>
                     <DollarSign size={32} className={formData.pricingMode === 'fixed' ? 'text-bg-primary' : 'text-text-primary'} />
                   </div>
                   <div className="text-center">
                     <span className="block text-base font-black tracking-wider mb-1">Preço Fixo</span>
-                    <span className="text-xs opacity-70 block">Valor único por serviço</span>
+                    <span className="text-xs opacity-70 block mb-2">Valor único pelo serviço completo</span>
+
+                    <p className={`text-[9px] leading-tight max-w-[120px] mx-auto ${formData.pricingMode === 'fixed' ? 'text-bg-primary/60' : 'text-text-tertiary'}`}>
+                      O cliente paga o valor total acordado antes do início, independente do tempo gasto. Ideal para serviços com escopo fechado.
+                    </p>
                   </div>
                 </button>
 
                 <button
                   onClick={() => updateField('pricingMode', 'hourly')}
-                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group ${formData.pricingMode === 'hourly' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-primary hover:border-text-tertiary'}`}
+                  className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-4 group h-full ${formData.pricingMode === 'hourly' ? 'bg-text-primary border-text-primary text-bg-primary shadow-lg scale-[1.02]' : 'bg-bg-secondary border-border-subtle text-text-primary hover:border-text-tertiary'}`}
                 >
                   <div className={`p-3 rounded-full transition-colors ${formData.pricingMode === 'hourly' ? 'bg-bg-primary/20' : 'bg-bg-tertiary group-hover:bg-accent-primary/10'}`}>
                     <Clock size={32} className={formData.pricingMode === 'hourly' ? 'text-bg-primary' : 'text-text-primary'} />
                   </div>
                   <div className="text-center">
                     <span className="block text-base font-black tracking-wider mb-1">Por Hora</span>
-                    <span className="text-xs opacity-70 block">Cobrança por tempo</span>
+                    <span className="text-xs opacity-70 block mb-2">Cobrança por tempo de execução</span>
+
+                    <p className={`text-[9px] leading-tight max-w-[120px] mx-auto ${formData.pricingMode === 'hourly' ? 'text-bg-primary/60' : 'text-text-tertiary'}`}>
+                      O valor final depende das horas trabalhadas. O cronômetro é usado durante a execução. Ideal para tarefas longas ou imprevisíveis.
+                    </p>
                   </div>
                 </button>
               </div>
