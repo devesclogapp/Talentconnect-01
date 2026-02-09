@@ -151,9 +151,15 @@ const Agenda: React.FC<Props> = ({ onBack, onNavigate }) => {
                         </span>
                       </div>
                     </div>
-                    <span className="badge badge--success">
-                      {job.status.toUpperCase().replace('_', ' ')}
-                    </span>
+                    {job.status === 'completed' ? (
+                      <span className="px-3 py-1 rounded-full bg-success/10 text-success text-[10px] font-bold border border-success/20">
+                        CONCLUÍDO
+                      </span>
+                    ) : (
+                      <span className="badge badge--success">
+                        {job.status.toUpperCase().replace('_', ' ')}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 text-text-secondary">

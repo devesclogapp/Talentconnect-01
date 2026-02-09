@@ -34,6 +34,7 @@ import OrderAcceptReject from './screens/OrderAcceptReject';
 import ServiceExecution from './screens/ServiceExecution';
 import EditProfile from './screens/EditProfile';
 import ClientsList from './screens/ClientsList';
+import DocumentSubmission from './screens/DocumentSubmission';
 
 import { useAppStore } from './store';
 import {
@@ -476,6 +477,11 @@ const App: React.FC = () => {
         return <Agenda onBack={goBack} onNavigate={navigate} />;
       case 'NOTIFICATIONS':
         return <NotificationCenter onBack={goBack} />;
+      case 'DOCUMENT_SUBMISSION':
+        return <DocumentSubmission
+          onBack={() => setView('PROFILE')}
+          onSubmissionSuccess={() => setView('PROFILE')}
+        />;
       case 'CLIENTS_LIST':
         return <ClientsList
           onBack={goBack}

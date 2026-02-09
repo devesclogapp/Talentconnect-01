@@ -193,31 +193,56 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                     {(() => {
                         const status = user?.user_metadata?.documents_status || 'pending';
                         const isVerified = status === 'approved';
+                        const isSubmitted = status === 'submitted';
+
+                        let bgColor = 'bg-warning/5 border-warning/20';
+                        let iconColor = 'bg-warning/10 text-warning';
+                        let textColor = 'text-warning';
+                        let title = 'Verificação Necessária';
+                        let description = 'Envie seus documentos para desbloquear recursos.';
+                        let Icon = Shield;
+
+                        if (isVerified) {
+                            bgColor = 'bg-success/5 border-success/20';
+                            iconColor = 'bg-success/10 text-success';
+                            textColor = 'text-success';
+                            title = 'Identidade Verificada';
+                            description = 'Sua conta apresenta alta credibilidade.';
+                            Icon = Verified;
+                        } else if (isSubmitted) {
+                            bgColor = 'bg-blue-500/5 border-blue-500/20';
+                            iconColor = 'bg-blue-500/10 text-blue-500';
+                            textColor = 'text-blue-500';
+                            title = 'Em Análise';
+                            description = 'Seus documentos estão sendo verificados pela equipe.';
+                            Icon = Shield;
+                        }
 
                         return (
-                            <div className={`p-4 rounded-2xl border ${isVerified
-                                ? 'bg-success/5 border-success/20'
-                                : 'bg-warning/5 border-warning/20'} flex items-center justify-between group interactive`}
+                            <div className={`p-4 rounded-2xl border ${bgColor} flex items-center justify-between group interactive`}
                                 onClick={() => {
-                                    if (!isVerified) alert('Fluxo de verificação de documentos será aberto aqui.');
+                                    if (isVerified) return;
+                                    if (isSubmitted) {
+                                        alert('Seus documentos já foram enviados e estão em análise.');
+                                        return;
+                                    }
+                                    onNavigate('DOCUMENT_SUBMISSION');
                                 }}
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isVerified ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-                                        {isVerified ? <Verified size={20} /> : <Shield size={20} />}
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconColor}`}>
+                                        <Icon size={20} />
                                     </div>
                                     <div>
-                                        <h3 className={`font-bold text-sm ${isVerified ? 'text-success' : 'text-warning'}`}>
-                                            {isVerified ? 'Identidade Verificada' : 'Verificação Necessária'}
+                                        <h3 className={`font-bold text-sm ${textColor}`}>
+                                            {title}
                                         </h3>
                                         <p className="text-[10px] text-text-tertiary max-w-[200px] leading-tight mt-0.5">
-                                            {isVerified
-                                                ? 'Sua conta apresenta alta credibilidade.'
-                                                : 'Envie seus documentos para desbloquear recursos.'}
+                                            {description}
                                         </p>
                                     </div>
                                 </div>
-                                {!isVerified && <ChevronRight size={18} className="text-warning/50" />}
+                                {!isVerified && !isSubmitted && <ChevronRight size={18} className="text-warning/50" />}
                             </div>
                         );
                     })()}
