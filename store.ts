@@ -17,6 +17,7 @@ interface AppState {
     // Selection State
     selectedService: Service | null;
     selectedProvider: any | null; // Tipar melhor depois
+    selectedClient: any | null;
     selectedOrder: Order | null;
     selectedNegotiation: any | null;
     orderData: any | null;
@@ -33,6 +34,7 @@ interface AppState {
     toggleDarkMode: () => void;
     setSelectedService: (service: Service | null) => void;
     setSelectedProvider: (provider: any | null) => void;
+    setSelectedClient: (client: any | null) => void;
     setSelectedOrder: (order: Order | null) => void;
     setOrderData: (data: any | null) => void;
     setSelectedServiceId: (id: string | undefined) => void;
@@ -50,6 +52,7 @@ export const useAppStore = create<AppState>((set) => ({
     isDarkMode: localStorage.getItem('darkMode') === 'true',
     selectedService: null,
     selectedProvider: null,
+    selectedClient: null,
     selectedOrder: null,
     selectedNegotiation: null,
     orderData: null,
@@ -103,6 +106,7 @@ export const useAppStore = create<AppState>((set) => ({
 
     setSelectedService: (selectedService) => set({ selectedService }),
     setSelectedProvider: (selectedProvider) => set({ selectedProvider }),
+    setSelectedClient: (selectedClient) => set({ selectedClient }),
     setSelectedOrder: (selectedOrder) => set({ selectedOrder }),
     setOrderData: (orderData) => set({ orderData }),
     setSelectedServiceId: (selectedServiceId) => set({ selectedServiceId }),
@@ -114,6 +118,7 @@ export const useAppStore = create<AppState>((set) => ({
         history: [], // Clear history on logout
         selectedService: null,
         selectedProvider: null,
+        selectedClient: null,
         selectedOrder: null,
         orderData: null
     }),

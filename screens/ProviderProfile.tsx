@@ -16,6 +16,7 @@ import {
     CheckCircle
 } from 'lucide-react';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
+import { WhatsAppIcon } from '../components/ui/WhatsAppIcon';
 
 interface ProviderProfileProps {
     provider: any;
@@ -129,7 +130,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                         onClick={onMessage}
                         className="w-14 h-14 rounded-2xl bg-bg-secondary border border-border-subtle flex items-center justify-center text-text-secondary   transition-all shadow-lg"
                     >
-                        <MessageCircle size={24} />
+                        <WhatsAppIcon size={24} />
                     </button>
                 </div>
 

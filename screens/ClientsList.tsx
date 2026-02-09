@@ -13,13 +13,15 @@ interface ClientData {
     city?: string; // If available in metadata, currently not fetched deep
     lastServiceDate: string;
     totalServices: number;
+    originalUser: any; // Added to pass full user object
 }
 
 interface Props {
     onBack: () => void;
+    onClientSelect: (client: any) => void; // Added
 }
 
-const ClientsList: React.FC<Props> = ({ onBack }) => {
+const ClientsList: React.FC<Props> = ({ onBack, onClientSelect }) => {
     const [clients, setClients] = useState<ClientData[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -33,11 +35,10 @@ const ClientsList: React.FC<Props> = ({ onBack }) => {
                 const clientMap = new Map<string, ClientData>();
 
                 orders.forEach(order => {
-                    // Consider only completed orders for "Served Clients" list? 
-                    // Or all clients ever interacted with? Usually "Atendidos" implies completed services.
-                    if (order.status === 'completed' && order.client) {
+                    // Consider only completed orders or all
+                    if (order.client) {
                         const existing = clientMap.get(order.client.id);
-                        const orderDate = order.created_at; // simplified, ideally execution_end
+                        const orderDate = order.created_at;
 
                         if (existing) {
                             existing.totalServices += 1;
@@ -52,7 +53,8 @@ const ClientsList: React.FC<Props> = ({ onBack }) => {
                                 email: order.client.email,
                                 phone: order.client.phone,
                                 lastServiceDate: orderDate,
-                                totalServices: 1
+                                totalServices: 1,
+                                originalUser: order.client // Store full object
                             });
                         }
                     }
@@ -124,7 +126,11 @@ const ClientsList: React.FC<Props> = ({ onBack }) => {
                 ) : (
                     <div className="grid gap-4">
                         {filteredClients.map(client => (
-                            <div key={client.id} className="bg-bg-secondary border border-border-subtle rounded-2xl p-4 flex items-center gap-4 hover:border-accent-primary/30 transition-colors group">
+                            <div
+                                key={client.id}
+                                onClick={() => onClientSelect(client.originalUser)}
+                                className="bg-bg-secondary border border-border-subtle rounded-2xl p-4 flex items-center gap-4 hover:border-accent-primary/30 transition-colors group cursor-pointer active:scale-[0.98]"
+                            >
                                 <img
                                     src={resolveUserAvatar(client)}
                                     alt={client.name}

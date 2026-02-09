@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { subscribeToOrderUpdates } from '../services/ordersService';
+import { WhatsAppIcon } from '../components/ui/WhatsAppIcon';
 
 // --- Shared Components (Copied from Tracking.tsx for consistency) ---
 const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, variant = 'success' }: any) => {
@@ -98,6 +99,8 @@ interface OrderDetailProps {
     onConfirmCompletion?: () => void;
     onPay?: (order: any) => void;
     onConfirmStart?: () => void;
+    viewingAs?: 'client' | 'provider'; // Added
+    onViewProfile?: (user: any) => void; // Added
 }
 
 const OrderDetail: React.FC<OrderDetailProps> = ({
@@ -107,7 +110,9 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
     onSupport,
     onRate,
     onConfirmCompletion,
-    onPay
+    onPay,
+    viewingAs = 'client', // Default to client view
+    onViewProfile
 }) => {
     const [order, setOrder] = useState(initialOrder);
 
@@ -166,9 +171,16 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
     };
 
     const currentStep = getStatusStep(order.status);
-    const providerName = resolveUserName(order.provider);
-    const clientName = resolveUserName(order.client);
-    const counterpartAvatar = resolveUserAvatar(order.provider?.name ? order.provider : order.client);
+
+    // Determine Counterpart based on viewingAs
+    const isProviderView = viewingAs === 'provider';
+    // If I am provider, counterpart is client. If I am client, counterpart is provider.
+    // Note: order.provider might be the object, order.client user object.
+    const counterpartUser = isProviderView ? order.client : order.provider;
+    const counterpartName = resolveUserName(counterpartUser);
+    const counterpartAvatar = resolveUserAvatar(counterpartUser);
+    const counterpartLabel = isProviderView ? 'Cliente' : 'Profissional';
+    const counterpartPhone = counterpartUser?.phone || (isProviderView ? order.client?.phone : order.provider?.phone);
 
     return (
         <div className="screen-container pb-6 bg-app-bg transition-colors">
@@ -359,29 +371,32 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                 <Card className="p-6">
                     <h3 className="font-semibold text-black dark:text-white mb-4 flex items-center gap-2">
                         <User size={18} className="text-black" />
-                        {order.provider?.name ? 'Profissional' : 'Cliente'}
+                        {counterpartLabel}
                     </h3>
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                        <div
+                            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => onViewProfile && onViewProfile(counterpartUser)}
+                        >
                             <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden border">
                                 <img src={counterpartAvatar} className="w-full h-full object-cover" />
                             </div>
                             <div>
                                 <p className="font-bold text-black dark:text-white text-sm">
-                                    {order.provider?.name ? providerName : clientName}
+                                    {counterpartName}
                                 </p>
                                 <p className="text-xs text-neutral-500">
-                                    Talent Connect
+                                    Ver perfil completo
                                 </p>
                             </div>
                         </div>
 
                         <div className="flex gap-2">
                             <button
-                                onClick={() => window.open(`https://wa.me/55${(order.provider?.phone || order.client?.phone || '').replace(/\D/g, '')}?text=Olá,%20estou%20entrando%20em%20contato%20sobre%20o%20pedido%20${order.id.slice(0, 8)}`, '_blank')}
+                                onClick={() => window.open(`https://wa.me/55${(counterpartPhone || '').replace(/\D/g, '')}?text=Olá,%20estou%20entrando%20em%20contato%20sobre%20o%20pedido%20${order.id.slice(0, 8)}`, '_blank')}
                                 className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white flex items-center justify-center interactive"
                             >
-                                <MessageCircle size={18} />
+                                <WhatsAppIcon size={18} />
                             </button>
                             <button
                                 className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white flex items-center justify-center interactive"

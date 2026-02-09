@@ -13,7 +13,8 @@ import {
     Star,
     Activity,
     ArrowUpRight,
-    LifeBuoy
+    LifeBuoy,
+    Verified
 } from 'lucide-react';
 import { signOut } from '../services/authService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
@@ -185,6 +186,41 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                             <p className="meta !text-[7px] !lowercase text-text-tertiary font-normal">{stat.sub}</p>
                         </div>
                     ))}
+                </div>
+
+                {/* Verification Status Banner */}
+                <div className="mb-8">
+                    {(() => {
+                        const status = user?.user_metadata?.documents_status || 'pending';
+                        const isVerified = status === 'approved';
+
+                        return (
+                            <div className={`p-4 rounded-2xl border ${isVerified
+                                ? 'bg-success/5 border-success/20'
+                                : 'bg-warning/5 border-warning/20'} flex items-center justify-between group interactive`}
+                                onClick={() => {
+                                    if (!isVerified) alert('Fluxo de verificação de documentos será aberto aqui.');
+                                }}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isVerified ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                                        {isVerified ? <Verified size={20} /> : <Shield size={20} />}
+                                    </div>
+                                    <div>
+                                        <h3 className={`font-bold text-sm ${isVerified ? 'text-success' : 'text-warning'}`}>
+                                            {isVerified ? 'Identidade Verificada' : 'Verificação Necessária'}
+                                        </h3>
+                                        <p className="text-[10px] text-text-tertiary max-w-[200px] leading-tight mt-0.5">
+                                            {isVerified
+                                                ? 'Sua conta apresenta alta credibilidade.'
+                                                : 'Envie seus documentos para desbloquear recursos.'}
+                                        </p>
+                                    </div>
+                                </div>
+                                {!isVerified && <ChevronRight size={18} className="text-warning/50" />}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Action Menu (Security & Preferences) */}

@@ -12,6 +12,7 @@ import ProviderDashboard from './screens/ProviderDashboard';
 import ServiceListing from './screens/ServiceListing';
 import ServiceDetails from './screens/ServiceDetails';
 import ProviderListing from './screens/ProviderListing';
+import ClientProfile from './screens/ClientProfile';
 import ProviderProfile from './screens/ProviderProfile';
 import CreateOrder from './screens/CreateOrder';
 import OrderConfirmation from './screens/OrderConfirmation';
@@ -60,6 +61,8 @@ const App: React.FC = () => {
     setSelectedService,
     selectedProvider,
     setSelectedProvider,
+    selectedClient,
+    setSelectedClient,
     selectedOrder,
     setSelectedOrder,
     orderData,
@@ -250,6 +253,12 @@ const App: React.FC = () => {
           }}
           onMessage={() => alert('Mensagem em desenvolvimento')}
         />;
+      case 'CLIENT_PROFILE':
+        return <ClientProfile
+          client={selectedClient}
+          onBack={goBack}
+          onMessage={() => alert('Mensagem em desenvolvimento')}
+        />;
       case 'CREATE_ORDER':
         return <CreateOrder
           service={selectedService}
@@ -294,6 +303,17 @@ const App: React.FC = () => {
           onBack={goBack}
           onContact={() => alert('Chat em desenvolvimento')}
           onSupport={() => alert('Suporte em desenvolvimento')}
+          viewingAs={(user?.role || 'client').toLowerCase() as 'client' | 'provider'}
+          onViewProfile={(profileUser) => {
+            const role = (user?.role || 'client').toLowerCase();
+            if (role === 'client') {
+              setSelectedProvider(profileUser);
+              setView('PROVIDER_PROFILE');
+            } else {
+              setSelectedClient(profileUser);
+              setView('CLIENT_PROFILE');
+            }
+          }}
           onPay={(order) => {
             setSelectedOrder(order);
             setView('PAYMENT');
@@ -457,7 +477,13 @@ const App: React.FC = () => {
       case 'NOTIFICATIONS':
         return <NotificationCenter onBack={goBack} />;
       case 'CLIENTS_LIST':
-        return <ClientsList onBack={goBack} />;
+        return <ClientsList
+          onBack={goBack}
+          onClientSelect={(client) => {
+            setSelectedClient(client);
+            setView('CLIENT_PROFILE');
+          }}
+        />;
 
       default:
         return <Login
