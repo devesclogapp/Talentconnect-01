@@ -35,6 +35,14 @@ import ServiceExecution from './screens/ServiceExecution';
 import EditProfile from './screens/EditProfile';
 import ClientsList from './screens/ClientsList';
 import DocumentSubmission from './screens/DocumentSubmission';
+import AdminLayout from './components/AdminLayout';
+import AdminDashboard from './screens/AdminDashboard';
+import UserManagement from './screens/UserManagement';
+import AuditLogs from './screens/AuditLogs';
+import AdminOrders from './screens/AdminOrders';
+import AdminFinance from './screens/AdminFinance';
+import AdminDisputes from './screens/AdminDisputes';
+import AdminServices from './screens/AdminServices';
 
 import { useAppStore } from './store';
 import {
@@ -45,7 +53,8 @@ import {
   ReceiptText,
   MessageSquare,
   Bell,
-  Plus
+  Plus,
+  Shield
 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -104,7 +113,12 @@ const App: React.FC = () => {
           } as any);
 
           if (view === 'SPLASH') {
-            setView(role.toLowerCase() === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            const targetView = role.toLowerCase() === 'client'
+              ? 'CLIENT_DASHBOARD'
+              : role.toLowerCase() === 'operator'
+                ? 'ADMIN_DASHBOARD'
+                : 'PROVIDER_DASHBOARD';
+            setView(targetView);
             resetHistory();
           }
         } else if (view === 'SPLASH') {
@@ -135,7 +149,12 @@ const App: React.FC = () => {
         syncUserSession(session.user);
 
         if (['LOGIN', 'REGISTER', 'ONBOARDING', 'SPLASH'].includes(view)) {
-          setView(role.toLowerCase() === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+          const targetView = role.toLowerCase() === 'client'
+            ? 'CLIENT_DASHBOARD'
+            : role.toLowerCase() === 'operator'
+              ? 'ADMIN_DASHBOARD'
+              : 'PROVIDER_DASHBOARD';
+          setView(targetView);
           resetHistory();
         }
       } else if (event === 'SIGNED_OUT') {
@@ -491,11 +510,37 @@ const App: React.FC = () => {
           }}
         />;
 
+      case 'ADMIN_DASHBOARD':
+      case 'ADMIN_USERS':
+      case 'ADMIN_SERVICES':
+      case 'ADMIN_ORDERS':
+      case 'ADMIN_FINANCE':
+      case 'ADMIN_DISPUTES':
+      case 'ADMIN_AUDIT':
+        return (
+          <AdminLayout activeView={view} onNavigate={setView}>
+            {view === 'ADMIN_DASHBOARD' && <AdminDashboard />}
+            {view === 'ADMIN_USERS' && <UserManagement />}
+            {view === 'ADMIN_AUDIT' && <AuditLogs />}
+            {view === 'ADMIN_ORDERS' && <AdminOrders />}
+            {view === 'ADMIN_FINANCE' && <AdminFinance />}
+            {view === 'ADMIN_DISPUTES' && <AdminDisputes />}
+            {view === 'ADMIN_SERVICES' && <AdminServices />}
+            {!['ADMIN_DASHBOARD', 'ADMIN_USERS', 'ADMIN_AUDIT', 'ADMIN_ORDERS', 'ADMIN_FINANCE', 'ADMIN_DISPUTES', 'ADMIN_SERVICES'].includes(view) && (
+              <div className="flex flex-col items-center justify-center py-20 opacity-50">
+                <Shield size={64} strokeWidth={1} />
+                <h2 className="heading-md mt-4">Módulo em Desenvolvimento</h2>
+                <p className="text-sm">Esta funcionalidade está sendo preparada para o sistema operacional.</p>
+              </div>
+            )}
+          </AdminLayout>
+        );
+
       default:
         return <Login
           onLoginSuccess={(user) => {
             const role = user.user_metadata?.role || 'client';
-            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : role.toUpperCase() === 'OPERATOR' ? 'ADMIN_DASHBOARD' : 'PROVIDER_DASHBOARD');
           }}
           onRegister={() => setView('REGISTER')}
           onForgotPassword={() => setView('FORGOT_PASSWORD')}
@@ -513,6 +558,8 @@ const App: React.FC = () => {
     'NOTIFICATIONS'
   ].includes(view) || view.startsWith('RECEIVED_ORDERS');
 
+  const isAdminView = view.startsWith('ADMIN_');
+
   const userRole = (user?.role || 'client').toLowerCase();
 
   return (
@@ -521,11 +568,11 @@ const App: React.FC = () => {
         <SplashScreen />
       ) : (
         <>
-          <div className={`animate-fade-in ${showBottomNav ? 'pb-24' : ''}`}>
+          <div className={`animate-fade-in ${(showBottomNav && !isAdminView) ? 'pb-24' : ''}`}>
             {renderView()}
           </div>
 
-          {showBottomNav && (
+          {(showBottomNav && !isAdminView) && (
             <nav className="bottom-nav">
               <button
                 onClick={() => setView(userRole === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')}

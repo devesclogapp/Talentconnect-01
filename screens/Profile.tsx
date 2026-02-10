@@ -108,7 +108,7 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                 <div className="absolute top-[-50px] left-[-50px] w-64 h-64 bg-accent-primary/5 rounded-full blur-[80px]"></div>
                 <div className="absolute bottom-[-30px] right-[-30px] w-80 h-80 bg-blue-500/5 rounded-full blur-[100px]"></div>
 
-                <div className="absolute bottom-[-50px] left-8 transform translate-y-[-50%] flex flex-col items-center">
+                <div className="absolute bottom-[-50px] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
                     <div className="relative group">
                         <div className="w-32 h-32 rounded-full border-[6px] border-bg-primary overflow-hidden shadow-2xl relative group bg-bg-tertiary">
                             <AvatarUpload

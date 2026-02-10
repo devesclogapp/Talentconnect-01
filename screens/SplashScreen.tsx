@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import { createAdminUser } from '../utils/createAdmin';
 
 const SplashScreen: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         setIsVisible(true);
+        // Garantir que o usuário admin de teste exista no ambiente local
+        createAdminUser().then(res => {
+            if (res.success) {
+                console.log('✅ Admin de teste pronto para uso.');
+            }
+        });
     }, []);
 
     return (
