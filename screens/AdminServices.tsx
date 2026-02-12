@@ -33,7 +33,7 @@ const AdminServices: React.FC = () => {
                 .from('services')
                 .select(`
                     *,
-                    provider:provider_id (id, email, user_metadata)
+                    provider:users!provider_id (id, email, user_metadata)
                 `)
                 .order('created_at', { ascending: false });
 

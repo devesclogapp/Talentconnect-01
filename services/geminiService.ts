@@ -17,7 +17,7 @@ export const getAISupport = async (userPrompt: string) => {
   try {
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: userPrompt,
       config: {
         systemInstruction: "Você é um assistente de IA prestativo da Justlife, uma plataforma de serviços domésticos. Você ajuda os usuários a encontrar serviços, explica procedimentos de limpeza ou oferece dicas de manutenção doméstica. Mantenha as respostas concisas e amigáveis em português do Brasil."

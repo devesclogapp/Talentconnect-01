@@ -25,9 +25,46 @@ export interface User extends DbUser {
   provider_profile?: DbProviderProfile;
 }
 
+// --- DISPUTE SYSTEM ---
+
+export type DisputeStatus = 'open' | 'waiting_other_party' | 'in_review' | 'resolved' | 'closed';
+export type DisputeReason = 'provider_no_show' | 'client_no_show' | 'service_not_as_agreed' | 'service_not_completed' | 'timing_issue' | 'other';
+export type ResolutionDecision = 'release_to_provider' | 'refund_to_client' | 'split_payment' | 'close_no_action';
+
+export interface Dispute {
+  id: string;
+  order_id: string;
+  opened_by_role: 'client' | 'provider';
+  opened_by_user_id: string;
+  reason_code: DisputeReason;
+  description: string;
+  status: DisputeStatus;
+  created_at: string;
+  resolved_at?: string;
+  order?: Order;
+}
+
+export interface DisputeMessage {
+  id: string;
+  dispute_id: string;
+  sender_role: 'client' | 'provider' | 'operator';
+  sender_user_id: string;
+  message: string;
+  created_at: string;
+}
+
+export interface DisputeResolution {
+  id: string;
+  dispute_id: string;
+  operator_user_id: string;
+  decision_code: ResolutionDecision;
+  decision_notes: string;
+  created_at: string;
+}
+
 // Keep legacy for backward compatibility during transition if needed
 export type ServiceType = 'UNIT' | 'HOUR';
-export type BookingStatus = DbOrder['status'];
+export type BookingStatus = DbOrder['status'] | 'disputed';
 
 export interface AuditLog {
   id: string;

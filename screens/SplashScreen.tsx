@@ -6,12 +6,17 @@ const SplashScreen: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
+        console.log("🌊 SplashScreen: Montando componente...");
         setIsVisible(true);
         // Garantir que o usuário admin de teste exista no ambiente local
         createAdminUser().then(res => {
             if (res.success) {
-                console.log('✅ Admin de teste pronto para uso.');
+                console.log('✅ SplashScreen: Admin de teste pronto para uso.');
+            } else {
+                console.warn('⚠️ SplashScreen: Falha não crítica ao criar admin:', res.error);
             }
+        }).catch(err => {
+            console.error('❌ SplashScreen: Erro na criação do admin:', err);
         });
     }, []);
 

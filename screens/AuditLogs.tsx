@@ -34,15 +34,8 @@ const AuditLogs: React.FC = () => {
                 .limit(100);
 
             if (error) {
-                // Return mock data if table doesn't exist
-                const mockLogs = [
-                    { id: '1', event: 'USER_LOGIN', actor: 'admin@talent.com', target: 'AUTH', status: 'success', description: 'Login administrativo detectado.', created_at: new Date().toISOString() },
-                    { id: '2', event: 'DOCUMENT_UPLOAD', actor: 'provider@test.com', target: 'KYC', status: 'pending', description: 'Documentos enviados para análise.', created_at: new Date(Date.now() - 3600000).toISOString() },
-                    { id: '3', event: 'PAYMENT_ESCROW', actor: 'client@test.com', target: 'ORDER_#492', status: 'success', description: 'Pagamento de R$ 150,00 retido.', created_at: new Date(Date.now() - 7200000).toISOString() },
-                    { id: '4', event: 'SERVICE_CREATED', actor: 'provider2@test.com', target: 'SERVICE_FIX', status: 'info', description: 'Novo serviço publicado.', created_at: new Date(Date.now() - 86400000).toISOString() },
-                    { id: '5', event: 'DISPUTE_OPENED', actor: 'client2@test.com', target: 'ORDER_#312', status: 'error', description: 'Disputa aberta por atraso.', created_at: new Date(Date.now() - 172800000).toISOString() },
-                ];
-                setLogs(mockLogs);
+                console.warn('Audit logs table not found or empty:', error);
+                setLogs([]);
             } else {
                 setLogs(data || []);
             }

@@ -35,6 +35,7 @@ import ServiceExecution from './screens/ServiceExecution';
 import EditProfile from './screens/EditProfile';
 import ClientsList from './screens/ClientsList';
 import DocumentSubmission from './screens/DocumentSubmission';
+import OpenDispute from './screens/OpenDispute';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './screens/AdminDashboard';
 import UserManagement from './screens/UserManagement';
@@ -99,10 +100,24 @@ const App: React.FC = () => {
 
   // Supabase Auth Listener & Initial Check
   useEffect(() => {
+    console.log("🚀 App: Iniciando verificação de autenticação...");
+
+    // Failsafe: Se em 6 segundos nada acontecer, força a saída da Splash
+    const failsafeTimer = setTimeout(() => {
+      if (view === 'SPLASH' && loading) {
+        console.warn("⚠️ App: Failsafe acionado - O check de auth demorou demais. Forçando Onboarding.");
+        setLoading(false);
+        setView('ONBOARDING');
+      }
+    }, 6000);
+
     const checkUser = async () => {
       try {
+        console.log("🔍 App: Buscando usuário atual no Supabase...");
         const currentUser = await getCurrentUser();
+
         if (currentUser) {
+          console.log("✅ App: Usuário encontrado:", currentUser.email);
           const role = currentUser.user_metadata?.role || 'client';
           const name = currentUser.user_metadata?.name || 'Usuário';
 
@@ -118,16 +133,24 @@ const App: React.FC = () => {
               : role.toLowerCase() === 'operator'
                 ? 'ADMIN_DASHBOARD'
                 : 'PROVIDER_DASHBOARD';
+            console.log("👉 App: Redirecionando para:", targetView);
             setView(targetView);
             resetHistory();
           }
-        } else if (view === 'SPLASH') {
-          setTimeout(() => setView('ONBOARDING'), 2500);
+        } else {
+          console.log("ℹ️ App: Nenhum usuário logado.");
+          if (view === 'SPLASH') {
+            setTimeout(() => {
+              console.log("👉 App: Indo para ONBOARDING via timeout normal.");
+              setView('ONBOARDING');
+            }, 2500);
+          }
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        console.error("❌ App: Erro fatal no check de auth:", error);
         if (view === 'SPLASH') setView('ONBOARDING');
       } finally {
+        clearTimeout(failsafeTimer);
         setLoading(false);
       }
     };
@@ -136,6 +159,7 @@ const App: React.FC = () => {
 
     // Listener para mudanças de estado (Login/Logout/SignUp)
     const { data: { subscription } } = onAuthStateChange((event, session) => {
+      console.log("🔔 App: Evento de Auth detectado:", event);
       if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
         const role = session.user.user_metadata?.role || 'client';
         const name = session.user.user_metadata?.name || 'Usuário';
@@ -163,7 +187,10 @@ const App: React.FC = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(failsafeTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const navigate = (newView: string) => setView(newView);
@@ -322,7 +349,7 @@ const App: React.FC = () => {
           order={selectedOrder}
           onBack={goBack}
           onContact={() => alert('Chat em desenvolvimento')}
-          onSupport={() => alert('Suporte em desenvolvimento')}
+          onSupport={() => setView('OPEN_DISPUTE')}
           viewingAs={(user?.role || 'client').toLowerCase() as 'client' | 'provider'}
           onViewProfile={(profileUser) => {
             const role = (user?.role || 'client').toLowerCase();
@@ -350,6 +377,22 @@ const App: React.FC = () => {
             } catch (e) {
               alert('Erro ao confirmar conclusão: ' + e);
             }
+          }}
+        />;
+      case 'OPEN_DISPUTE':
+        return <OpenDispute
+          order={selectedOrder}
+          user={user}
+          onBack={goBack}
+          onSuccess={(dispute) => {
+            console.log("🚀 App: Recebido sinal de sucesso da disputa!", dispute);
+            // Update order status locally
+            if (selectedOrder) {
+              console.log("🚀 App: Atualizando status local do pedido para 'disputed'");
+              setSelectedOrder({ ...selectedOrder, status: 'disputed' });
+            }
+            console.log("🚀 App: Navegando para ORDER_DETAIL...");
+            setView('ORDER_DETAIL');
           }}
         />;
       case 'PROVIDER_RATING':

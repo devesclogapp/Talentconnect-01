@@ -115,17 +115,52 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
     onViewProfile
 }) => {
     const [order, setOrder] = useState(initialOrder);
+    const [dispute, setDispute] = useState<any>(null);
 
     useEffect(() => {
         setOrder(initialOrder);
         if (!initialOrder?.id) return;
 
+        let disputeSub: any = null;
+
+        const setupDisputeSubscription = async (disputeId: string) => {
+            const { subscribeToDisputeUpdates } = await import('../services/disputesService');
+            disputeSub = subscribeToDisputeUpdates(disputeId, (updatedDispute) => {
+                setDispute(updatedDispute);
+            });
+        };
+
+        // Buscar disputa se estiver em status de disputa
+        if (initialOrder.status === 'disputed') {
+            const fetchDisputeData = async () => {
+                try {
+                    const { getDisputeByOrderId } = await import('../services/disputesService');
+                    const data = await getDisputeByOrderId(initialOrder.id);
+                    setDispute(data);
+                    if (data?.id) setupDisputeSubscription(data.id);
+                } catch (err) {
+                    console.error("Erro ao buscar detalhes da disputa:", err);
+                }
+            };
+            fetchDisputeData();
+        }
+
         const subscription = subscribeToOrderUpdates(initialOrder.id, (updatedOrder) => {
             setOrder(updatedOrder);
+            // Se o status mudou para disputed durante a visualização
+            if (updatedOrder.status === 'disputed' && !dispute) {
+                import('../services/disputesService').then(m => {
+                    m.getDisputeByOrderId(updatedOrder.id).then(data => {
+                        setDispute(data);
+                        if (data?.id) setupDisputeSubscription(data.id);
+                    });
+                });
+            }
         });
 
         return () => {
             subscription.unsubscribe();
+            if (disputeSub) disputeSub.unsubscribe();
         };
     }, [initialOrder]);
 
@@ -139,6 +174,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
             case 'in_execution': return { label: 'Em Execução', variant: 'success' as const, icon: Clock };
             case 'sent': return { label: 'Aguardando Resposta', variant: 'secondary' as const, icon: AlertCircle };
             case 'accepted': return { label: 'Aguardando Pagamento', variant: 'warning' as const, icon: Clock };
+            case 'disputed': return { label: 'Em Disputa', variant: 'error' as const, icon: ShieldCheck };
             case 'rejected': case 'cancelled': return { label: 'Cancelado', variant: 'error' as const, icon: XCircle };
             default: return { label: 'Em Andamento', variant: 'warning' as const, icon: Clock };
         }
@@ -166,6 +202,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
             case 'awaiting_start_confirmation': return 4;
             case 'in_execution': case 'awaiting_finish_confirmation': return 5;
             case 'completed': return 6;
+            case 'disputed': return -1; // Special value for dispute
             default: return 1;
         }
     };
@@ -272,7 +309,31 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                 <Card className="p-6">
                     <h3 className="font-semibold text-black dark:text-white mb-6">Status do Pedido</h3>
 
-                    <div className="space-y-0 relative">
+                    {order.status === 'disputed' && (
+                        <div className={`mb-8 p-4 border rounded-2xl flex gap-3 animate-in fade-in slide-in-from-top-2 ${dispute?.status === 'in_review'
+                            ? 'bg-feedback-info/5 border-feedback-info/20'
+                            : 'bg-feedback-error/5 border-feedback-error/20'
+                            }`}>
+                            {dispute?.status === 'in_review' ? (
+                                <Clock className="text-feedback-info shrink-0" size={20} />
+                            ) : (
+                                <ShieldCheck className="text-feedback-error shrink-0" size={20} />
+                            )}
+                            <div>
+                                <p className={`text-xs font-bold mb-1 ${dispute?.status === 'in_review' ? 'text-feedback-info' : 'text-feedback-error'
+                                    }`}>
+                                    {dispute?.status === 'in_review' ? 'Mediação em Andamento' : 'Negociação Suspensa por Disputa'}
+                                </p>
+                                <p className="text-[10px] text-neutral-500 font-normal leading-relaxed">
+                                    {dispute?.status === 'in_review'
+                                        ? 'Um de nossos mediadores já está analisando o seu caso e tomará uma decisão em breve. Fique atento às notificações.'
+                                        : 'Uma disputa foi aberta para este pedido. Nossa equipe de mediação analisará os detalhes para resolver o caso da forma mais justa.'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className={`space-y-0 relative ${order.status === 'disputed' ? 'opacity-40 grayscale-[0.5]' : ''}`}>
                         <ProgressStep
                             title="Pedido Enviado"
                             desc="Aguardando confirmação do Profissional"
@@ -440,6 +501,34 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                         >
                             Confirmar Conclusão
                         </Button>
+                    )}
+
+                    {order.status === 'disputed' && (
+                        <div className="w-full py-6 px-4 bg-neutral-50 dark:bg-neutral-900 rounded-[20px] border border-neutral-100 dark:border-neutral-800 text-center">
+                            {dispute?.status === 'in_review' ? (
+                                <Clock className="mx-auto text-feedback-info mb-2" size={24} />
+                            ) : (
+                                <ShieldCheck className="mx-auto text-feedback-error mb-2" size={24} />
+                            )}
+                            <p className="text-sm font-bold text-black dark:text-white">
+                                {dispute?.status === 'in_review' ? 'Mediação em Andamento' : 'Aguardando Mediação'}
+                            </p>
+                            <p className="text-[10px] text-neutral-500 mt-1 px-4">
+                                {dispute?.status === 'in_review'
+                                    ? 'A equipe de suporte está revisando os detalhes e logs para uma decisão justa.'
+                                    : 'Você será notificado assim que houver uma atualização sobre a resolução deste caso.'}
+                            </p>
+                        </div>
+                    )}
+
+                    {['accepted', 'awaiting_details', 'awaiting_payment', 'paid_escrow_held', 'awaiting_start_confirmation', 'in_execution', 'awaiting_finish_confirmation', 'completed'].includes(order.status) && (
+                        <button
+                            onClick={() => onSupport()}
+                            className="w-full py-4 text-app-muted text-xs font-normal flex items-center justify-center gap-2 rounded-[20px] transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                        >
+                            <AlertCircle size={16} />
+                            Relatar Problema / Abrir Disputa
+                        </button>
                     )}
 
                     {['sent', 'accepted', 'awaiting_payment'].includes(order.status) && (

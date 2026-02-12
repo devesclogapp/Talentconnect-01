@@ -1,3 +1,4 @@
+console.log("🏁 index.tsx: Ponto de entrada carregado. Iniciando React...");
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
