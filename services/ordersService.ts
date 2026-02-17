@@ -3,6 +3,27 @@ import type { Database } from '../types/database.types'
 
 import { Order, Service } from '../types'
 
+const logWorkflowAction = async (action: string, orderId: string, details: string, metadata: any = {}) => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        await (supabase as any).from('audit_logs').insert({
+            action,
+            entity_type: 'orders',
+            entity_id: orderId,
+            actor_user_id: user?.id,
+            payload_json: {
+                details,
+                ...metadata,
+                ua: typeof navigator !== 'undefined' ? navigator.userAgent : 'Server',
+                origin: 'Talent Connect App'
+            }
+        });
+    } catch (err) {
+        console.error("Workflow Audit Failure:", err);
+    }
+};
+
 type OrderInsert = Database['public']['Tables']['orders']['Insert']
 type OrderUpdate = Database['public']['Tables']['orders']['Update']
 
@@ -35,6 +56,10 @@ export const createOrder = async (orderData: Omit<OrderInsert, 'client_id'> & {
         .single()
 
     if (error) throw error
+
+    // Log de Auditoria
+    await logWorkflowAction('ORDER_CREATED', data.id, `Pedido criado pelo cliente para o serviço: ${orderData.service_title_snapshot || 'N/A'}`, { amount: orderData.total_amount });
+
     return data as Order
 }
 
@@ -121,6 +146,10 @@ export const acceptOrder = async (orderId: string) => {
         .single()
 
     if (error) throw error
+
+    // Log de Auditoria
+    await logWorkflowAction('ORDER_ACCEPTED', orderId, 'O prestador aceitou o pedido.');
+
     return data as Order
 }
 
@@ -137,6 +166,10 @@ export const rejectOrder = async (orderId: string) => {
         .single()
 
     if (error) throw error
+
+    // Log de Auditoria
+    await logWorkflowAction('ORDER_REJECTED', orderId, 'O prestador recusou o pedido.');
+
     return data as Order
 }
 
@@ -159,6 +192,10 @@ export const sendCounterOffer = async (orderId: string, newAmount: number) => {
         .single()
 
     if (error) throw error
+
+    // Log de Auditoria
+    await logWorkflowAction('ORDER_COUNTER_OFFER', orderId, `O prestador enviou uma contraproposta de R$ ${newAmount}.`, { newAmount });
+
     return data as Order
 }
 
@@ -186,6 +223,10 @@ export const updateOrderDetails = async (
         .single()
 
     if (error) throw error
+
+    // Log de Auditoria
+    await logWorkflowAction('ORDER_DETAILS_UPDATED', orderId, 'O cliente atualizou agendamento e local.', { details });
+
     return data as Order
 }
 
@@ -246,6 +287,9 @@ export const markExecutionStart = async (orderId: string) => {
         .update({ status: 'awaiting_start_confirmation' })
         .eq('id', orderId)
 
+    // Log de Auditoria
+    await logWorkflowAction('EXECUTION_STARTED_MARK', orderId, 'O prestador sinalizou o início do serviço.');
+
     return data
 }
 
@@ -267,6 +311,9 @@ export const confirmExecutionStart = async (orderId: string) => {
         .from('orders') as any)
         .update({ status: 'in_execution' })
         .eq('id', orderId)
+
+    // Log de Auditoria
+    await logWorkflowAction('EXECUTION_STARTED_CONFIRM', orderId, 'O cliente confirmou a presença do prestador.');
 
     return data
 }
@@ -293,6 +340,9 @@ export const markExecutionFinish = async (orderId: string) => {
         .update({ status: 'awaiting_finish_confirmation' })
         .eq('id', orderId)
 
+    // Log de Auditoria
+    await logWorkflowAction('EXECUTION_FINISHED_MARK', orderId, 'O prestador sinalizou a conclusão do serviço.');
+
     return data
 }
 
@@ -316,6 +366,9 @@ export const confirmExecutionFinish = async (orderId: string) => {
         .from('orders') as any)
         .update({ status: 'completed' })
         .eq('id', orderId);
+
+    // Log de Auditoria
+    await logWorkflowAction('EXECUTION_FINISHED_CONFIRM', orderId, 'O cliente confirmou a conclusão do serviço. Pedido finalizado.');
 
     return data
 }
@@ -346,6 +399,9 @@ export const openDispute = async (
         .from('orders') as any)
         .update({ status: 'disputed' })
         .eq('id', orderId)
+
+    // Log de Auditoria
+    await logWorkflowAction('DISPUTE_OPENED', orderId, `Disputa aberta pelo ${openedBy === 'client' ? 'cliente' : 'prestador'}. Motivo: ${reason}`, { reason, openedBy });
 
     return data
 }

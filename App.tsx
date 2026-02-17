@@ -44,6 +44,7 @@ import AdminOrders from './screens/AdminOrders';
 import AdminFinance from './screens/AdminFinance';
 import AdminDisputes from './screens/AdminDisputes';
 import AdminServices from './screens/AdminServices';
+import AdminLogin from './screens/AdminLogin';
 
 import { useAppStore } from './store';
 import {
@@ -173,9 +174,10 @@ const App: React.FC = () => {
         syncUserSession(session.user);
 
         if (['LOGIN', 'REGISTER', 'ONBOARDING', 'SPLASH'].includes(view)) {
-          const targetView = role.toLowerCase() === 'client'
+          const lowerRole = role.toLowerCase();
+          const targetView = lowerRole === 'client'
             ? 'CLIENT_DASHBOARD'
-            : role.toLowerCase() === 'operator'
+            : lowerRole === 'operator'
               ? 'ADMIN_DASHBOARD'
               : 'PROVIDER_DASHBOARD';
           setView(targetView);
@@ -225,7 +227,13 @@ const App: React.FC = () => {
               name: name
             } as any);
 
-            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            setView(
+              role.toUpperCase() === 'CLIENT'
+                ? 'CLIENT_DASHBOARD'
+                : role.toUpperCase() === 'OPERATOR'
+                  ? 'ADMIN_DASHBOARD'
+                  : 'PROVIDER_DASHBOARD'
+            );
             resetHistory();
           }}
           onRegister={() => setView('REGISTER')}
@@ -235,9 +243,27 @@ const App: React.FC = () => {
         return <Register
           onBack={() => setView('LOGIN')}
           onRegisterSuccess={(role) => {
-            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            const targetView = role.toUpperCase() === 'CLIENT'
+              ? 'CLIENT_DASHBOARD'
+              : role.toUpperCase() === 'OPERATOR'
+                ? 'ADMIN_DASHBOARD'
+                : 'PROVIDER_DASHBOARD';
+            setView(targetView);
             resetHistory();
           }}
+        />;
+      case 'ADMIN_LOGIN':
+        return <AdminLogin
+          onLoginSuccess={(user) => {
+            setUser({
+              ...user,
+              role: 'OPERATOR',
+              name: user.user_metadata?.name || 'Operador'
+            } as any);
+            setView('ADMIN_DASHBOARD');
+            resetHistory();
+          }}
+          onNavigate={navigate}
         />;
       case 'FORGOT_PASSWORD':
         return <ForgotPassword onBack={() => setView('LOGIN')} />;

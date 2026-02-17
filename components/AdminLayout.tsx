@@ -29,13 +29,13 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
     const [isSidebarOpen, setSidebarOpen] = React.useState(true);
 
     const menuItems = [
-        { id: 'ADMIN_DASHBOARD', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-        { id: 'ADMIN_USERS', label: 'Usuários', icon: <Users size={20} /> },
-        { id: 'ADMIN_SERVICES', label: 'Serviços', icon: <Briefcase size={20} /> },
-        { id: 'ADMIN_ORDERS', label: 'Pedidos', icon: <ReceiptText size={20} /> },
-        { id: 'ADMIN_FINANCE', label: 'Financeiro', icon: <History size={20} /> },
-        { id: 'ADMIN_DISPUTES', label: 'Disputas', icon: <AlertCircle size={20} /> },
-        { id: 'ADMIN_AUDIT', label: 'Auditoria', icon: <ShieldCheck size={20} /> },
+        { id: 'ADMIN_DASHBOARD', label: 'Painel Geral', icon: <LayoutDashboard size={20} /> },
+        { id: 'ADMIN_USERS', label: 'Gestão de Usuários', icon: <Users size={20} /> },
+        { id: 'ADMIN_SERVICES', label: 'Catálogo de Serviços', icon: <Briefcase size={20} /> },
+        { id: 'ADMIN_ORDERS', label: 'Fluxo de Pedidos', icon: <ReceiptText size={20} /> },
+        { id: 'ADMIN_FINANCE', label: 'Gestão Financeira', icon: <History size={20} /> },
+        { id: 'ADMIN_DISPUTES', label: 'Fila de Disputas', icon: <AlertCircle size={20} /> },
+        { id: 'ADMIN_AUDIT', label: 'Logs de Auditoria', icon: <ShieldCheck size={20} /> },
     ];
 
     return (

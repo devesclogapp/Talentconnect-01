@@ -23,9 +23,46 @@ import {
     FileText,
     AlertCircle,
     Clock,
-    Gavel
+    Gavel,
+    MoreVertical,
+    Activity,
+    AlertTriangle,
+    ShieldAlert,
+    Target,
+    Zap,
+    Scale,
+    ShieldCheck,
+    ArrowRightCircle,
+    ExternalLink,
+    Lock
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
+
+// --- Helpers de Governança ---
+const logAdminAction = async (action: string, entityType: string, entityId: string, details: string, reason: string) => {
+    try {
+        await (supabase as any).from('audit_logs').insert({
+            action,
+            entity_type: entityType,
+            entity_id: entityId,
+            details,
+            reason,
+            timestamp: new Date().toISOString(),
+            origin: 'User Governance'
+        });
+    } catch (err) {
+        console.error("Audit Log Failure:", err);
+    }
+};
+
+const calculateUserScore = (stats: any) => {
+    let score = 5;
+    if (stats.disputes > 0) score += (stats.disputes * 15);
+    if (stats.cancellationRate > 10) score += 20;
+    if (stats.negativeRatings > 0) score += (stats.negativeRatings * 10);
+    if (stats.frequentDataChanges) score += 10;
+    return Math.min(score, 100);
+};
 
 const UserManagement: React.FC = () => {
     const [users, setUsers] = useState<any[]>([]);
@@ -35,7 +72,25 @@ const UserManagement: React.FC = () => {
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [activeTab, setActiveTab] = useState('summary');
-    const [userStats, setUserStats] = useState({ orders: 0, disputes: 0, revenue: 0 });
+    const [userStats, setUserStats] = useState({
+        orders: 0,
+        disputes: 0,
+        revenue: 0,
+        cancellationRate: 0,
+        negativeRatings: 0,
+        activePenalties: 0,
+        refunds: 0
+    });
+    const [actionModal, setActionModal] = useState<{ open: boolean, type: string, user: any } | null>(null);
+    const [actionReason, setActionReason] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    const [filters, setFilters] = useState({
+        score: 'all',
+        kyc: 'all',
+        dispute: 'all',
+        penalty: 'all'
+    });
 
     useEffect(() => {
         fetchUsers();
@@ -44,13 +99,50 @@ const UserManagement: React.FC = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // 1. Fetch Users
+            const { data: usersData, error: usersError } = await supabase.from('users').select('*, provider_profiles(*)');
+            if (usersError) throw usersError;
 
-            if (error) throw error;
-            setUsers(data || []);
+            // 2. Fetch Aggregates (Para evitar múltiplas queries por linha, carregamos em lote)
+            const { data: allOrders } = await supabase.from('orders').select('id, client_id, provider_id, status');
+            const { data: allPayments } = await supabase.from('payments').select('order_id, amount_total, escrow_status');
+            const { data: allDisputes } = await supabase.from('disputes').select('order_id');
+
+            const processedUsers = (usersData || []).map(u => {
+                const userOrders = (allOrders as any[] || []).filter(o => o.client_id === u.id || o.provider_id === u.id);
+                const orderIds = userOrders.map(o => o.id);
+
+                const userDisputes = (allDisputes as any[] || []).filter(d => orderIds.includes(d.order_id)).length;
+                const userCancellations = userOrders.filter(o => o.status === 'cancelled').length;
+                const userRevenue = (allPayments as any[] || [])
+                    .filter(p => orderIds.includes(p.order_id) && p.escrow_status === 'released')
+                    .reduce((acc, p) => acc + (p.amount_total || 0), 0);
+
+                const kyc = u.provider_profiles?.[0]?.documents_status || u.kyc_status || 'pending';
+
+                const stats = {
+                    disputes: userDisputes,
+                    cancellationRate: userOrders.length > 0 ? (userCancellations / userOrders.length) * 100 : 0,
+                    negativeRatings: 0, // Fallback até termos ratings reais por usuário
+                    frequentDataChanges: false
+                };
+
+                const score = calculateUserScore(stats);
+
+                return {
+                    ...u,
+                    kyc_status: kyc,
+                    status: u.status || 'active',
+                    risk_score: score,
+                    risk_level: score > 70 ? 'high' : score > 30 ? 'medium' : 'low',
+                    total_orders: userOrders.length,
+                    revenue: userRevenue,
+                    disputes_30d: userDisputes,
+                    cancellation_rate: Math.round(stats.cancellationRate)
+                };
+            }).sort((a, b) => b.risk_score - a.risk_score);
+
+            setUsers(processedUsers);
         } catch (error) {
             console.error('Error fetching users:', error);
         } finally {
@@ -60,46 +152,31 @@ const UserManagement: React.FC = () => {
 
     const fetchUserStats = async (userId: string) => {
         try {
-            // Conta pedidos vinculados (como cliente ou prestador)
-            const { count: orderCount } = await supabase
-                .from('orders')
-                .select('*', { count: 'exact', head: true })
-                .or(`client_id.eq.${userId},provider_id.eq.${userId}`);
-
-            // Conta disputas abertas/envolvidas
-            // Nota: disputas estão vinculadas a pedidos
-            const { data: userOrders } = await supabase
-                .from('orders')
-                .select('id')
-                .or(`client_id.eq.${userId},provider_id.eq.${userId}`);
-
-            const orderIds = (userOrders as any[])?.map(o => o.id) || [];
+            const { count: orderCount } = await supabase.from('orders').select('*', { count: 'exact', head: true }).or(`client_id.eq.${userId},provider_id.eq.${userId}`);
+            const { data: userOrders } = await supabase.from('orders').select('id').or(`client_id.eq.${userId},provider_id.eq.${userId}`);
+            const orderIds = (userOrders || [])?.map(o => o.id);
             let disputeCount = 0;
-            if (orderIds.length > 0) {
-                const { count } = await supabase
-                    .from('disputes')
-                    .select('*', { count: 'exact', head: true })
-                    .in('order_id', orderIds);
+            if (orderIds && orderIds.length > 0) {
+                const { count } = await supabase.from('disputes').select('*', { count: 'exact', head: true }).in('order_id', orderIds);
                 disputeCount = count || 0;
             }
 
-            // Calcula receita (se for prestador) ou gastos (se for cliente)
-            const { data: payments } = await supabase
-                .from('payments')
-                .select('amount_total, provider_amount')
-                .in('order_id', orderIds)
-                .eq('escrow_status', 'released');
-
-            const totalRevenue = (payments as any[])?.reduce((acc, p) => acc + (p.amount_total || 0), 0) || 0;
+            const { data: payments } = await supabase.from('payments').select('*').in('order_id', orderIds || []);
+            const revenue = (payments || []).filter(p => p.escrow_status === 'released').reduce((acc, p) => acc + (p.amount_total || 0), 0);
+            const refunds = (payments || []).filter(p => p.escrow_status === 'refunded').reduce((acc, p) => acc + (p.amount_total || 0), 0);
+            const { count: cancelledCount } = await supabase.from('orders').select('*', { count: 'exact', head: true }).or(`client_id.eq.${userId},provider_id.eq.${userId}`).eq('status', 'cancelled');
 
             setUserStats({
                 orders: orderCount || 0,
                 disputes: disputeCount,
-                revenue: totalRevenue
+                revenue,
+                cancellationRate: orderCount ? (cancelledCount || 0) / orderCount * 100 : 0,
+                negativeRatings: 1,
+                activePenalties: 0,
+                refunds
             });
         } catch (error) {
             console.error('Error fetching user stats:', error);
-            setUserStats({ orders: 0, disputes: 0, revenue: 0 });
         }
     };
 
@@ -109,52 +186,33 @@ const UserManagement: React.FC = () => {
         fetchUserStats(user.id);
     };
 
-    const updateUserStatus = async (userId: string, updates: any) => {
+    const performGlobalAction = async () => {
+        if (!actionModal || !actionReason) return;
+        setIsUpdating(true);
         try {
-            setIsUpdating(true);
-            const { error } = await (supabase as any)
-                .from('users')
-                .update(updates)
-                .eq('id', userId);
+            const { type, user } = actionModal;
+            const updates: any = {};
+            if (type === 'BLOCK') updates.status = 'blocked';
+            if (type === 'SUSPEND') updates.status = 'suspended';
+            if (type === 'ACTIVATE') updates.status = 'active';
+            if (type === 'APPROVE_KYC') updates.kyc_status = 'approved';
+            if (type === 'REJECT_KYC') updates.kyc_status = 'rejected';
 
+            const { error } = await (supabase as any).from('users').update(updates).eq('id', user.id);
             if (error) throw error;
 
-            setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...updates } : u));
-            if (selectedUser?.id === userId) {
-                setSelectedUser({ ...selectedUser, ...updates });
-            }
-            alert('Usuário atualizado com sucesso!');
-        } catch (error: any) {
-            alert('Erro ao atualizar: ' + error.message);
+            await logAdminAction(`GOVERNANCE_${type}`, 'USER', user.id, `Ação de governança: ${type}`, actionReason);
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, ...updates } : u));
+            if (selectedUser?.id === user.id) setSelectedUser({ ...selectedUser, ...updates });
+
+            alert('Ação executada com sucesso.');
+            setActionModal(null);
+            setActionReason('');
+        } catch (err: any) {
+            alert('Erro: ' + err.message);
         } finally {
             setIsUpdating(false);
         }
-    };
-
-    const exportToCSV = () => {
-        const headers = ['ID', 'Nome', 'Email', 'Papel', 'KYC', 'Status', 'Risco', 'Criado em'];
-        const rows = filteredUsers.map(u => [
-            u.id,
-            u.name || u.user_metadata?.name || '',
-            u.email || '',
-            u.role || u.user_metadata?.role || 'client',
-            u.kyc_status || 'pending',
-            u.status || 'active',
-            u.risk_score || 0,
-            u.created_at
-        ]);
-
-        const csvContent = "data:text/csv;charset=utf-8,"
-            + headers.join(",") + "\n"
-            + rows.map(e => e.join(",")).join("\n");
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `users_export_${new Date().toISOString().slice(0, 10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     };
 
     const filteredUsers = users.filter(user => {
@@ -162,250 +220,194 @@ const UserManagement: React.FC = () => {
         const email = (user.email || '').toLowerCase();
         const matchesSearch = email.includes(searchTerm.toLowerCase()) || name.includes(searchTerm.toLowerCase());
         const matchesRole = filterRole === 'all' || (user.role || user.user_metadata?.role || 'client').toLowerCase() === filterRole.toLowerCase();
-        return matchesSearch && matchesRole;
+        const matchesScore = filters.score === 'all' || (filters.score === 'high' && user.risk_score > 70) || (filters.score === 'medium' && user.risk_score > 30 && user.risk_score <= 70) || (filters.score === 'low' && user.risk_score <= 30);
+        const matchesKYC = filters.kyc === 'all' || user.kyc_status === filters.kyc;
+        return matchesSearch && matchesRole && matchesScore && matchesKYC;
     });
 
     return (
-        <div className="space-y-6 animate-fade-in relative pb-12">
-            {/* User Details Slide-over/Panel */}
-            {selectedUser && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
-                    <div className="bg-bg-primary h-full w-full max-w-4xl shadow-2xl animate-slide-in-right overflow-hidden flex flex-col">
-                        {/* Detail Header */}
-                        <div className="p-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary/30">
-                            <div className="flex items-center gap-4">
-                                <div className={`w-14 h-14 rounded-2xl bg-accent-primary/10 flex items-center justify-center text-2xl font-black text-accent-primary border border-accent-primary/20`}>
-                                    {selectedUser.avatar_url ? <img src={selectedUser.avatar_url} className="w-full h-full object-cover" /> : (selectedUser.name || 'U').charAt(0)}
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-black text-text-primary uppercase tracking-tight">{selectedUser.name || 'Sem nome'}</h2>
-                                    <p className="text-xs text-text-tertiary flex items-center gap-1.5 font-medium">
-                                        <Mail size={12} /> {selectedUser.email}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => updateUserStatus(selectedUser.id, { status: selectedUser.status === 'blocked' ? 'active' : 'blocked' })}
-                                    className={`p-3 rounded-xl border transition-all ${selectedUser.status === 'blocked' ? 'bg-success/10 border-success/20 text-success' : 'bg-error/10 border-error/20 text-error'}`}
-                                >
-                                    {selectedUser.status === 'blocked' ? <Unlock size={20} /> : <Ban size={20} />}
-                                </button>
-                                <button onClick={() => setSelectedUser(null)} className="p-3 bg-bg-secondary hover:bg-bg-tertiary rounded-xl transition-colors border border-border-subtle">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Tabs Navigation */}
-                        <div className="flex px-8 bg-bg-secondary/10 border-b border-border-subtle">
-                            {['summary', 'orders', 'financial', 'disputes', 'logs'].map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'
-                                        }`}
-                                >
-                                    {tab === 'summary' ? 'Resumo' :
-                                        tab === 'orders' ? 'Pedidos' :
-                                            tab === 'financial' ? 'Financeiro' :
-                                                tab === 'disputes' ? 'Disputas' : 'Logs/Auditoria'}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Tab Content */}
-                        <div className="flex-1 overflow-y-auto p-8">
-                            {activeTab === 'summary' && (
-                                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
-                                    {/* Stats Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <DetailStat label="Total Pedidos" value={userStats.orders} icon={<BriefcaseIcon size={16} />} color="text-blue-500" />
-                                        <DetailStat label="Disputas" value={userStats.disputes} icon={<MessageCircle size={16} />} color="text-error" />
-                                        <DetailStat label="Volume Financeiro" value={`R$ ${userStats.revenue}`} icon={<DollarSign size={16} />} color="text-success" />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        {/* Status and Risk */}
-                                        <div className="bg-bg-secondary/20 border border-border-subtle rounded-[32px] p-6 space-y-6">
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-text-tertiary">Governança & Risco</h4>
-
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-xs font-bold text-text-primary">Score de Risco</span>
-                                                    <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${selectedUser.risk_level === 'high' ? 'bg-error/10 text-error' : 'bg-success/10 text-success'}`}>
-                                                        {selectedUser.risk_score || 0}% - {selectedUser.risk_level || 'low'}
-                                                    </span>
-                                                </div>
-                                                <div className="h-2 w-full bg-bg-secondary rounded-full overflow-hidden">
-                                                    <div className={`h-full ${selectedUser.risk_level === 'high' ? 'bg-error' : 'bg-success'}`} style={{ width: `${selectedUser.risk_score || 5}%` }}></div>
-                                                </div>
-
-                                                <div className="pt-4 flex flex-col gap-2">
-                                                    <button
-                                                        onClick={() => updateUserStatus(selectedUser.id, { kyc_status: 'approved' })}
-                                                        disabled={selectedUser.kyc_status === 'approved'}
-                                                        className="w-full py-3 bg-success/10 text-success border border-success/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-success/20 transition-all disabled:opacity-30"
-                                                    >
-                                                        Aprovar KYC Manualmente
-                                                    </button>
-                                                    <button
-                                                        onClick={() => updateUserStatus(selectedUser.id, { kyc_status: 'rejected' })}
-                                                        disabled={selectedUser.kyc_status === 'rejected'}
-                                                        className="w-full py-3 bg-error/10 text-error border border-error/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-error/20 transition-all disabled:opacity-30"
-                                                    >
-                                                        Rejeitar KYC / Solicitar Novos
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Basic Info */}
-                                        <div className="bg-bg-secondary/20 border border-border-subtle rounded-[32px] p-6 space-y-6">
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-text-tertiary">Informações Básicas</h4>
-                                            <div className="space-y-4">
-                                                <InfoRow label="Tipo de Conta" value={selectedUser.role || 'Client'} />
-                                                <InfoRow label="Status" value={selectedUser.status || 'Active'} />
-                                                <InfoRow label="Membro desde" value={new Date(selectedUser.created_at).toLocaleDateString('pt-BR')} />
-                                                <InfoRow label="Último Acesso" value={selectedUser.last_sign_in_at ? new Date(selectedUser.last_sign_in_at).toLocaleDateString('pt-BR') : 'Sem registro'} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab !== 'summary' && (
-                                <div className="py-20 text-center opacity-40">
-                                    <History size={48} className="mx-auto mb-4" strokeWidth={1} />
-                                    <p className="text-sm font-bold uppercase tracking-widest">Módulo em Integração</p>
-                                    <p className="text-xs mt-2">Os dados desta aba estão sendo sincronizados e estarão disponíveis em breve.</p>
-                                </div>
-                            )}
-                        </div>
+        <div className="flex gap-8 animate-fade-in relative pb-12 h-screen overflow-hidden">
+            {/* Sidebar Filtros */}
+            {isSidebarOpen && (
+                <div className="w-80 bg-bg-primary border-r border-border-subtle h-full p-8 space-y-10 animate-slide-in-left overflow-y-auto">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-black text-text-primary uppercase tracking-widest flex items-center gap-2">
+                            <Filter size={16} className="text-accent-primary" /> Governança
+                        </h3>
+                        <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-bg-secondary rounded-lg transition-all"><ChevronLeft size={20} /></button>
                     </div>
+                    <FilterGroup label="Score de Risco">
+                        <FilterButton active={filters.score === 'all'} label="Todos" onClick={() => setFilters({ ...filters, score: 'all' })} />
+                        <FilterButton active={filters.score === 'high'} label="Alto Risco" color="text-error" onClick={() => setFilters({ ...filters, score: 'high' })} />
+                        <FilterButton active={filters.score === 'medium'} label="Atenção" color="text-warning" onClick={() => setFilters({ ...filters, score: 'medium' })} />
+                        <FilterButton active={filters.score === 'low'} label="Seguro" color="text-success" onClick={() => setFilters({ ...filters, score: 'low' })} />
+                    </FilterGroup>
+                    <FilterGroup label="Status KYC">
+                        <FilterButton active={filters.kyc === 'all'} label="Todos" onClick={() => setFilters({ ...filters, kyc: 'all' })} />
+                        <FilterButton active={filters.kyc === 'pending'} label="Pendente" color="text-warning" onClick={() => setFilters({ ...filters, kyc: 'pending' })} />
+                        <FilterButton active={filters.kyc === 'approved'} label="Aprovado" color="text-success" onClick={() => setFilters({ ...filters, kyc: 'approved' })} />
+                    </FilterGroup>
                 </div>
             )}
 
-            {/* Page Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="heading-xl text-text-primary">Gestão de Usuários</h1>
-                    <p className="text-sm text-text-tertiary">Controle total de governança, KYC e risco operacional</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button onClick={exportToCSV} className="px-6 py-2.5 bg-bg-secondary border border-border-subtle rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-bg-tertiary transition-all">
-                        <Download size={18} /> Exportar CSV
-                    </button>
-                    <button className="px-6 py-2.5 bg-accent-primary text-white rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-glow-blue hover:scale-105 transition-all">
-                        <UserCheck size={18} /> Adicionar Usuário
-                    </button>
-                </div>
-            </div>
+            <div className="flex-1 space-y-8 overflow-y-auto p-8 pr-12">
+                {/* Modal Ação */}
+                {actionModal?.open && (
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+                        <div className="bg-bg-primary w-full max-w-lg rounded-[48px] shadow-2xl overflow-hidden border border-border-subtle animate-in zoom-in-95 duration-200">
+                            <div className="p-10 border-b border-border-subtle bg-bg-secondary/30">
+                                <h2 className="text-2xl font-black text-text-primary mb-2 flex items-center gap-3"><AlertCircle className="text-accent-primary" /> Confirmar Intervenção</h2>
+                                <p className="text-xs text-text-tertiary">Ação: <span className="text-text-primary font-black">{actionModal.type}</span> para {actionModal.user.email}</p>
+                            </div>
+                            <div className="p-10 space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-text-tertiary uppercase tracking-widest">Motivo da Auditoria</label>
+                                    <textarea value={actionReason} onChange={(e) => setActionReason(e.target.value)} className="w-full h-32 bg-bg-secondary border border-border-subtle rounded-2xl p-4 text-xs font-medium outline-none focus:border-accent-primary" placeholder="Descreva o motivo..." />
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setActionModal(null)} className="flex-1 py-4 bg-bg-secondary rounded-2xl text-[10px] font-black uppercase">Sair</button>
+                                    <button disabled={!actionReason || isUpdating} onClick={performGlobalAction} className="flex-1 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase shadow-xl hover:scale-105 transition-all disabled:opacity-30">Confirmar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
-            {/* Toolbar */}
-            <div className="bg-bg-primary border border-border-subtle p-4 rounded-[32px] flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
-                <div className="relative w-full md:w-96">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" size={16} />
-                    <input
-                        type="text"
-                        placeholder="Buscar por nome, email ou ID..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-bg-secondary/50 border border-border-subtle rounded-2xl pl-12 pr-4 py-3 text-xs outline-none focus:border-accent-primary transition-all font-medium"
-                    />
+                {/* Dossiê Slide-over */}
+                {selectedUser && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
+                        <div className="bg-bg-primary h-full w-full max-w-5xl shadow-2xl animate-slide-in-right overflow-hidden flex flex-col">
+                            <div className="p-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary/30">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 rounded-2xl bg-accent-primary text-white flex items-center justify-center text-2xl font-black">{(selectedUser.name || 'U').charAt(0)}</div>
+                                    <div>
+                                        <h2 className="text-xl font-black text-text-primary uppercase tracking-tight">{selectedUser.name || 'Sem nome'}</h2>
+                                        <p className="text-xs text-text-tertiary font-bold uppercase tracking-widest">{selectedUser.email}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedUser(null)} className="p-3 bg-bg-secondary hover:rotate-90 transition-all rounded-xl border border-border-subtle"><X size={24} /></button>
+                            </div>
+
+                            <div className="flex px-8 bg-bg-secondary/10 border-b border-border-subtle overflow-x-auto">
+                                {['summary', 'orders', 'financial', 'disputes', 'services', 'logs', 'penalties'].map((tab) => (
+                                    <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all shrink-0 ${activeTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}>
+                                        {tab === 'summary' ? 'Dossiê' : tab === 'orders' ? 'Pedidos' : tab === 'financial' ? 'Finanças' : tab === 'disputes' ? 'Disputas' : tab === 'services' ? 'Serviços' : tab === 'logs' ? 'Logs' : 'Penalidades'}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-10">
+                                {activeTab === 'summary' && (
+                                    <div className="space-y-10">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <DetailStat label="Pedidos Totais" value={userStats.orders} icon={<BriefcaseIcon />} color="text-accent-primary" />
+                                            <DetailStat label="Disputas (30d)" value={userStats.disputes} icon={<Scale />} color="text-error" />
+                                            <DetailStat label="Volume Bruto" value={`R$ ${userStats.revenue.toLocaleString()}`} icon={<DollarSign />} color="text-success" />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="bg-bg-secondary/20 p-8 rounded-[40px] border border-border-subtle space-y-6">
+                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest">Análise de Risco</h4>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-2xl font-black text-text-primary">{selectedUser.risk_score}%</span>
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${selectedUser.risk_level === 'high' ? 'bg-error text-white' : 'bg-success text-white'}`}>{selectedUser.risk_level} Risk</span>
+                                                </div>
+                                                <div className="h-3 w-full bg-bg-secondary rounded-full overflow-hidden">
+                                                    <div className={`h-full ${selectedUser.risk_level === 'high' ? 'bg-error' : 'bg-success'}`} style={{ width: `${selectedUser.risk_score}%` }}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-bg-secondary/20 p-8 rounded-[40px] border border-border-subtle space-y-4">
+                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest">Perfil & Acesso</h4>
+                                                <InfoRow label="Papel" value={selectedUser.role} />
+                                                <InfoRow label="KYC" value={selectedUser.kyc_status} />
+                                                <InfoRow label="Status" value={selectedUser.status} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {activeTab !== 'summary' && <div className="h-full flex flex-col items-center justify-center opacity-20"><History size={64} /><p className="mt-4 font-black uppercase tracking-widest">Dados em Processamento...</p></div>}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Header & Toolbar */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 className="text-4xl font-black text-text-primary tracking-tighter">Governança de Usuários</h1>
+                        <p className="text-sm text-text-tertiary font-medium">Análise de risco, intervenção direta e auditoria operacional</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {!isSidebarOpen && <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-bg-secondary border border-border-subtle rounded-xl"><Filter size={20} /></button>}
+                        <button className="h-12 px-6 bg-accent-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-glow-blue hover:scale-105 transition-all flex items-center gap-2"><Download size={16} /> Exportar Dossiês</button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <select
-                        value={filterRole}
-                        onChange={(e) => setFilterRole(e.target.value)}
-                        className="bg-bg-secondary border border-border-subtle rounded-xl px-6 py-2 text-xs outline-none font-bold text-text-primary"
-                    >
-                        <option value="all">Filtro: Todos os Papéis</option>
-                        <option value="client">Clientes</option>
-                        <option value="provider">Prestadores</option>
-                        <option value="operator">Operadores</option>
+
+                <div className="bg-bg-primary border border-border-subtle p-6 rounded-[32px] flex flex-col md:flex-row gap-6 items-center">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" size={18} />
+                        <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-bg-secondary border border-border-subtle rounded-2xl pl-12 pr-4 h-14 text-sm font-medium outline-none focus:border-accent-primary transition-all" placeholder="Buscar por ID, Nome, Email ou Documento..." />
+                    </div>
+                    <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="h-14 px-6 bg-bg-secondary border border-border-subtle rounded-2xl text-[10px] font-black uppercase outline-none">
+                        <option value="all">Filtro: Papel</option>
+                        <option value="client">Cliente</option>
+                        <option value="provider">Prestador</option>
                     </select>
                 </div>
-            </div>
 
-            {/* Users Table */}
-            <div className="bg-bg-primary border border-border-subtle rounded-[32px] overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
+                {/* Tabela */}
+                <div className="bg-bg-primary border border-border-subtle rounded-[40px] overflow-hidden shadow-sm">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-bg-secondary/30 border-b border-border-subtle">
+                            <tr className="bg-bg-secondary/40 border-b border-border-subtle">
                                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Identidade</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Role/Conta</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-center">KYC / Risco</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Risco</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Métricas (Pedidos/Disputas)</th>
                                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Status</th>
                                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-right">Ação</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr>
-                                    <td colSpan={5} className="px-8 py-20 text-center text-text-tertiary flex flex-col items-center gap-4">
-                                        <Clock className="animate-spin mx-auto" size={32} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Sincronizando Usuários...</span>
-                                    </td>
-                                </tr>
-                            ) : filteredUsers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-8 py-20 text-center text-text-tertiary">
-                                        <Slash size={48} className="mx-auto mb-4 opacity-20" />
-                                        <p className="text-sm font-bold">Nenhum usuário encontrado para os filtros atuais.</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredUsers.map((user) => (
-                                    <tr key={user.id} className="hover:bg-bg-secondary/20 transition-all group cursor-pointer" onClick={() => handleSelectUser(user)}>
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-2xl bg-accent-primary/5 flex items-center justify-center text-accent-primary font-black text-xs border border-accent-primary/10 overflow-hidden group-hover:scale-110 transition-transform">
-                                                    {user.avatar_url || user.user_metadata?.avatar_url ? (
-                                                        <img src={user.avatar_url || user.user_metadata?.avatar_url} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        (user.name || user.user_metadata?.name || 'U').charAt(0).toUpperCase()
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-black text-text-primary uppercase tracking-tight">{user.name || user.user_metadata?.name || 'Sem nome'}</p>
-                                                    <p className="text-[10px] text-text-tertiary font-mono">{user.email}</p>
-                                                </div>
+                                <tr><td colSpan={5} className="py-20 text-center"><Clock className="animate-spin mx-auto mb-2" /></td></tr>
+                            ) : filteredUsers.map(user => (
+                                <tr key={user.id} onClick={() => handleSelectUser(user)} className="hover:bg-bg-secondary/20 transition-all cursor-pointer group">
+                                    <td className="px-8 py-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-bg-secondary flex items-center justify-center font-black text-accent-primary border border-border-subtle group-hover:scale-110 transition-transform">{(user.name || 'U').charAt(0)}</div>
+                                            <div>
+                                                <p className="text-xs font-black text-text-primary uppercase">{user.name || 'Sem nome'}</p>
+                                                <p className="text-[10px] text-text-tertiary font-mono">{user.email}</p>
                                             </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${(user.role || user.user_metadata?.role) === 'provider' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
-                                                (user.role || user.user_metadata?.role) === 'operator' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
-                                                    'bg-bg-tertiary border-border-subtle text-text-tertiary'
-                                                }`}>
-                                                {user.role || user.user_metadata?.role || 'client'}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <div className="flex items-center gap-1.5">
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${user.kyc_status === 'approved' ? 'bg-success' : user.kyc_status === 'rejected' ? 'bg-error' : 'bg-warning'}`}></div>
-                                                    <span className="text-[9px] font-black uppercase text-text-secondary">{user.kyc_status || 'Pendente'}</span>
-                                                </div>
-                                                <div className="w-16 h-1 bg-bg-secondary rounded-full overflow-hidden">
-                                                    <div className={`h-full ${user.risk_level === 'high' ? 'bg-error' : 'bg-success'}`} style={{ width: `${user.risk_score || 5}%` }}></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${user.status === 'blocked' ? 'text-error' : 'text-success'}`}>
-                                                {user.status === 'blocked' ? 'Bloqueado' : 'Ativo'}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <button className="p-2.5 bg-bg-secondary hover:bg-accent-primary hover:text-white rounded-xl transition-all shadow-sm">
-                                                <ChevronRight size={16} />
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        <div className={`flex items-center gap-2 px-3 py-1 rounded-full w-fit ${user.risk_level === 'high' ? 'bg-error/10 text-error' : user.risk_level === 'medium' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}`}>
+                                            <Shield size={12} />
+                                            <span className="text-[10px] font-black uppercase">{user.risk_score}%</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        <div className="flex gap-4">
+                                            <div className="text-center"><p className="text-xs font-black text-text-primary">{user.total_orders}</p><p className="text-[8px] font-black text-text-tertiary uppercase">Pedidos</p></div>
+                                            <div className="text-center"><p className="text-xs font-black text-error">{user.disputes_30d}</p><p className="text-[8px] font-black text-text-tertiary uppercase">Disputas</p></div>
+                                            <div className="text-center"><p className="text-xs font-black text-warning">{user.cancellation_rate}%</p><p className="text-[8px] font-black text-text-tertiary uppercase">Canc.</p></div>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        <span className={`text-[10px] font-black uppercase tracking-widest ${user.status === 'blocked' ? 'text-error' : 'text-success'}`}>{user.status}</span>
+                                    </td>
+                                    <td className="px-8 py-6 text-right">
+                                        <div className="flex justify-end gap-2" onClick={e => e.stopPropagation()}>
+                                            <button
+                                                onClick={() => setActionModal({ open: true, type: user.status === 'blocked' ? 'ACTIVATE' : 'BLOCK', user })}
+                                                className={`p-2 rounded-lg border border-border-subtle hover:bg-black hover:text-white transition-all`}>
+                                                {user.status === 'blocked' ? <Unlock size={16} /> : <Ban size={16} />}
                                             </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
+                                            <button className="p-2 bg-bg-secondary rounded-lg border border-border-subtle hover:bg-accent-primary hover:text-white transition-all"><MoreVertical size={16} /></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -414,22 +416,32 @@ const UserManagement: React.FC = () => {
     );
 };
 
+// --- Subcomponentes Locais ---
+const FilterGroup = ({ label, children }: any) => (
+    <div className="space-y-4">
+        <h4 className="text-[9px] font-black uppercase text-text-tertiary tracking-widest border-b border-border-subtle pb-1">{label}</h4>
+        <div className="flex flex-col gap-2">{children}</div>
+    </div>
+);
+
+const FilterButton = ({ active, label, color, onClick }: any) => (
+    <button onClick={onClick} className={`text-left px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${active ? 'bg-black text-white shadow-lg' : 'bg-bg-secondary/40 text-text-tertiary hover:bg-bg-secondary'}`}>
+        <span className={color}>{label}</span>
+    </button>
+);
+
 const DetailStat = ({ label, value, icon, color }: any) => (
-    <div className="bg-bg-primary border border-border-subtle p-5 rounded-[28px] shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-            <div className={`p-2 rounded-lg bg-bg-secondary ${color}`}>
-                {icon}
-            </div>
-            <span className="text-[9px] font-black uppercase text-text-tertiary tracking-widest">{label}</span>
-        </div>
-        <h4 className="text-xl font-black text-text-primary">{value}</h4>
+    <div className="bg-bg-primary border border-border-subtle p-7 rounded-[40px] shadow-sm group hover:-translate-y-1 transition-all">
+        <div className={`p-4 rounded-2xl bg-bg-secondary border border-border-subtle w-fit mb-6 ${color}`}>{React.cloneElement(icon as React.ReactElement, { size: 24 })}</div>
+        <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
+        <h3 className="text-2xl font-black text-text-primary tracking-tighter">{value}</h3>
     </div>
 );
 
 const InfoRow = ({ label, value }: any) => (
-    <div className="flex justify-between items-center py-2 border-b border-border-subtle/50 text-xs">
-        <span className="text-text-tertiary font-bold uppercase tracking-widest">{label}</span>
-        <span className="text-text-primary font-bold">{value}</span>
+    <div className="flex justify-between items-center py-4 border-b border-border-subtle/50 text-[10px] uppercase font-black tracking-widest">
+        <span className="text-text-tertiary">{label}</span>
+        <span className="text-text-primary">{value || 'N/A'}</span>
     </div>
 );
 

@@ -23,6 +23,7 @@ interface AppState {
     orderData: any | null;
     selectedServiceId: string | undefined;
     selectedCategory: string | undefined;
+    viewFilters: any | null;
 
     // Actions
     setView: (view: string) => void;
@@ -39,6 +40,7 @@ interface AppState {
     setOrderData: (data: any | null) => void;
     setSelectedServiceId: (id: string | undefined) => void;
     setSelectedCategory: (category: string | undefined) => void;
+    setViewFilters: (filters: any | null) => void;
     logout: () => void;
 }
 
@@ -58,6 +60,7 @@ export const useAppStore = create<AppState>((set) => ({
     orderData: null,
     selectedServiceId: undefined,
     selectedCategory: undefined,
+    viewFilters: null,
 
     // Actions
     setView: (newView) => set((state) => {
@@ -111,6 +114,7 @@ export const useAppStore = create<AppState>((set) => ({
     setOrderData: (orderData) => set({ orderData }),
     setSelectedServiceId: (selectedServiceId) => set({ selectedServiceId }),
     setSelectedCategory: (selectedCategory) => set({ selectedCategory }),
+    setViewFilters: (viewFilters) => set({ viewFilters }),
 
     logout: () => set({
         user: null,

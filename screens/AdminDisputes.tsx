@@ -22,11 +22,14 @@ import {
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { resolveUserName } from '../utils/userUtils';
+import { useAppStore } from '../store';
 
 const AdminDisputes: React.FC = () => {
+    const { viewFilters, setViewFilters } = useAppStore();
+
     const [disputes, setDisputes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterStatus, setFilterStatus] = useState('all');
+    const [filterStatus, setFilterStatus] = useState(viewFilters?.status || 'all');
     const [searchTerm, setSearchTerm] = useState('');
     const [isProcessing, setIsProcessing] = useState<string | null>(null);
     const [selectedDispute, setSelectedDispute] = useState<any>(null);
@@ -34,6 +37,7 @@ const AdminDisputes: React.FC = () => {
 
     useEffect(() => {
         fetchDisputes();
+        return () => setViewFilters(null);
     }, []);
 
     const fetchDisputes = async () => {
@@ -160,7 +164,7 @@ const AdminDisputes: React.FC = () => {
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="text-[10px] font-black text-text-tertiary uppercase tracking-widest bg-bg-secondary px-2 py-0.5 rounded">Protocolo #{selectedDispute.id.slice(0, 12)}</span>
                                         <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${getStatusStyle(selectedDispute.status)}`}>
-                                            {selectedDispute.status}
+                                            {selectedDispute.status === 'open' ? 'Aberto' : selectedDispute.status === 'in_review' ? 'Em Análise' : selectedDispute.status === 'resolved' ? 'Resolvido' : selectedDispute.status}
                                         </span>
                                     </div>
                                 </div>
@@ -194,12 +198,12 @@ const AdminDisputes: React.FC = () => {
                                             <div className="p-5 bg-bg-secondary/30 rounded-3xl border border-border-subtle">
                                                 <p className="text-[9px] font-black text-text-tertiary uppercase mb-2">Reclamante</p>
                                                 <p className="text-sm font-black text-text-primary">{selectedDispute.opened_by_role === 'client' ? resolveUserName(selectedDispute.order?.client) : resolveUserName(selectedDispute.order?.provider)}</p>
-                                                <p className="text-[10px] text-text-tertiary mt-1 opacity-60 uppercase font-bold">{selectedDispute.opened_by_role}</p>
+                                                <p className="text-[10px] text-text-tertiary mt-1 opacity-60 uppercase font-bold">{selectedDispute.opened_by_role === 'client' ? 'Cliente' : 'Prestador'}</p>
                                             </div>
                                             <div className="p-5 bg-bg-secondary/30 rounded-3xl border border-border-subtle">
                                                 <p className="text-[9px] font-black text-text-tertiary uppercase mb-2">Parte Notificada</p>
                                                 <p className="text-sm font-black text-text-primary">{selectedDispute.opened_by_role === 'client' ? resolveUserName(selectedDispute.order?.provider) : resolveUserName(selectedDispute.order?.client)}</p>
-                                                <p className="text-[10px] text-text-tertiary mt-1 opacity-60 uppercase font-bold">{selectedDispute.opened_by_role === 'client' ? 'provider' : 'client'}</p>
+                                                <p className="text-[10px] text-text-tertiary mt-1 opacity-60 uppercase font-bold">{selectedDispute.opened_by_role === 'client' ? 'Prestador' : 'Cliente'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -358,7 +362,7 @@ const AdminDisputes: React.FC = () => {
                                         </td>
                                         <td className="px-8 py-6">
                                             <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(dispute.status)}`}>
-                                                {dispute.status}
+                                                {dispute.status === 'open' ? 'Aberto' : dispute.status === 'in_review' ? 'Em Análise' : dispute.status === 'resolved' ? 'Resolvido' : dispute.status}
                                             </span>
                                         </td>
                                         <td className="px-8 py-6 text-right">

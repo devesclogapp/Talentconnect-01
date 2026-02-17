@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { sendCounterOffer, subscribeToOrderUpdates, getOrderById } from '../services/ordersService';
+import { sendCounterOffer, subscribeToOrderUpdates, getOrderById, acceptOrder, openDispute } from '../services/ordersService';
 
 interface Props {
   negotiation: any;
@@ -69,11 +69,15 @@ const NegotiationFlow: React.FC<Props> = ({ negotiation: initialNegotiation, onB
   const handleAction = async (type: 'ACCEPT' | 'COUNTER' | 'SEND_COUNTER' | 'CANCEL' | 'FINISH' | 'OPEN_DISPUTE' | 'CONFIRM_DISPUTE') => {
     switch (type) {
       case 'ACCEPT':
-        // No MVP, aceitar sem contraproposta muda para accepted
         setLoading(true);
-        // Aqui chamaríamos acceptOrder se quiséssemos pular a negociação
-        // Mas o componente foca na negociação
-        setLoading(false);
+        try {
+          await acceptOrder(negotiation.id);
+          // O listener useEffect cuidará de atualizar o estado local para currentStep 4
+        } catch (e) {
+          alert("Erro ao aceitar pedido: " + e);
+        } finally {
+          setLoading(false);
+        }
         break;
       case 'COUNTER':
         setShowCounterInput(true);
@@ -105,10 +109,15 @@ const NegotiationFlow: React.FC<Props> = ({ negotiation: initialNegotiation, onB
       case 'CONFIRM_DISPUTE':
         setShowDisputeModal(false);
         setLoading(true);
-        setTimeout(() => {
-          setLoading(false);
+        try {
+          // No NegotiationFlow, o ator logado é o provider
+          await openDispute(negotiation.id, 'Disputa aberta via Negotiation Flow', 'provider');
           setIsDisputed(true);
-        }, 1500);
+        } catch (e) {
+          alert("Erro ao abrir disputa: " + e);
+        } finally {
+          setLoading(false);
+        }
         break;
     }
   };
