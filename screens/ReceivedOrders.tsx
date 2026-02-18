@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/Badge';
 import { getProviderOrders } from '../services/ordersService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { supabase } from '../services/supabaseClient';
+import OrderCard from '../components/OrderCard';
 
 interface ReceivedOrdersProps {
     onBack: () => void;
@@ -208,84 +209,17 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder, 
                         <p className="text-sm font-medium text-text-secondary">Nenhum pedido encontrado.</p>
                     </div>
                 ) : (
-                    filteredOrders.map((order) => {
-                        const status = getStatusConfig(order.status);
-                        const StatusIcon = status.icon;
-                        const clientName = resolveUserName(order.client);
-                        const clientAvatar = resolveUserAvatar(order.client);
-
-                        return (
-                            <button
-                                key={order.id}
-                                onClick={() => onSelectOrder(order)}
-                                className="w-full bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-[32px] p-6 text-left shadow-sm hover:shadow-md transition-all group active:scale-[0.99] relative overflow-hidden"
-                            >
-                                {/* Status Badge Top Right */}
-                                <div className={`absolute top-6 right-6 px-2 py-1 rounded-full flex items-center gap-1 border ${status.className}`}>
-                                    <StatusIcon size={10} />
-                                    <span className="text-[9px] font-normal tracking-normal">{status.label}</span>
-                                </div>
-
-                                {/* Client Header */}
-                                <div className="flex items-center gap-4 mb-6">
-                                    <img
-                                        src={clientAvatar}
-                                        alt={clientName}
-                                        className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-neutral-800 shadow-sm"
-                                    />
-                                    <div>
-                                        <h3 className="text-lg font-bold text-text-primary leading-tight mb-1">{clientName}</h3>
-                                        <p className="text-[10px] font-normal text-text-tertiary tracking-normal">
-                                            {getTimeAgo(order.created_at)}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Service Details Box */}
-                                <div className="bg-neutral-50 dark:bg-neutral-800/50 rounded-[24px] p-5 mb-6">
-                                    <p className="text-[9px] font-normal text-text-tertiary tracking-normal mb-2">Serviço Solicitado</p>
-                                    <h4 className="text-base font-bold text-text-primary mb-3 line-clamp-2">
-                                        {order.service_title_snapshot || order.service?.title || 'Serviço Personalizado'}
-                                    </h4>
-
-                                    <div className="flex flex-wrap gap-4">
-                                        <div className="flex items-center gap-2 text-text-secondary text-xs">
-                                            <Calendar size={14} className="text-text-tertiary" />
-                                            <span className="font-medium">{formatDate(order.scheduled_at)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-text-secondary text-xs">
-                                            <Clock size={14} className="text-text-tertiary" />
-                                            <span className="font-medium">{formatTime(order.scheduled_at) || 'horário a definir'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Location Pill if exists */}
-                                {order.location_text && (
-                                    <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300 rounded-2xl text-xs font-normal mb-6">
-                                        <MapPin size={14} className="shrink-0" />
-                                        <span className="line-clamp-1">{order.location_text}</span>
-                                    </div>
-                                )}
-
-                                {/* Footer: Price & Action */}
-                                <div className="flex items-end justify-between border-t border-border-subtle pt-5">
-                                    <div>
-                                        <p className="text-[9px] font-medium text-text-tertiary mb-1">Valor Total</p>
-                                        <div className="flex items-baseline gap-0.5">
-                                            <span className="text-sm font-bold text-text-secondary">R$</span>
-                                            <span className="text-2xl font-bold text-text-primary">
-                                                {order.total_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="w-12 h-12 rounded-full bg-text-primary text-bg-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                                        <ArrowLeft size={20} className="rotate-180" />
-                                    </div>
-                                </div>
-                            </button>
-                        );
-                    })
+                    filteredOrders.map((order) => (
+                        <OrderCard
+                            key={order.id}
+                            order={order}
+                            onClick={onSelectOrder}
+                            type="provider"
+                            resolveUserName={resolveUserName}
+                            resolveUserAvatar={resolveUserAvatar}
+                            formatDate={formatDate}
+                        />
+                    ))
                 )}
             </div>
         </div>

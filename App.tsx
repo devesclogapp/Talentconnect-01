@@ -132,7 +132,7 @@ const App: React.FC = () => {
             const targetView = role.toLowerCase() === 'client'
               ? 'CLIENT_DASHBOARD'
               : role.toLowerCase() === 'operator'
-                ? 'ADMIN_DASHBOARD'
+                ? (localStorage.getItem('lastAdminView') || 'ADMIN_DASHBOARD')
                 : 'PROVIDER_DASHBOARD';
             console.log("👉 App: Redirecionando para:", targetView);
             setView(targetView);
@@ -178,7 +178,7 @@ const App: React.FC = () => {
           const targetView = lowerRole === 'client'
             ? 'CLIENT_DASHBOARD'
             : lowerRole === 'operator'
-              ? 'ADMIN_DASHBOARD'
+              ? (localStorage.getItem('lastAdminView') || 'ADMIN_DASHBOARD')
               : 'PROVIDER_DASHBOARD';
           setView(targetView);
           resetHistory();
@@ -231,7 +231,7 @@ const App: React.FC = () => {
               role.toUpperCase() === 'CLIENT'
                 ? 'CLIENT_DASHBOARD'
                 : role.toUpperCase() === 'OPERATOR'
-                  ? 'ADMIN_DASHBOARD'
+                  ? (localStorage.getItem('lastAdminView') || 'ADMIN_DASHBOARD')
                   : 'PROVIDER_DASHBOARD'
             );
             resetHistory();
@@ -246,7 +246,7 @@ const App: React.FC = () => {
             const targetView = role.toUpperCase() === 'CLIENT'
               ? 'CLIENT_DASHBOARD'
               : role.toUpperCase() === 'OPERATOR'
-                ? 'ADMIN_DASHBOARD'
+                ? (localStorage.getItem('lastAdminView') || 'ADMIN_DASHBOARD')
                 : 'PROVIDER_DASHBOARD';
             setView(targetView);
             resetHistory();
@@ -260,7 +260,7 @@ const App: React.FC = () => {
               role: 'OPERATOR',
               name: user.user_metadata?.name || 'Operador'
             } as any);
-            setView('ADMIN_DASHBOARD');
+            setView(localStorage.getItem('lastAdminView') || 'ADMIN_DASHBOARD');
             resetHistory();
           }}
           onNavigate={navigate}
@@ -609,7 +609,7 @@ const App: React.FC = () => {
         return <Login
           onLoginSuccess={(user) => {
             const role = user.user_metadata?.role || 'client';
-            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : role.toUpperCase() === 'OPERATOR' ? 'ADMIN_DASHBOARD' : 'PROVIDER_DASHBOARD');
+            setView(role.toUpperCase() === 'CLIENT' ? 'CLIENT_DASHBOARD' : role.toUpperCase() === 'OPERATOR' ? (localStorage.getItem('lastAdminView') || 'ADMIN_DASHBOARD') : 'PROVIDER_DASHBOARD');
           }}
           onRegister={() => setView('REGISTER')}
           onForgotPassword={() => setView('FORGOT_PASSWORD')}
@@ -644,8 +644,14 @@ const App: React.FC = () => {
           {(showBottomNav && !isAdminView) && (
             <nav className="bottom-nav">
               <button
-                onClick={() => setView(userRole === 'client' ? 'CLIENT_DASHBOARD' : 'PROVIDER_DASHBOARD')}
-                className={`bottom-nav__item interactive ${(view === 'CLIENT_DASHBOARD' || view === 'PROVIDER_DASHBOARD') ? 'bottom-nav__item--active' : ''}`}
+                onClick={() => setView(
+                  userRole === 'client'
+                    ? 'CLIENT_DASHBOARD'
+                    : userRole === 'operator'
+                      ? (localStorage.getItem('lastAdminView') || 'ADMIN_DASHBOARD')
+                      : 'PROVIDER_DASHBOARD'
+                )}
+                className={`bottom-nav__item interactive ${(view === 'CLIENT_DASHBOARD' || view === 'PROVIDER_DASHBOARD' || view.startsWith('ADMIN_')) ? 'bottom-nav__item--active' : ''}`}
               >
                 <Home size={24} />
                 <span className="sr-only">Início</span>

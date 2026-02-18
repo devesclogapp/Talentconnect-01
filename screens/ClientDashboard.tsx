@@ -17,6 +17,7 @@ import {
 import { getActiveServices } from '../services/servicesService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { CATEGORY_MAP, CATEGORIES_LIST } from '../constants';
+import ServiceCard from '../components/ServiceCard';
 
 interface Props {
     onSelectCategory: (category?: string) => void;
@@ -267,85 +268,56 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 <Zap size={40} className="mx-auto text-text-tertiary mb-4 opacity-20" />
                                 <p className="meta text-text-tertiary !text-[10px] font-normal">Mercado limpo. Aguardando novos especialistas.</p>
                             </div>
-                        ) : services.map(service => (
-                            <div
-                                key={service.id}
-                                onClick={() => onSelectService(service)}
-                                className="group relative rounded-[32px] overflow-hidden bg-bg-secondary border border-border-subtle transition-all active:scale-[0.98] cursor-pointer shadow-lg flex items-center pr-5"
-                            >
-                                <div className="relative w-32 h-32 shrink-0 overflow-hidden bg-bg-tertiary flex items-center justify-center">
-                                    <img
-                                        src={service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/600/400`}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        alt={service.title}
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).classList.add('opacity-0');
-                                            (e.target as HTMLImageElement).parentElement?.classList.add('bg-bg-tertiary');
-                                        }}
+                        ) : (
+                            <div className="flex flex-col bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden px-4">
+                                {services.map(service => (
+                                    <ServiceCard
+                                        key={service.id}
+                                        service={service}
+                                        onClick={onSelectService}
+                                        resolveUserName={resolveUserName}
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/80 via-transparent to-transparent"></div>
-                                    <div className="absolute top-2 left-2">
-                                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-bg-primary/60 backdrop-blur-md border border-white/20">
-                                            <Star size={8} className="text-accent-secondary" fill="currentColor" />
-                                            <span className="text-[8px] font-bold text-text-primary">4.9</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex-1 pl-4 py-1">
-                                    <div className="flex items-start justify-between mb-1">
-                                        <div className="flex-1">
-                                            <span className="meta px-1.5 py-0.5 rounded-md bg-accent-primary/10 text-text-primary border border-accent-primary/20 mb-1 inline-block text-[9px] font-normal">
-                                                {service.category}
-                                            </span>
-                                            <h3 className="heading-lg leading-tight line-clamp-1 text-[15px] font-bold">{service.title}</h3>
-                                        </div>
-                                    </div>
-
-                                    <p className="body !text-[10px] line-clamp-2 text-text-secondary mb-2 leading-snug font-normal">
-                                        {service.description || "Execução de serviço de nível expert com garantia de qualidade premium."}
-                                    </p>
-
-                                    <div className="flex items-center justify-between mt-auto">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-5 h-5 rounded-full border border-border-medium overflow-hidden">
-                                                <img src={`https://i.pravatar.cc/150?u=${service.provider_id}`} alt="provider" className="w-full h-full object-cover" />
-                                            </div>
-                                            <p className="text-[9px] font-normal text-text-primary">Prestador Verificado</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="flex items-center justify-end gap-1">
-                                                <span className="text-[10px] font-bold text-accent-secondary">R$</span>
-                                                <span className="text-lg font-black text-text-primary leading-none">{service.base_price}</span>
-                                            </div>
-                                            <p className="text-[7px] text-text-tertiary uppercase tracking-tighter font-bold mt-0.5">
-                                                {service.pricing_mode === 'hourly' ? 'por hora' : 'valor fixo'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                ))}
+                                <button
+                                    onClick={() => onNavigate('SERVICES')}
+                                    className="py-4 text-[13px] font-medium text-black hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                                >
+                                    Ver todos os {services.length}+ resultados
+                                </button>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </section>
 
                 {/* Market Intelligence (Analytics Row) */}
                 <section className="grid grid-cols-2 gap-4">
-                    <div className="bg-bg-secondary p-6 rounded-3xl border border-border-subtle relative overflow-hidden group interactive">
-                        <div className="absolute right-[-10px] top-[-10px] opacity-5">
-                            <TrendingUp size={60} />
+                    <div className="relative group interactive overflow-hidden rounded-[32px] p-6 bg-black text-white shadow-xl shadow-black/10 transition-all hover:-translate-y-1">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-accent-secondary/20 transition-colors" />
+                        <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-6">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">Operações</p>
+                                <TrendingUp size={16} className="text-neutral-600 group-hover:text-accent-secondary transition-colors" />
+                            </div>
+                            <h5 className="text-4xl font-black mb-1 flex items-baseline gap-1">
+                                {activeOrdersCount.toString().padStart(2, '0')}
+                                <span className="text-[10px] font-bold text-accent-secondary animate-pulse">●</span>
+                            </h5>
+                            <p className="text-[11px] font-medium text-neutral-400">Contratos ativos no mercado</p>
                         </div>
-                        <p className="meta !text-[8px] text-text-tertiary mb-3 font-normal">Operações atuais</p>
-                        <h5 className="text-3xl font-bold text-text-primary mb-1">
-                            {activeOrdersCount.toString().padStart(2, '0')}
-                        </h5>
-                        <p className="text-[9px] font-normal text-text-primary">Contratos ativos</p>
                     </div>
-                    <div className="bg-bg-secondary p-6 rounded-3xl border border-border-subtle relative overflow-hidden group interactive">
-                        <p className="meta !text-[8px] text-text-tertiary mb-3 font-normal">Posição no mercado</p>
-                        <h5 className="text-3xl font-bold text-text-primary mb-1">
-                            {activeOrdersCount > 5 ? 'Elite' : (activeOrdersCount > 0 ? 'Pro' : 'User')}
-                        </h5>
-                        <p className="text-[9px] font-normal text-text-primary">Nível de conta</p>
+
+                    <div className="relative group interactive overflow-hidden rounded-[32px] p-6 bg-white border border-neutral-100 shadow-xl shadow-black/5 transition-all hover:-translate-y-1">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-neutral-100 rounded-full blur-2xl group-hover:bg-neutral-200 transition-colors" />
+                        <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-6">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">Posição</p>
+                                <Zap size={16} className="text-neutral-300 group-hover:text-black transition-colors" />
+                            </div>
+                            <h5 className="text-4xl font-black mb-1 text-black">
+                                {activeOrdersCount > 5 ? 'Elite' : (activeOrdersCount > 0 ? 'Pro' : 'Iniciante')}
+                            </h5>
+                            <p className="text-[11px] font-medium text-neutral-500">Status atual da conta</p>
+                        </div>
                     </div>
                 </section>
 

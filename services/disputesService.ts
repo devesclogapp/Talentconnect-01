@@ -21,10 +21,8 @@ export const openDispute = async (data: {
     const { data: dispute, error: disputeError } = await (supabase.from('disputes') as any)
         .insert({
             order_id: data.order_id,
-            opened_by_role: data.opened_by_role,
-            opened_by_user_id: data.opened_by_user_id,
-            reason_code: data.reason_code,
-            description: data.description,
+            opened_by: data.opened_by_role, // PRD says client|provider
+            reason: data.description || data.reason_code, // Use description if available, else code
             status: 'open',
             created_at: new Date().toISOString()
         })

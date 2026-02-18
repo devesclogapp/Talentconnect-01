@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/Badge';
 import { getClientOrders } from '../services/ordersService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { supabase } from '../services/supabaseClient';
+import OrderCard from '../components/OrderCard';
 
 interface OrderHistoryProps {
     onBack: () => void;
@@ -181,71 +182,22 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                         </p>
                     </div>
                 ) : (
-                    filteredOrders.map((order) => {
-                        const statusConfig = getStatusConfig(order.status);
-                        const StatusIcon = statusConfig.icon;
-                        const providerName = resolveUserName(order.provider);
-                        const providerAvatar = resolveUserAvatar(order.provider);
-
-                        return (
-                            <button
-                                key={order.id}
-                                onClick={() => onSelectOrder(order)}
-                                className="w-full card interactive p-6 text-left border border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-[28px]  transition-all"
-                            >
-                                <div className="flex gap-4 mb-4">
-                                    <div className="w-14 h-14 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-100 dark:border-neutral-900">
-                                        {providerAvatar ? (
-                                            <img src={providerAvatar} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <span className="text-xl font-bold text-text-primary">{providerName[0]}</span>
-                                        )}
-                                    </div>
-
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between gap-2 mb-1">
-                                            <h3 className="font-semibold text-black dark:text-white truncate">
-                                                {order.service_title_snapshot || order.service?.title || 'Serviço'}
-                                            </h3>
-                                            <Badge variant={statusConfig.variant} size="sm">
-                                                <StatusIcon size={12} className="mr-1" />
-                                                {statusConfig.label}
-                                            </Badge>
-                                        </div>
-
-                                        <p className="text-sm text-text-secondary mb-2">
-                                            {providerName}
-                                        </p>
-
-                                        <div className="flex items-center gap-3 text-xs text-text-tertiary">
-                                            <div className="flex items-center gap-1">
-                                                <AlertCircle size={12} className="text-black-green" />
-                                                <span>{formatDate(order.scheduled_at)}</span>
-                                            </div>
-                                            <span>•</span>
-                                            <span>{new Date(order.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-neutral-800">
-                                    <span className="text-sm text-text-secondary truncate flex-1 mr-4">
-                                        📍 {order.location_text || 'Local do serviço'}
-                                    </span>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-[10px] font-bold text-accent-secondary">R$</span>
-                                        <span className="text-lg font-black text-text-primary leading-none">
-                                            {order.total_amount?.toFixed(2) || '0.00'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </button>
-                        );
-                    })
+                    filteredOrders.map((order) => (
+                        <OrderCard
+                            key={order.id}
+                            order={order}
+                            onClick={onSelectOrder}
+                            type="client"
+                            resolveUserName={resolveUserName}
+                            resolveUserAvatar={resolveUserAvatar}
+                            formatDate={formatDate}
+                        />
+                    ))
                 )}
             </div>
         </div>
     );
 };
+
 
 export default OrderHistory;

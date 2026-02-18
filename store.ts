@@ -66,6 +66,12 @@ export const useAppStore = create<AppState>((set) => ({
     setView: (newView) => set((state) => {
         // Prevent pushing duplicate consecutive views
         if (state.view === newView) return state;
+
+        // Persistir última visualização do admin se for uma tela de admin
+        if (newView.startsWith('ADMIN_') && newView !== 'ADMIN_LOGIN') {
+            localStorage.setItem('lastAdminView', newView);
+        }
+
         return {
             history: [...state.history, state.view],
             previousView: state.view,
