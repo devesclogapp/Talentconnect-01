@@ -2,18 +2,18 @@
 
 ## Design System Implementado
 
-### 🎨 Paleta de Cores
-- **Navy Primary**: `#0A0E27` - Background principal
-- **Navy Secondary**: `#151933` - Cards e elementos
-- **Navy Tertiary**: `#1C2039` - Inputs e containers
-- **Lime Primary**: `#C6FF00` - Accent e CTAs
-- **Lime Secondary**: `#8BC34A` - Gradientes
+### 🎨 Paleta de Cores (Fintech Premium)
+- **Primary Black**: `#09090b` - Background e elementos estruturais
+- **Secondary Gray**: `#18181b` - Cards e áreas de conteúdo
+- **Tertiary Gray**: `#27272a` - Inputs e bordas sutis
+- **Premium Orange**: `#ff6b00` - Accent principal e CTAs de alta performance
+- **Success Green**: `#10b981` - Confirmações e indicadores positivos
 
 ### 📐 Componentes Core
 
 #### Botões
-- `.btn-primary` - CTA principal com glow effect
-- `.btn-icon` - Ícones circulares com border
+- `.btn-primary` - CTA com gradiente laranja e glow effect
+- `.btn-icon` - Elementos circulares minimalistas
 
 #### Cards
 - `.card` - Container base

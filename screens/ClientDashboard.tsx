@@ -291,32 +291,32 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
                 {/* Market Intelligence (Analytics Row) */}
                 <section className="grid grid-cols-2 gap-4">
-                    <div className="relative group interactive overflow-hidden rounded-[32px] p-6 bg-black text-white shadow-xl shadow-black/10 transition-all hover:-translate-y-1">
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-accent-secondary/20 transition-colors" />
+                    <div className="relative group interactive overflow-hidden rounded-[24px] p-5 bg-black text-white shadow-xl shadow-black/10 transition-all hover:-translate-y-1">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-accent-primary/20 transition-colors" />
                         <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-6">
-                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">Operações</p>
-                                <TrendingUp size={16} className="text-neutral-600 group-hover:text-accent-secondary transition-colors" />
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500">Operações</p>
+                                <TrendingUp size={14} className="text-neutral-600 group-hover:text-accent-primary transition-colors" />
                             </div>
-                            <h5 className="text-4xl font-black mb-1 flex items-baseline gap-1">
+                            <h5 className="text-3xl font-black mb-1 flex items-baseline gap-0.5">
                                 {activeOrdersCount.toString().padStart(2, '0')}
-                                <span className="text-[10px] font-bold text-accent-secondary animate-pulse">●</span>
+                                <span className="text-accent-primary animate-pulse">.</span>
                             </h5>
-                            <p className="text-[11px] font-medium text-neutral-400">Contratos ativos no mercado</p>
+                            <p className="text-[10px] font-medium text-neutral-400 leading-tight">Contratos ativos no mercado</p>
                         </div>
                     </div>
 
-                    <div className="relative group interactive overflow-hidden rounded-[32px] p-6 bg-white border border-neutral-100 shadow-xl shadow-black/5 transition-all hover:-translate-y-1">
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-neutral-100 rounded-full blur-2xl group-hover:bg-neutral-200 transition-colors" />
+                    <div className="relative group interactive overflow-hidden rounded-[24px] p-5 bg-white border border-neutral-100 shadow-xl shadow-black/5 transition-all hover:-translate-y-1">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-neutral-100 rounded-full blur-2xl group-hover:bg-neutral-200 transition-colors" />
                         <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-6">
-                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">Posição</p>
-                                <Zap size={16} className="text-neutral-300 group-hover:text-black transition-colors" />
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400">Posição</p>
+                                <Zap size={14} className="text-neutral-300 group-hover:text-black transition-colors" />
                             </div>
-                            <h5 className="text-4xl font-black mb-1 text-black">
+                            <h5 className="text-3xl font-black mb-1 text-black tracking-tight">
                                 {activeOrdersCount > 5 ? 'Elite' : (activeOrdersCount > 0 ? 'Pro' : 'Iniciante')}
                             </h5>
-                            <p className="text-[11px] font-medium text-neutral-500">Status atual da conta</p>
+                            <p className="text-[10px] font-medium text-neutral-500 leading-tight">Status atual da conta</p>
                         </div>
                     </div>
                 </section>

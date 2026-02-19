@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, Star, MapPin, ShieldCheck, ChevronRight } from 'lucide-react';
+import { CATEGORY_MAP, getCategoryImage } from '../constants';
 
 interface ServiceCardProps {
     service: any;
@@ -8,7 +9,7 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick, resolveUserName }) => {
-    const providerName = service.provider?.name || (resolveUserName ? resolveUserName(service.provider) : 'Prestador Verificado');
+    const providerName = service.provider?.name || (resolveUserName ? resolveUserName(service.provider) : 'Profissional Verificado');
 
     return (
         <button
@@ -18,7 +19,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick, resolveUser
             {/* Left side: Image */}
             <div className="relative w-32 h-32 shrink-0 rounded-lg overflow-hidden bg-neutral-100">
                 <img
-                    src={service.image_url || `https://picsum.photos/seed/${service.id}/400/400`}
+                    src={service.image_url || getCategoryImage(service.category)}
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = getCategoryImage(service.category);
+                    }}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     alt={service.title}
                 />

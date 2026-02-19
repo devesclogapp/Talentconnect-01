@@ -122,7 +122,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                         <Globe size={32} className="text-accent-primary" />
                     </div>
                     <h1 className="heading-4xl mb-3">Junte-se à Elite</h1>
-                    <p className="body max-w-[280px] mx-auto">Selecione seu perfil de acesso.</p>
+                    <p className="body max-w-[280px] mx-auto">Selecione seu perfil de acesso no Talent Connect.</p>
                 </div>
 
                 <div className="space-y-4 relative z-10">
@@ -136,8 +136,8 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
                                     <User className="text-text-secondary group" size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="heading-lg mb-0.5 group">Contratante</h3>
-                                    <p className="meta !text-[9px] text-text-tertiary font-normal">Contrate especialistas de alto nível</p>
+                                    <h3 className="heading-lg mb-0.5 group">Cliente</h3>
+                                    <p className="meta !text-[9px] text-text-tertiary font-normal">Contrate serviços e especialistas de elite</p>
                                 </div>
                             </div>
                             <ChevronRight size={20} className="text-text-tertiary group transition-transform group" />
@@ -181,7 +181,7 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
             <div className="mb-10 relative z-10">
                 <h1 className="heading-3xl mb-2">Criar Conta</h1>
                 <p className="body max-w-[260px]">
-                    Registrar como <span className="text-accent-primary font-bold">{selectedRole === 'CLIENT' ? 'Contratante' : 'Profissional'}</span>
+                    Registrar como <span className="text-accent-primary font-bold">{selectedRole === 'CLIENT' ? 'Cliente' : 'Profissional'}</span>
                 </p>
             </div>
 

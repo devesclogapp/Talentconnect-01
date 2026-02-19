@@ -192,7 +192,7 @@ const AdminDashboard: React.FC = () => {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in relative">
+        <div className="h-full flex flex-col space-y-3 animate-fade-in relative">
 
             {/* --- Universal Search Overlay --- */}
             {isSearchOpen && (
@@ -239,32 +239,31 @@ const AdminDashboard: React.FC = () => {
                 />
             )}
 
-            {/* --- Header Section --- */}
             <div className="flex justify-between items-end">
                 <div className="animate-slide-up">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-2 mb-1">
                         <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-                        <span className="text-[10px] font-black text-success uppercase tracking-widest">Servidor Operacional</span>
+                        <span className="text-[9px] font-black text-success uppercase tracking-widest">Servidor Operacional</span>
                     </div>
-                    <h1 className="text-5xl font-black text-text-primary tracking-tight leading-none mb-2">Centro de Comando</h1>
-                    <p className="text-sm text-text-tertiary font-medium">Orquestração e inteligência operacional Talent Connect</p>
+                    <h1 className="text-3xl font-black text-text-primary tracking-tight leading-none mb-1">Centro de Comando</h1>
+                    <p className="text-xs text-text-tertiary font-medium">Orquestração e inteligência operacional</p>
                 </div>
                 <div className="flex gap-4">
                     <button
                         onClick={() => setIsSearchOpen(true)}
-                        className="w-14 h-14 bg-bg-secondary border border-border-subtle rounded-2xl flex items-center justify-center hover:bg-bg-tertiary transition-all">
-                        <Search size={24} />
+                        className="w-10 h-10 bg-bg-secondary border border-border-subtle rounded-xl flex items-center justify-center hover:bg-bg-tertiary transition-all">
+                        <Search size={20} />
                     </button>
                     <button
                         onClick={() => setActiveModal('communication')}
-                        className="px-8 bg-accent-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-glow-blue hover:scale-105 transition-all flex items-center gap-3">
-                        <MessageSquare size={18} /> Novo Comunicado
+                        className="px-6 h-10 bg-accent-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-glow-blue hover:scale-105 transition-all flex items-center gap-2">
+                        <MessageSquare size={16} /> Novo Comunicado
                     </button>
                 </div>
             </div>
 
-            {/* --- Top KPIs (Actionable) --- */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* --- Top KPIs --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <StatCard
                     label="Volume em Garantia"
                     value={`R$ ${stats.inEscrow.toLocaleString()}`}
@@ -308,19 +307,18 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* --- Main Operational Layer --- */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0">
 
                 {/* Left Column (Inbox & Discovery) */}
-                <div className="lg:col-span-8 space-y-8">
-
-                    {/* Operational Queue (Inbox Style) */}
-                    <div className="bg-bg-primary border border-border-subtle rounded-[48px] p-10 shadow-sm relative overflow-hidden">
-                        <div className="flex items-center justify-between mb-10">
+                <div className="lg:col-span-8 space-y-4 flex flex-col h-full overflow-hidden">
+                    {/* Operational Queue */}
+                    <div className="bg-bg-primary border border-border-subtle rounded-[24px] p-5 shadow-sm relative overflow-hidden flex flex-col flex-[1.2]">
+                        <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight flex items-center gap-3">
-                                    <Target className="text-accent-primary" /> Fila de Decisão
+                                <h3 className="text-lg font-black text-text-primary uppercase tracking-tight flex items-center gap-2">
+                                    <Target className="text-accent-primary" size={18} /> Fila de Decisão
                                 </h3>
-                                <p className="text-xs text-text-tertiary font-medium">Triagem operacional por prioridade e SLA</p>
+                                <p className="text-[9px] text-text-tertiary font-medium">Triagem operacional por prioridade e SLA</p>
                             </div>
                             <div className="flex gap-2">
                                 <span className="px-4 py-2 bg-error text-white text-[10px] font-black rounded-full uppercase tracking-widest">{stats.openDisputes} Críticos</span>
@@ -328,7 +326,7 @@ const AdminDashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
                             {/* Inbox Items */}
                             {stats.openDisputes > 0 && (
                                 <InboxItem
@@ -366,19 +364,19 @@ const AdminDashboard: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Risk & Fraud (Explainability) */}
-                    <div className="bg-bg-primary border border-border-subtle rounded-[48px] p-10 shadow-sm">
-                        <div className="flex items-center justify-between mb-10">
+                    {/* Risk & Fraud */}
+                    <div className="bg-bg-primary border border-border-subtle rounded-[24px] p-5 shadow-sm flex-1 flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h3 className="text-xl font-black text-text-primary uppercase tracking-tight flex items-center gap-3">
-                                    <ShieldAlert className="text-error" /> Risco & Fraude
+                                <h3 className="text-base font-black text-text-primary uppercase tracking-tight flex items-center gap-2">
+                                    <ShieldAlert className="text-error" size={18} /> Risco & Fraude
                                 </h3>
-                                <p className="text-xs text-text-tertiary font-medium">Detecção de padrões e comportamento anômalo</p>
+                                <p className="text-[9px] text-text-tertiary font-medium">Detecção de padrões e comportamento anômalo</p>
                             </div>
                             <button onClick={() => setView('USER_MANAGEMENT')} className="text-[10px] font-black uppercase text-accent-primary hover:underline">Ver Tabela Completa</button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto custom-scrollbar">
                             {riskSignals.map((signal, i) => (
                                 <div key={i} className="p-6 bg-bg-secondary/40 border border-border-subtle rounded-[32px] group hover:bg-bg-secondary transition-all">
                                     <div className="flex justify-between items-start mb-4">
@@ -391,13 +389,13 @@ const AdminDashboard: React.FC = () => {
                                             <p className="text-xl font-black text-error leading-tight">{signal.score}</p>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-text-tertiary leading-relaxed mb-6 italic">"{signal.reason}"</p>
+                                    <p className="text-[10px] text-text-tertiary leading-relaxed mb-4 italic">"{signal.reason}"</p>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => { setSelectedUser(signal); setActiveModal('risk'); }}
-                                            className="flex-1 py-3 bg-error text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Bloquear</button>
-                                        <button className="px-4 bg-bg-primary border border-border-subtle rounded-xl text-text-tertiary hover:text-text-primary transition-all">
-                                            <Info size={16} />
+                                            className="flex-1 py-1.5 bg-error text-white rounded-lg text-[8px] font-black uppercase tracking-widest hover:scale-105 transition-all">Bloquear</button>
+                                        <button className="p-1.5 bg-bg-primary border border-border-subtle rounded-lg text-text-tertiary hover:text-text-primary transition-all">
+                                            <Info size={12} />
                                         </button>
                                     </div>
                                 </div>
@@ -407,48 +405,47 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Right Column (Live Feed & Audit) */}
-                <div className="lg:col-span-4 space-y-8">
-
+                <div className="lg:col-span-4 space-y-4 flex flex-col h-full">
                     {/* Live Event Feed */}
-                    <div className="bg-bg-primary border border-border-subtle rounded-[40px] p-8 min-h-[500px] flex flex-col">
-                        <div className="flex items-center justify-between mb-8">
-                            <h4 className="text-xs font-black text-text-primary uppercase tracking-widest flex items-center gap-2">
-                                <Zap size={16} className="text-accent-primary fill-accent-primary" /> Eventos Ao Vivo
+                    <div className="bg-bg-primary border border-border-subtle rounded-[24px] p-5 flex flex-col flex-1 overflow-hidden min-h-[250px]">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-[9px] font-black text-text-primary uppercase tracking-widest flex items-center gap-2">
+                                <Zap size={12} className="text-accent-primary fill-accent-primary" /> Eventos Ao Vivo
                             </h4>
                             <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
                         </div>
 
-                        <div className="flex-1 space-y-6">
+                        <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
                             {liveEvents.map((evt) => (
-                                <div key={evt.id} className="flex gap-4 relative pl-8 before:absolute before:left-3 before:top-2 before:bottom-0 before:w-px before:bg-border-subtle group hover:bg-bg-secondary/30 p-2 rounded-2xl transition-all cursor-pointer">
-                                    <div className={`absolute left-1 top-2 w-4 h-4 rounded-full border-4 border-bg-primary bg-bg-secondary flex items-center justify-center`}>
+                                <div key={evt.id} className="flex gap-3 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-border-subtle group hover:bg-bg-secondary/30 p-1.5 rounded-xl transition-all cursor-pointer">
+                                    <div className={`absolute left-0 top-2 w-4 h-4 rounded-full border-4 border-bg-primary bg-bg-secondary flex items-center justify-center`}>
                                         <div className={`w-1.5 h-1.5 rounded-full ${evt.type === 'order' ? 'bg-success' : evt.type === 'payment' ? 'bg-accent-primary' : 'bg-error'}`}></div>
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start mb-0.5">
-                                            <p className="text-[11px] font-black text-text-primary uppercase">{evt.action}</p>
-                                            <span className="text-[9px] font-medium text-text-tertiary">{evt.time}</span>
+                                            <p className="text-[10px] font-black text-text-primary uppercase leading-tight">{evt.action}</p>
+                                            <span className="text-[8px] font-medium text-text-tertiary">{evt.time}</span>
                                         </div>
-                                        <p className="text-[10px] text-text-tertiary font-bold mb-1 truncate">{evt.name}</p>
-                                        <div className="flex items-center gap-2 text-[9px] text-text-tertiary uppercase font-black opacity-60">
-                                            <Users size={10} /> {evt.user}
+                                        <p className="text-[9px] text-text-tertiary font-bold mb-0.5 truncate">{evt.name}</p>
+                                        <div className="flex items-center gap-2 text-[8px] text-text-tertiary uppercase font-black opacity-60">
+                                            <Users size={8} /> {evt.user}
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-                        <button onClick={() => setView('AUDIT_LOGS')} className="w-full mt-8 py-4 border border-dashed border-border-subtle rounded-2xl text-[10px] font-black text-text-tertiary uppercase tracking-widest hover:bg-bg-secondary transition-all">
+                        <button onClick={() => setView('AUDIT_LOGS')} className="w-full mt-4 py-3 border border-dashed border-border-subtle rounded-xl text-[9px] font-black text-text-tertiary uppercase tracking-widest hover:bg-bg-secondary transition-all">
                             Ver Logs de Auditoria
                         </button>
                     </div>
 
                     {/* Quick System Shortcuts */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <SimpleShortcut icon={<Plus />} label="Admin" />
-                        <SimpleShortcut icon={<RefreshCw />} label="Sync Cache" onClick={fetchDashboardStats} />
-                        <SimpleShortcut icon={<Smartphone />} label="Mobile V" />
-                        <SimpleShortcut icon={<History />} label="Logs" onClick={() => setView('AUDIT_LOGS')} />
+                    <div className="grid grid-cols-2 gap-2">
+                        <SimpleShortcut icon={<Plus size={16} />} label="Admin" />
+                        <SimpleShortcut icon={<RefreshCw size={16} />} label="Sync" onClick={fetchDashboardStats} />
+                        <SimpleShortcut icon={<Smartphone size={16} />} label="Mobile" />
+                        <SimpleShortcut icon={<History size={16} />} label="Logs" onClick={() => setView('AUDIT_LOGS')} />
                     </div>
                 </div>
             </div>
@@ -461,21 +458,21 @@ const AdminDashboard: React.FC = () => {
 const StatCard = ({ label, value, icon, aging, color, bg, trend, onClick }: any) => (
     <div
         onClick={onClick}
-        className="bg-bg-primary border border-border-subtle p-7 rounded-[40px] shadow-sm hover:shadow-xl transition-all group cursor-pointer relative overflow-hidden active:scale-95"
+        className="bg-bg-primary border border-border-subtle p-5 rounded-[32px] shadow-sm hover:shadow-lg transition-all group cursor-pointer relative overflow-hidden active:scale-95"
     >
-        <div className="flex items-start justify-between mb-6">
-            <div className={`p-4 rounded-2xl ${bg} ${color}`}>
-                {React.cloneElement(icon, { size: 24 })}
+        <div className="flex items-start justify-between mb-4">
+            <div className={`p-3 rounded-xl ${bg} ${color}`}>
+                {React.cloneElement(icon, { size: 20 })}
             </div>
             <div className="flex flex-col items-end gap-1">
-                <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest ${trend.includes('Ação') || trend.includes('Urgente') ? 'bg-error text-white' : 'bg-bg-secondary text-text-tertiary'}`}>
+                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-lg uppercase tracking-widest ${trend.includes('Ação') || trend.includes('Urgente') ? 'bg-error text-white' : 'bg-bg-secondary text-text-tertiary'}`}>
                     {trend}
                 </span>
-                <span className="text-[8px] font-bold text-text-tertiary uppercase opacity-60">{aging}</span>
+                <span className="text-[7px] font-bold text-text-tertiary uppercase opacity-60">{aging}</span>
             </div>
         </div>
-        <p className="text-[10px] text-text-tertiary font-black uppercase tracking-[0.15em] mb-1">{label}</p>
-        <h3 className="text-3xl font-black text-text-primary leading-tight tracking-tighter">{value}</h3>
+        <p className="text-[9px] text-text-tertiary font-black uppercase tracking-[0.1em] mb-0.5">{label}</p>
+        <h3 className="text-2xl font-black text-text-primary leading-tight tracking-tighter">{value}</h3>
 
         {/* Progress Hint */}
         <div className="mt-4 h-1 w-full bg-bg-secondary rounded-full overflow-hidden opacity-30">
@@ -487,29 +484,29 @@ const StatCard = ({ label, value, icon, aging, color, bg, trend, onClick }: any)
 const InboxItem = ({ title, desc, count, priority, sla, action, onClick }: any) => (
     <div
         onClick={onClick}
-        className="flex items-center gap-6 p-6 bg-bg-secondary/30 border border-border-subtle/40 rounded-[32px] hover:bg-bg-secondary hover:shadow-lg transition-all cursor-pointer group active:scale-[0.98]"
+        className="flex items-center gap-4 p-4 bg-bg-secondary/30 border border-border-subtle/40 rounded-[24px] hover:bg-bg-secondary hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
     >
-        <div className="w-16 h-16 rounded-[24px] bg-bg-primary border border-border-subtle flex items-center justify-center relative shadow-sm group-hover:scale-110 transition-transform">
-            <Activity className="text-accent-primary" size={28} />
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-error text-white text-xs font-black flex items-center justify-center rounded-full border-4 border-bg-secondary shadow-lg">
+        <div className="w-12 h-12 rounded-[18px] bg-bg-primary border border-border-subtle flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform">
+            <Activity className="text-accent-primary" size={24} />
+            <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-error text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-bg-secondary shadow-lg">
                 {count}
             </div>
         </div>
         <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-                <h5 className="text-base font-black text-text-primary uppercase tracking-tight">{title}</h5>
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest ${priority === 'Alta' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'}`}>
+            <div className="flex items-center gap-2 mb-0.5">
+                <h5 className="text-sm font-black text-text-primary uppercase tracking-tight">{title}</h5>
+                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest ${priority === 'Alta' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'}`}>
                     {priority}
                 </span>
             </div>
-            <p className="text-xs text-text-tertiary font-medium mb-1">{desc}</p>
-            <div className="flex items-center gap-4">
-                <span className="text-[10px] font-black text-accent-primary uppercase tracking-widest flex items-center gap-1">
-                    <Clock size={12} /> SLA: {sla}
+            <p className="text-[10px] text-text-tertiary font-medium mb-0.5">{desc}</p>
+            <div className="flex items-center gap-3">
+                <span className="text-[9px] font-black text-accent-primary uppercase tracking-widest flex items-center gap-1">
+                    <Clock size={10} /> SLA: {sla}
                 </span>
             </div>
         </div>
-        <button className="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-accent-primary hover:text-white transition-all shadow-sm">
+        <button className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-accent-primary hover:text-white transition-all shadow-sm">
             {action}
         </button>
     </div>
@@ -539,12 +536,12 @@ const SearchResultBox = ({ title, icon, results }: any) => (
 const SimpleShortcut = ({ icon, label, onClick }: any) => (
     <button
         onClick={onClick}
-        className="flex flex-col items-center justify-center gap-3 p-6 bg-bg-primary border border-border-subtle rounded-[32px] hover:bg-bg-secondary hover:shadow-md transition-all group active:scale-95"
+        className="flex flex-col items-center justify-center gap-1.5 p-3 bg-bg-primary border border-border-subtle rounded-[20px] hover:bg-bg-secondary hover:shadow-md transition-all group active:scale-95"
     >
-        <div className="text-text-tertiary group-hover:text-accent-primary transition-all">
-            {React.cloneElement(icon, { size: 24 })}
+        <div className="text-text-tertiary group-hover:text-accent-primary transition-all scale-90">
+            {icon}
         </div>
-        <span className="text-[10px] font-black text-text-tertiary uppercase tracking-widest">{label}</span>
+        <span className="text-[8px] font-black text-text-tertiary uppercase tracking-widest">{label}</span>
     </button>
 );
 
@@ -602,7 +599,7 @@ const CommunicationModal = ({ onClose, onSend }: any) => {
                                     className="w-full h-12 bg-bg-secondary border border-border-subtle rounded-xl px-4 text-xs font-bold"
                                 >
                                     <option value="all">Toda a Base</option>
-                                    <option value="providers">Prestadores</option>
+                                    <option value="providers">Profissionais</option>
                                     <option value="clients">Clientes</option>
                                     <option value="kyc_pending">KYC Pendente</option>
                                 </select>

@@ -78,7 +78,7 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                     </p>
 
                     <p className="text-sm text-black dark:text-black mb-8">
-                        Sua avaliação ajuda outros clientes a escolherem os melhores prestadores
+                        Sua avaliação ajuda outros clientes a escolherem os melhores profissionais
                     </p>
 
                     <div className="animate-pulse">
@@ -104,7 +104,7 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                 </button>
 
                 <h1 className="text-2xl font-bold text-black dark:text-white">
-                    Avaliar Prestador
+                    Avaliar Profissional
                 </h1>
             </div>
 
@@ -117,7 +117,7 @@ const ProviderRating: React.FC<ProviderRatingProps> = ({ provider, order, onBack
                         </div>
                         <div>
                             <h2 className="text-lg font-semibold text-black dark:text-white">
-                                {provider?.name || order?.providerName || 'Nome do Prestador'}
+                                {provider?.name || order?.providerName || 'Nome do Profissional'}
                             </h2>
                             <p className="text-sm text-black dark:text-black">
                                 {order?.serviceTitle || 'Serviço'}

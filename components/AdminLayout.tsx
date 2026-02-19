@@ -135,7 +135,7 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
                 </header>
 
                 {/* Content Render Area */}
-                <main className="flex-1 overflow-y-auto bg-bg-secondary/30 p-8 custom-scrollbar">
+                <main className="flex-1 overflow-y-auto bg-bg-secondary/30 p-6 custom-scrollbar flex flex-col">
                     {children}
                 </main>
             </div>

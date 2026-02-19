@@ -56,7 +56,7 @@ export const getServiceById = async (serviceId: string) => {
 }
 
 /**
- * Buscar serviços de um prestador
+ * Buscar serviços de um profissional
  */
 export const getProviderServices = async (providerId: string) => {
 
@@ -81,7 +81,7 @@ export const createService = async (serviceData: Omit<ServiceInsert, 'provider_i
         throw new Error('O preço base deve ser um valor válido.');
     }
 
-    // Obtém o ID do usuário (Prestador)
+    // Obtém o ID do usuário (Profissional)
     let userId: string | null = null;
 
     // 1. Tenta via sessão real do Supabase

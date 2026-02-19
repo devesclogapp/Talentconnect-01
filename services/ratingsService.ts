@@ -16,8 +16,8 @@ export const createRating = async (
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
-    const { data, error } = await supabase
-        .from('ratings')
+    const { data, error } = await (supabase
+        .from('ratings') as any)
         .insert({
             order_id: orderId,
             client_id: user.id,
@@ -37,7 +37,7 @@ export const createRating = async (
 }
 
 /**
- * Buscar avaliações de um prestador
+ * Buscar avaliações de um profissional
  */
 export const getProviderRatings = async (providerId: string, limit?: number) => {
     let query = supabase
@@ -93,7 +93,7 @@ export const isOrderRated = async (orderId: string) => {
 }
 
 /**
- * Buscar estatísticas de avaliações de um prestador
+ * Buscar estatísticas de avaliações de um profissional
  */
 export const getProviderRatingStats = async (providerId: string) => {
     const { data: profile, error } = await supabase
@@ -121,13 +121,13 @@ export const getProviderRatingStats = async (providerId: string) => {
         1: 0,
     }
 
-    ratings?.forEach((rating) => {
+    ratings?.forEach((rating: any) => {
         distribution[rating.score as keyof typeof distribution]++
     })
 
     return {
-        average: profile.rating_average,
-        total: profile.total_ratings,
+        average: profile?.rating_average || 0,
+        total: profile?.total_ratings || 0,
         distribution,
     }
 }

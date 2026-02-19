@@ -161,7 +161,7 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
 
                         <div className="flex items-center gap-2">
                             <span className="meta px-3 py-1 rounded-full bg-accent-primary/10 text-text-primary border border-accent-primary/20 leading-none font-normal text-[10px]">
-                                {(user?.role || '').toLowerCase() === 'provider' ? 'Prestador Verificado' : 'Membro Ativo'}
+                                {(user?.role || '').toLowerCase() === 'provider' ? 'Profissional Verificado' : 'Membro Ativo'}
                             </span>
                             <p className="meta !text-text-tertiary flex items-center gap-1 font-normal text-[10px]">
                                 <MapPin size={10} className="text-accent-primary" /> {user?.user_metadata?.city || 'Brasil'}

@@ -116,13 +116,13 @@ const ProviderListing: React.FC<ProviderListingProps> = ({ onBack, onSelectProvi
                 </button>
 
                 <h1 className="text-2xl font-bold text-black dark:text-white mb-4">
-                    {category || 'Prestadores'}
+                    {category || 'Profissionais'}
                 </h1>
 
                 {/* Search */}
                 <Input
                     icon={Search}
-                    placeholder="Buscar prestador ou serviço..."
+                    placeholder="Buscar profissional ou serviço..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -157,7 +157,7 @@ const ProviderListing: React.FC<ProviderListingProps> = ({ onBack, onSelectProvi
                 {filteredProviders.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-black dark:text-black">
-                            Nenhum prestador encontrado
+                            Nenhum profissional encontrado
                         </p>
                     </div>
                 ) : (

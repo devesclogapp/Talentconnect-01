@@ -235,7 +235,7 @@ const AdminDisputes: React.FC = () => {
                                                         <div className="min-w-0">
                                                             <p className="text-[9px] font-black text-text-tertiary uppercase mb-0.5">Reclamante</p>
                                                             <p className="text-sm font-black text-text-primary uppercase tracking-tight truncate">{selectedDispute.opened_by === 'client' ? resolveUserName(selectedDispute.order?.client) : resolveUserName(selectedDispute.order?.provider)}</p>
-                                                            <p className="text-[9px] text-accent-primary font-black uppercase tracking-widest">{selectedDispute.opened_by === 'client' ? 'Cliente' : 'Prestador'}</p>
+                                                            <p className="text-[9px] text-accent-primary font-black uppercase tracking-widest">{selectedDispute.opened_by === 'client' ? 'Cliente' : 'Profissional'}</p>
                                                         </div>
                                                     </div>
                                                     <div className="p-5 bg-bg-secondary/30 rounded-3xl border border-border-subtle flex gap-4 items-center">
@@ -245,7 +245,7 @@ const AdminDisputes: React.FC = () => {
                                                         <div className="min-w-0">
                                                             <p className="text-[9px] font-black text-text-tertiary uppercase mb-0.5">Parte Notificada</p>
                                                             <p className="text-sm font-black text-text-primary uppercase tracking-tight truncate">{selectedDispute.opened_by === 'client' ? resolveUserName(selectedDispute.order?.provider) : resolveUserName(selectedDispute.order?.client)}</p>
-                                                            <p className="text-[9px] text-text-tertiary font-black uppercase tracking-widest">{selectedDispute.opened_by === 'client' ? 'Prestador' : 'Cliente'}</p>
+                                                            <p className="text-[9px] text-text-tertiary font-black uppercase tracking-widest">{selectedDispute.opened_by === 'client' ? 'Profissional' : 'Cliente'}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -264,7 +264,7 @@ const AdminDisputes: React.FC = () => {
                                                         <div className="w-10 h-10 rounded-2xl bg-success text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-success/20">
                                                             <CheckCircle2 size={20} />
                                                         </div>
-                                                        <p className="text-sm font-black text-success uppercase mb-1">Liberar p/ Prestador</p>
+                                                        <p className="text-sm font-black text-success uppercase mb-1">Liberar p/ Profissional</p>
                                                         <p className="text-[10px] text-text-tertiary leading-relaxed font-medium">O serviço será considerado executado e o valor será repassado imediatamente ao profissional.</p>
                                                     </button>
                                                     <button
@@ -275,7 +275,7 @@ const AdminDisputes: React.FC = () => {
                                                             <XCircle size={20} />
                                                         </div>
                                                         <p className="text-sm font-black text-error uppercase mb-1">Estornar p/ Cliente</p>
-                                                        <p className="text-[10px] text-text-tertiary leading-relaxed font-medium">Estorno integral do valor bloqueado. O prestador não receberá remuneração por este pedido.</p>
+                                                        <p className="text-[10px] text-text-tertiary leading-relaxed font-medium">Estorno integral do valor bloqueado. O profissional não receberá remuneração por este pedido.</p>
                                                     </button>
                                                 </div>
 

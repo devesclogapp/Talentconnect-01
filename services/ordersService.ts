@@ -39,7 +39,7 @@ export const createOrder = async (orderData: Omit<OrderInsert, 'client_id'> & {
 }) => {
     // Validação básica
     if (!orderData.service_id) throw new Error('Serviço não identificado.');
-    if (!orderData.provider_id) throw new Error('Prestador não identificado.');
+    if (!orderData.provider_id) throw new Error('Profissional não identificado.');
     if (!orderData.pricing_mode) throw new Error('Modalidade de preço não definida.');
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -148,7 +148,7 @@ export const acceptOrder = async (orderId: string) => {
     if (error) throw error
 
     // Log de Auditoria
-    await logWorkflowAction('ORDER_ACCEPTED', orderId, 'O prestador aceitou o pedido.');
+    await logWorkflowAction('ORDER_ACCEPTED', orderId, 'O profissional aceitou o pedido.');
 
     return data as Order
 }
@@ -168,7 +168,7 @@ export const rejectOrder = async (orderId: string) => {
     if (error) throw error
 
     // Log de Auditoria
-    await logWorkflowAction('ORDER_REJECTED', orderId, 'O prestador recusou o pedido.');
+    await logWorkflowAction('ORDER_REJECTED', orderId, 'O profissional recusou o pedido.');
 
     return data as Order
 }
@@ -194,7 +194,7 @@ export const sendCounterOffer = async (orderId: string, newAmount: number) => {
     if (error) throw error
 
     // Log de Auditoria
-    await logWorkflowAction('ORDER_COUNTER_OFFER', orderId, `O prestador enviou uma contraproposta de R$ ${newAmount}.`, { newAmount });
+    await logWorkflowAction('ORDER_COUNTER_OFFER', orderId, `O profissional enviou uma contraproposta de R$ ${newAmount}.`, { newAmount });
 
     return data as Order
 }
@@ -288,7 +288,7 @@ export const markExecutionStart = async (orderId: string) => {
         .eq('id', orderId)
 
     // Log de Auditoria
-    await logWorkflowAction('EXECUTION_STARTED_MARK', orderId, 'O prestador sinalizou o início do serviço.');
+    await logWorkflowAction('EXECUTION_STARTED_MARK', orderId, 'O profissional sinalizou o início do serviço.');
 
     return data
 }
@@ -313,7 +313,7 @@ export const confirmExecutionStart = async (orderId: string) => {
         .eq('id', orderId)
 
     // Log de Auditoria
-    await logWorkflowAction('EXECUTION_STARTED_CONFIRM', orderId, 'O cliente confirmou a presença do prestador.');
+    await logWorkflowAction('EXECUTION_STARTED_CONFIRM', orderId, 'O cliente confirmou a presença do profissional.');
 
     return data
 }
@@ -341,7 +341,7 @@ export const markExecutionFinish = async (orderId: string) => {
         .eq('id', orderId)
 
     // Log de Auditoria
-    await logWorkflowAction('EXECUTION_FINISHED_MARK', orderId, 'O prestador sinalizou a conclusão do serviço.');
+    await logWorkflowAction('EXECUTION_FINISHED_MARK', orderId, 'O profissional sinalizou a conclusão do serviço.');
 
     return data
 }
@@ -401,7 +401,7 @@ export const openDispute = async (
         .eq('id', orderId)
 
     // Log de Auditoria
-    await logWorkflowAction('DISPUTE_OPENED', orderId, `Disputa aberta pelo ${openedBy === 'client' ? 'cliente' : 'prestador'}. Motivo: ${reason}`, { reason, openedBy });
+    await logWorkflowAction('DISPUTE_OPENED', orderId, `Disputa aberta pelo ${openedBy === 'client' ? 'cliente' : 'profissional'}. Motivo: ${reason}`, { reason, openedBy });
 
     return data
 }

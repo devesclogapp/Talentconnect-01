@@ -69,7 +69,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
             },
             {
                 id: '2',
-                clientName: 'Contratante Gamma',
+                clientName: 'Cliente Gamma',
                 rating: 5,
                 date: '2024-01-10',
                 comment: 'Alto fator de confiança. Pontual e tecnicamente preciso.'

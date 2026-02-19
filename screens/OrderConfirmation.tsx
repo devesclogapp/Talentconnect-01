@@ -48,7 +48,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
             const providerId = orderData.provider?.id || orderData.service?.provider_id;
 
             if (!providerId) {
-                throw new Error("ID do prestador não encontrado");
+                throw new Error("ID do profissional não encontrado");
             }
 
             const payload = {

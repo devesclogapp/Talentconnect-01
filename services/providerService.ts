@@ -6,7 +6,7 @@ type ProviderProfileInsert = Database['public']['Tables']['provider_profiles']['
 type ProviderProfileUpdate = Database['public']['Tables']['provider_profiles']['Update']
 
 /**
- * Criar perfil de prestador
+ * Criar perfil de profissional
  */
 export const createProviderProfile = async (
     profileData: Omit<ProviderProfileInsert, 'user_id'>
@@ -14,8 +14,8 @@ export const createProviderProfile = async (
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
-    const { data, error } = await supabase
-        .from('provider_profiles')
+    const { data, error } = await (supabase
+        .from('provider_profiles') as any)
         .insert({
             ...profileData,
             user_id: user.id,
@@ -28,7 +28,7 @@ export const createProviderProfile = async (
 }
 
 /**
- * Buscar perfil de prestador por user_id
+ * Buscar perfil de profissional por user_id
  */
 export const getProviderProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -45,7 +45,7 @@ export const getProviderProfile = async (userId: string) => {
 }
 
 /**
- * Buscar meu perfil de prestador
+ * Buscar meu perfil de profissional
  */
 export const getMyProviderProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -55,7 +55,7 @@ export const getMyProviderProfile = async () => {
 }
 
 /**
- * Atualizar perfil de prestador
+ * Atualizar perfil de profissional
  */
 export const updateProviderProfile = async (updates: ProviderProfileUpdate) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -70,8 +70,8 @@ export const updateProviderProfile = async (updates: ProviderProfileUpdate) => {
 
     if (existing) {
         // Atualizar
-        const { data, error } = await supabase
-            .from('provider_profiles')
+        const { data, error } = await (supabase
+            .from('provider_profiles') as any)
             .update(updates)
             .eq('user_id', user.id)
             .select()
@@ -81,8 +81,8 @@ export const updateProviderProfile = async (updates: ProviderProfileUpdate) => {
         return data
     } else {
         // Criar
-        const { data, error } = await supabase
-            .from('provider_profiles')
+        const { data, error } = await (supabase
+            .from('provider_profiles') as any)
             .insert({
                 ...updates,
                 user_id: user.id,
@@ -96,7 +96,7 @@ export const updateProviderProfile = async (updates: ProviderProfileUpdate) => {
 }
 
 /**
- * Buscar prestadores ativos
+ * Buscar profissionais ativos
  */
 export const getActiveProviders = async (limit?: number) => {
     let query = supabase
@@ -120,7 +120,7 @@ export const getActiveProviders = async (limit?: number) => {
 }
 
 /**
- * Buscar prestadores por categoria de serviço
+ * Buscar profissionais por categoria de serviço
  */
 export const getProvidersByCategory = async (category: string) => {
     const { data, error } = await supabase
@@ -135,7 +135,7 @@ export const getProvidersByCategory = async (category: string) => {
 
     if (error) throw error
 
-    // Remover duplicatas (mesmo prestador pode ter vários serviços)
+    // Remover duplicatas (mesmo profissional pode ter vários serviços)
     const uniqueProviders = data.reduce((acc, item) => {
         if (!acc.find((p: any) => p.provider_id === item.provider_id)) {
             acc.push(item)
@@ -147,7 +147,7 @@ export const getProvidersByCategory = async (category: string) => {
 }
 
 /**
- * Verificar se usuário tem perfil de prestador
+ * Verificar se usuário tem perfil de profissional
  */
 export const hasProviderProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -164,14 +164,14 @@ export const hasProviderProfile = async () => {
 }
 
 /**
- * Ativar/Desativar perfil de prestador
+ * Ativar/Desativar perfil de profissional
  */
 export const toggleProviderStatus = async (active: boolean) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
-    const { data, error } = await supabase
-        .from('provider_profiles')
+    const { data, error } = await (supabase
+        .from('provider_profiles') as any)
         .update({ active })
         .eq('user_id', user.id)
         .select()

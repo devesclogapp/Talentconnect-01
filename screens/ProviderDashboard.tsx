@@ -152,7 +152,7 @@ const ProviderDashboard: React.FC<Props> = ({
                             </div>
                         </div>
                         <div>
-                            <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none mb-0.5">terminal do prestador</p>
+                            <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none mb-0.5">terminal do profissional</p>
                             <h2 className="heading-lg text-text-primary">{userName}</h2>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>

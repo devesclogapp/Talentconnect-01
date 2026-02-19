@@ -3,37 +3,38 @@
 @tailwind utilities;
 
 :root {
-  /* Light Mode Design System - Premium Marketplace */
+  /* Talent Connect - Light Theme (Default) */
   --bg-primary: #FFFFFF;
   --bg-secondary: #F8F9FA;
   --bg-tertiary: #F1F3F5;
 
-  --accent-primary: #000000;
-  --accent-secondary: #e48900;
+  --accent-primary: #ff6b00;
+  /* Premium Orange */
+  --accent-secondary: #e65a00;
 
   --text-primary: #111111;
   --text-secondary: #4A4A4A;
   --text-tertiary: #888888;
 
-  --success: #4CAF50;
-  --error: #F44336;
-  --warning: #FF9800;
-  --info: #00B8D4;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
 
   --border-subtle: #E9ECEF;
   --border-medium: #DEE2E6;
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
-  --glow-accent: 0 0 20px rgba(198, 255, 0, 0.4);
+  --glow-accent: 0 0 20px rgba(255, 107, 0, 0.4);
 
   /* Legacy Compatibility (mapped to new system) */
   --primary-green: var(--success);
@@ -109,6 +110,12 @@
     @apply h-[56px] px-8 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95;
     background: var(--accent-primary);
     color: #FFFFFF;
+    box-shadow: 0 4px 14px 0 rgba(255, 107, 0, 0.39);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-secondary);
+    box-shadow: 0 6px 20px rgba(255, 107, 0, 0.23);
   }
 
 

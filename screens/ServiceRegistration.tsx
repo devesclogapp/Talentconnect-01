@@ -9,7 +9,7 @@ import {
   Clock
 } from 'lucide-react';
 import { useAppStore } from '../store';
-import { CATEGORIES_LIST as CATEGORIES, CATEGORY_MAP } from '../constants';
+import { CATEGORIES_LIST as CATEGORIES, CATEGORY_MAP, getCategoryImage } from '../constants';
 
 interface Props {
   onBack: () => void;
@@ -84,7 +84,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
         description: formData.description,
         pricing_mode: formData.pricingMode,
         duration_hours: parseFloat(formData.durationHours) || 0,
-        image_url: CATEGORY_MAP[formData.category]?.image || null,
+        image_url: getCategoryImage(formData.category),
         active: true
       };
 

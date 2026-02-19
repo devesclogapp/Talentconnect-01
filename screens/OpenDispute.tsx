@@ -12,7 +12,7 @@ interface OpenDisputeProps {
 }
 
 const REASONS: { value: DisputeReason; label: string; desc: string }[] = [
-    { value: 'provider_no_show', label: 'Profissional não compareceu', desc: 'O prestador não apareceu no horário agendado.' },
+    { value: 'provider_no_show', label: 'Profissional não compareceu', desc: 'O profissional não apareceu no horário agendado.' },
     { value: 'service_not_completed', label: 'Serviço incompleto', desc: 'O serviço foi iniciado mas não foi finalizado como acordado.' },
     { value: 'service_not_as_agreed', label: 'Serviço diferente do contratado', desc: 'O que foi executado não condiz com a descrição do serviço.' },
     { value: 'timing_issue', label: 'Problema com horário/data', desc: 'Divergência significativa no cronograma agendado.' },
@@ -104,8 +104,8 @@ const OpenDispute: React.FC<OpenDisputeProps> = ({ order, user, onBack, onSucces
                                 onClick={() => setReason(item.value)}
                                 disabled={loading || showSuccess}
                                 className={`w-full text-left p-4 rounded-2xl border transition-all ${reason === item.value
-                                        ? 'border-black dark:border-white bg-neutral-100 dark:bg-neutral-800'
-                                        : 'border-neutral-100 dark:border-neutral-800 bg-white dark:bg-black'
+                                    ? 'border-black dark:border-white bg-neutral-100 dark:bg-neutral-800'
+                                    : 'border-neutral-100 dark:border-neutral-800 bg-white dark:bg-black'
                                     } ${showSuccess ? 'opacity-40' : ''}`}
                             >
                                 <div className="flex justify-between items-center mb-1">

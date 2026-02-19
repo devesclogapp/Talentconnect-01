@@ -468,7 +468,7 @@ const AdminOrders: React.FC = () => {
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                                             <FinancialCard label="Total Custódia" value={`R$ ${selectedOrder.payment?.amount_total || '0'}`} sub="Valor retido no Escrow" color="text-text-primary" />
                                             <FinancialCard label="Taxa Operadora" value={`R$ ${selectedOrder.payment?.operator_fee || '0'}`} sub="Comissão Admin Connect" color="text-accent-primary" />
-                                            <FinancialCard label="Líquido Prestador" value={`R$ ${selectedOrder.payment?.provider_amount || '0'}`} sub="Previsão de Repasse" color="text-success" />
+                                            <FinancialCard label="Líquido Profissional" value={`R$ ${selectedOrder.payment?.provider_amount || '0'}`} sub="Previsão de Repasse" color="text-success" />
                                         </div>
 
                                         <div className="bg-bg-secondary/20 p-10 rounded-[40px] border border-border-subtle space-y-8 text-left">
@@ -510,7 +510,7 @@ const AdminOrders: React.FC = () => {
                                                         <p className="text-xs text-text-primary">Olá, já cheguei no local. Quando podemos começar?</p>
                                                     </div>
                                                     <div className="bg-black p-4 rounded-2xl ml-auto max-w-[80%]">
-                                                        <p className="text-[8px] font-black uppercase text-white/60 mb-1">{resolveUserName(selectedOrder.provider)} (Prestador)</p>
+                                                        <p className="text-[8px] font-black uppercase text-white/60 mb-1">{resolveUserName(selectedOrder.provider)} (Profissional)</p>
                                                         <p className="text-xs text-white">Oi! Já estou finalizando o atendimento anterior e chego em 5 minutos.</p>
                                                     </div>
                                                     <div className="bg-bg-primary p-4 rounded-2xl border border-border-subtle max-w-[80%]">
@@ -679,7 +679,7 @@ const AdminOrders: React.FC = () => {
                 <div className="bg-bg-primary border border-border-subtle p-6 rounded-[32px] flex flex-col md:flex-row gap-6 items-center">
                     <div className="relative flex-1 w-full">
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-text-tertiary" size={18} />
-                        <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-bg-secondary border border-border-subtle rounded-2xl pl-14 pr-6 h-16 text-sm font-medium outline-none focus:border-accent-primary transition-all" placeholder="Filtrar por Protocolo, Cliente, Prestador ou Serviço..." />
+                        <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-bg-secondary border border-border-subtle rounded-2xl pl-14 pr-6 h-16 text-sm font-medium outline-none focus:border-accent-primary transition-all" placeholder="Filtrar por Protocolo, Cliente, Profissional ou Serviço..." />
                     </div>
                     <div className="flex gap-4 w-full md:w-auto">
                         <div className="flex-1 md:w-48">

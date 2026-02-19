@@ -146,7 +146,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                     </div>
                     <div>
                         <h3 className="heading-md !text-base mb-1">Garantia Talent Connect</h3>
-                        <p className="meta text-black">Seu dinheiro está seguro conosco. O prestador só recebe após sua autorização final.</p>
+                        <p className="meta text-black">Seu dinheiro está seguro conosco. O profissional só recebe após sua autorização final.</p>
                     </div>
                 </Card>
 

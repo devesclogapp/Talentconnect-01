@@ -81,6 +81,12 @@ export const CATEGORY_MAP: Record<string, CategoryInfo> = {
   },
 };
 
+export const getCategoryImage = (category: string): string => {
+  if (!category) return CATEGORY_MAP['Elite'].image;
+  const normalized = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+  return CATEGORY_MAP[normalized]?.image || CATEGORY_MAP['Elite'].image;
+};
+
 export const CATEGORIES_LIST = Object.entries(CATEGORY_MAP).map(([id, data]) => ({
   id,
   ...data

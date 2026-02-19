@@ -106,7 +106,7 @@ const AuditLogs: React.FC = () => {
 
             // Buscar metadados dos pedidos em lote
             const orderIds = Array.from(new Set(
-                currentLogs
+                (currentLogs as any[])
                     .filter(l => l.entity_type === 'orders' || l.entity_type === 'disputes' || l.entity_type === 'executions')
                     .map(l => {
                         if (l.entity_type === 'orders') return l.entity_id;
@@ -129,7 +129,7 @@ const AuditLogs: React.FC = () => {
                     .in('id', orderIds);
 
                 const meta: Record<string, any> = {};
-                ordersData?.forEach(o => { meta[o.id] = o; });
+                (ordersData as any[])?.forEach(o => { meta[o.id] = o; });
                 setOrderMetadata(meta);
             }
 
@@ -254,7 +254,7 @@ const AuditLogs: React.FC = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" size={16} />
                     <input
                         type="text"
-                        placeholder="Buscar por cliente, prestador, serviço ou ID..."
+                        placeholder="Buscar por cliente, profissional, serviço ou ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-bg-secondary border border-border-subtle rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-accent-primary transition-all"

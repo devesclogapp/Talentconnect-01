@@ -108,7 +108,7 @@ const UserManagement: React.FC = () => {
             const { data: allPayments } = await supabase.from('payments').select('order_id, amount_total, escrow_status');
             const { data: allDisputes } = await supabase.from('disputes').select('order_id');
 
-            const processedUsers = (usersData || []).map(u => {
+            const processedUsers = (usersData as any[] || []).map((u: any) => {
                 const userOrders = (allOrders as any[] || []).filter(o => o.client_id === u.id || o.provider_id === u.id);
                 const orderIds = userOrders.map(o => o.id);
 
@@ -350,7 +350,7 @@ const UserManagement: React.FC = () => {
                     <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="h-14 px-6 bg-bg-secondary border border-border-subtle rounded-2xl text-[10px] font-black uppercase outline-none">
                         <option value="all">Filtro: Papel</option>
                         <option value="client">Cliente</option>
-                        <option value="provider">Prestador</option>
+                        <option value="provider">Profissional</option>
                     </select>
                 </div>
 

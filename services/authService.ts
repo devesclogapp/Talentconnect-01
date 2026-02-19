@@ -40,48 +40,50 @@ export const signUp = async (data: SignUpData) => {
     // Inserir explicitamente na tabela public.users para garantir que os dados existam
     if (authData.user) {
         try {
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0E0E10&color=fff`;
+
             await (supabase as any)
                 .from('users')
-                .insert({
+                .upsert({
                     id: authData.user.id,
                     email: authData.user.email,
                     name: name,
                     role: role,
                     phone: phone || null,
-                    avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0E0E10&color=fff`
-                });
+                    avatar_url: avatarUrl
+                }, { onConflict: 'id' });
+
+            console.log("✅ Usuário sincronizado no banco de dados.");
         } catch (dbError) {
             console.error("Erro ao sincronizar tabela users:", dbError);
         }
     }
 
-    // Se for prestador, cria o perfil inicial
+    // Se for profissional, cria o perfil inicial
     if (role === 'provider' && authData.user) {
         try {
             const profileData: any = {
                 user_id: authData.user.id,
-                professional_title: 'Novo Prestador',
+                professional_title: 'Novo Profissional',
                 active: true,
                 rating_average: 5.0,
                 total_ratings: 0,
                 total_services_completed: 0
             };
 
-            // Map document to provider_profiles columns if possible
             if (document) {
-                // We use document_cpf for both for now, or just CPF if PF.
-                // Since we don't have document_cnpj column in types yet, we rely on metadata.
-                // But if it's PF, we can try to save to document_cpf.
-                if (category === 'pf') {
-                    profileData.document_cpf = document;
-                }
+                // Se for PF, salvamos no CPF; se for MEI, poderíamos ter uma coluna CNPJ, 
+                // mas como o schema atual foca em CPF, mantemos a compatibilidade.
+                profileData.document_cpf = document;
             }
 
             await (supabase as any)
                 .from('provider_profiles')
-                .insert(profileData);
+                .upsert(profileData, { onConflict: 'user_id' });
+
+            console.log("✅ Perfil de profissional inicializado.");
         } catch (profileError) {
-            console.error("Erro ao criar perfil de prestador:", profileError);
+            console.error("Erro ao criar perfil de profissional:", profileError);
         }
     }
 

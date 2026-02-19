@@ -1,5 +1,5 @@
 import React from 'react';
-import { CATEGORY_MAP } from '../constants';
+import { CATEGORY_MAP, getCategoryImage } from '../constants';
 
 interface Props {
   service: any;
@@ -12,16 +12,23 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
 
   const providerName = service.provider?.name || 'Profissional';
   const providerAvatar = service.provider?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(providerName)}&background=34A853&color=fff`;
-  const serviceImage = service.image_url || CATEGORY_MAP[service.category]?.image || `https://picsum.photos/seed/${service.id}/600/400`;
+  const serviceImage = service.image_url || getCategoryImage(service.category);
   const rating = service.provider?.provider_profile?.rating_average || 0;
   const reviews = service.provider?.provider_profile?.total_ratings || 0;
 
   return (
     <div className="bg-app-bg min-h-screen transition-colors">
       <div className="relative h-[300px] w-full">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${serviceImage})` }}>
-          <div className="absolute inset-0 bg-gradient-to-t from-app-bg via-transparent to-black/30"></div>
-        </div>
+        <img
+          src={serviceImage}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = getCategoryImage(service.category);
+          }}
+          className="absolute inset-0 w-full h-full object-cover"
+          alt={service.title}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-app-bg via-transparent to-black/30"></div>
         <button onClick={onBack} className="absolute top-12 left-6 w-10 h-10 bg-white dark:bg-zinc-900 rounded-full flex items-center justify-center text-app-text shadow-xl z-20">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
