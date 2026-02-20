@@ -141,7 +141,10 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack, onSelectOrder }) =>
                     />
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6">
+                <div
+                    className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
                     {[
                         { id: 'all', label: 'Todos', icon: <Filter size={16} /> },
                         { id: 'in_progress', label: 'Em Andamento', icon: <Clock size={16} /> },
