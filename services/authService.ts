@@ -1,4 +1,7 @@
 import { supabase } from './supabaseClient'
+import type { Database } from '../types/database.types'
+import { User as CustomUser } from '../types'
+import { AuthChangeEvent, Session, User } from '@supabase/supabase-js'
 
 export interface SignUpData {
     email: string
@@ -42,16 +45,17 @@ export const signUp = async (data: SignUpData) => {
         try {
             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0E0E10&color=fff`;
 
-            await (supabase as any)
-                .from('users')
+            await (supabase
+                .from('users') as any)
                 .upsert({
                     id: authData.user.id,
-                    email: authData.user.email,
+                    email: authData.user.email || '',
                     name: name,
-                    role: role,
+                    role: (role as 'client' | 'provider' | 'operator'),
                     phone: phone || null,
-                    avatar_url: avatarUrl
-                }, { onConflict: 'id' });
+                    avatar_url: avatarUrl,
+                    updated_at: new Date().toISOString()
+                } as Database['public']['Tables']['users']['Insert'], { onConflict: 'id' });
 
             console.log("✅ Usuário sincronizado no banco de dados.");
         } catch (dbError) {
@@ -62,23 +66,18 @@ export const signUp = async (data: SignUpData) => {
     // Se for profissional, cria o perfil inicial
     if (role === 'provider' && authData.user) {
         try {
-            const profileData: any = {
+            const profileData: Database['public']['Tables']['provider_profiles']['Insert'] = {
                 user_id: authData.user.id,
-                professional_title: 'Novo Profissional',
-                active: true,
-                rating_average: 5.0,
-                total_ratings: 0,
-                total_services_completed: 0
+                documents_status: 'pending',
+                active: false
             };
 
             if (document) {
-                // Se for PF, salvamos no CPF; se for MEI, poderíamos ter uma coluna CNPJ, 
-                // mas como o schema atual foca em CPF, mantemos a compatibilidade.
                 profileData.document_cpf = document;
             }
 
-            await (supabase as any)
-                .from('provider_profiles')
+            await (supabase
+                .from('provider_profiles') as any)
                 .upsert(profileData, { onConflict: 'user_id' });
 
             console.log("✅ Perfil de profissional inicializado.");
@@ -127,7 +126,6 @@ export const getCurrentUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         return user;
     } catch (e) {
-        // Retorna null silenciosamente se não houver sessão
         return null;
     }
 }
@@ -135,48 +133,46 @@ export const getCurrentUser = async () => {
 /**
  * Sincronizar dados da sessão com a tabela public.users
  */
-export const syncUserSession = async (user: any) => {
+export const syncUserSession = async (user: User | null) => {
     if (!user) return;
 
     const metadata = user.user_metadata;
     let nameToSave = metadata?.name || 'Usuário';
 
-    // Se o nome for genérico e tivermos email, tenta gerar um nome melhor
     if ((nameToSave === 'Usuário' || nameToSave === 'Cliente' || nameToSave === 'Profissional') && user.email) {
         const emailName = user.email.split('@')[0];
-        // Capitalizar a primeira letra
         nameToSave = emailName.charAt(0).toUpperCase() + emailName.slice(1);
     }
 
     try {
-        await (supabase as any)
-            .from('users')
+        await (supabase
+            .from('users') as any)
             .upsert({
                 id: user.id,
-                email: user.email,
+                email: user.email || '',
                 name: nameToSave,
-                role: metadata?.role || 'client',
+                role: (metadata?.role || 'client') as 'client' | 'provider' | 'operator',
                 phone: metadata?.phone || null,
                 avatar_url: metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameToSave)}&background=0E0E10&color=fff`,
                 updated_at: new Date().toISOString()
-            });
+            } as Database['public']['Tables']['users']['Insert']);
     } catch (dbError) {
         console.error("Erro ao sincronizar tabela users:", dbError);
     }
 }
 
 /**
- * Obter perfil completo do usuário (com dados da tabela users)
+ * Obter perfil completo do usuário
  */
 export const getUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-        .from('users')
+    const { data, error } = await (supabase
+        .from('users') as any)
         .select('*')
         .eq('id', userId)
         .single()
 
     if (error) throw error
-    return data
+    return data as CustomUser
 }
 
 /**
@@ -187,11 +183,6 @@ export const updateUserProfile = async (userId: string, updates: {
     phone?: string
     avatar_url?: string
 }) => {
-    const query = (supabase as any)
-        .from('users')
-        .update(updates)
-        .eq('id', userId);
-
     // Também atualizar metadata no Auth (importante para consistency)
     if (updates.name || updates.avatar_url || updates.phone) {
         await supabase.auth.updateUser({
@@ -201,10 +192,15 @@ export const updateUserProfile = async (userId: string, updates: {
         });
     }
 
-    const { data, error } = await query.select().single()
+    const { data, error } = await (supabase
+        .from('users') as any)
+        .update(updates)
+        .eq('id', userId)
+        .select()
+        .single()
 
     if (error) throw error
-    return data
+    return data as CustomUser
 }
 
 /**
@@ -246,6 +242,7 @@ export const updatePassword = async (newPassword: string) => {
 /**
  * Listener para mudanças de autenticação
  */
-export const onAuthStateChange = (callback: (event: string, session: any) => void) => {
+export const onAuthStateChange = (callback: (event: AuthChangeEvent, session: Session | null) => void) => {
     return supabase.auth.onAuthStateChange(callback)
 }
+

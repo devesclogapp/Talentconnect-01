@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { User, Service, Order } from './types';
 
 interface AppState {
-    // Navigation
-    view: string;
-    previousView: string | null;
-    history: string[];
+    // Navigation (Legacy removed, moved to react-router-dom)
+    // view: string;
+    // previousView: string | null;
+    // history: string[];
 
     // Auth
     user: User | null;
@@ -16,7 +16,7 @@ interface AppState {
 
     // Selection State
     selectedService: Service | null;
-    selectedProvider: any | null; // Tipar melhor depois
+    selectedProvider: any | null;
     selectedClient: any | null;
     selectedOrder: Order | null;
     selectedNegotiation: any | null;
@@ -26,9 +26,9 @@ interface AppState {
     viewFilters: any | null;
 
     // Actions
-    setView: (view: string) => void;
-    goBack: () => void;
-    resetHistory: () => void;
+    // setView: (view: string) => void;
+    // goBack: () => void;
+    resetHistory: () => void; // Keeping for compatibility or specific reset needs
 
     setUser: (user: User | null) => void;
     setLoading: (loading: boolean) => void;
@@ -46,9 +46,6 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
     // Initial State
-    view: 'SPLASH',
-    previousView: null,
-    history: [],
     user: null,
     loading: true,
     isDarkMode: localStorage.getItem('darkMode') === 'true',
@@ -63,40 +60,7 @@ export const useAppStore = create<AppState>((set) => ({
     viewFilters: null,
 
     // Actions
-    setView: (newView) => set((state) => {
-        // Prevent pushing duplicate consecutive views
-        if (state.view === newView) return state;
-
-        // Persistir última visualização do admin se for uma tela de admin
-        if (newView.startsWith('ADMIN_') && newView !== 'ADMIN_LOGIN') {
-            localStorage.setItem('lastAdminView', newView);
-        }
-
-        return {
-            history: [...state.history, state.view],
-            previousView: state.view,
-            view: newView
-        };
-    }),
-
-    goBack: () => set((state) => {
-        if (state.history.length === 0) {
-            // Fallback if history is empty (e.g. reload on sub-page)
-            const fallback = (state.user?.role as string)?.toUpperCase() === 'PROVIDER' ? 'PROVIDER_DASHBOARD' : 'CLIENT_DASHBOARD';
-            return { view: fallback };
-        }
-
-        const previous = state.history[state.history.length - 1];
-        const newHistory = state.history.slice(0, -1);
-
-        return {
-            view: previous,
-            history: newHistory,
-            previousView: newHistory.length > 0 ? newHistory[newHistory.length - 1] : null
-        };
-    }),
-
-    resetHistory: () => set({ history: [] }),
+    resetHistory: () => { }, // History managed by router now
 
     setUser: (user) => set({ user }),
 
@@ -124,8 +88,6 @@ export const useAppStore = create<AppState>((set) => ({
 
     logout: () => set({
         user: null,
-        view: 'LOGIN',
-        history: [], // Clear history on logout
         selectedService: null,
         selectedProvider: null,
         selectedClient: null,

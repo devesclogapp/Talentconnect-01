@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
-import { ArrowLeft, CreditCard, Lock, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { Button } from '../components/ui/Button';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, CreditCard, Lock, CheckCircle, Loader2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { supabase } from '../services/supabaseClient';
+import { useAppStore } from '../store';
+import { processPayment } from '../services/ordersService';
 
-interface PaymentProps {
-    order: any;
-    onBack: () => void;
-    onPaymentSuccess: () => void;
-}
+const Payment: React.FC = () => {
+    const navigate = useNavigate();
+    const { selectedOrder, setSelectedOrder } = useAppStore();
 
-const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) => {
     const [paymentMethod, setPaymentMethod] = useState<'credit' | 'debit' | 'pix'>('credit');
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentComplete, setPaymentComplete] = useState(false);
@@ -25,16 +24,23 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    // If no order is selected, go back to orders
+    useEffect(() => {
+        if (!selectedOrder) {
+            navigate('/client/orders');
+        }
+    }, [selectedOrder, navigate]);
+
     const formatCardNumber = (value: string) => {
         const cleaned = value.replace(/\s/g, '').replace(/\D/g, '');
         const chunks = cleaned.match(/.{1,4}/g) || [];
-        return chunks.join(' ').substr(0, 19);
+        return chunks.join(' ').substring(0, 19);
     };
 
     const formatExpiry = (value: string) => {
         const cleaned = value.replace(/\D/g, '');
         if (cleaned.length >= 2) {
-            return cleaned.substr(0, 2) + '/' + cleaned.substr(2, 2);
+            return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 2);
         }
         return cleaned;
     };
@@ -62,6 +68,8 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
     };
 
     const handlePayment = async () => {
+        if (!selectedOrder) return;
+
         if (paymentMethod !== 'pix' && !validateCardForm()) {
             return;
         }
@@ -69,36 +77,22 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
         setIsProcessing(true);
 
         try {
-            // Gateway simulation
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Call our service (which is currently a simulation/invoke)
+            await processPayment(
+                selectedOrder.id,
+                paymentMethod,
+                selectedOrder.total_amount || 0
+            );
 
-            // Update order status to 'paid_escrow_held'
-            const { error } = await (supabase as any)
-                .from('orders')
-                .update({
-                    status: 'paid_escrow_held',
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', order.id);
-
-            if (error) throw error;
-
-            // Create payment record
-            await (supabase as any)
-                .from('payments')
-                .insert({
-                    order_id: order.id,
-                    amount_total: order.total_amount,
-                    operator_fee: order.total_amount * 0.15,
-                    provider_amount: order.total_amount * 0.85,
-                    escrow_status: 'held',
-                    payment_method: paymentMethod
-                });
+            // Simulation of local delay for UX
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
             setPaymentComplete(true);
+
+            // Auto-redirect after success
             setTimeout(() => {
-                onPaymentSuccess();
-            }, 2000);
+                navigate(`/client/tracking`);
+            }, 2500);
         } catch (error: any) {
             console.error('Payment error:', error);
             setErrors({ general: 'Falha ao processar pagamento: ' + error.message });
@@ -106,6 +100,8 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
             setIsProcessing(false);
         }
     };
+
+    if (!selectedOrder) return null;
 
     if (paymentComplete) {
         return (
@@ -118,7 +114,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                     <p className="body text-black mb-8">Seu valor está retido com segurança e será liberado apenas após a conclusão do serviço.</p>
                     <div className="flex items-center justify-center gap-3 text-black-green font-normal text-[10px]">
                         <Loader2 size={16} className="animate-spin" />
-                        Redirecionando...
+                        Redirecionando para acompanhamento...
                     </div>
                 </div>
             </div>
@@ -129,11 +125,11 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
         <div className="screen-container bg-app-bg min-h-screen pb-6">
             <header className="sticky top-0 bg-white/90 dark:bg-black/90 backdrop-blur-md z-10 px-4 pt-6 pb-4 border-b border-neutral-100 dark:border-neutral-900">
                 <button
-                    onClick={onBack}
+                    onClick={() => navigate(-1)}
                     className="interactive flex items-center gap-2 text-black mb-4"
                 >
                     <ArrowLeft size={20} />
-                    <span className="font-normal text-[10px]">Resumo do pedido</span>
+                    <span className="font-normal text-[10px]">Voltar</span>
                 </button>
                 <h1 className="text-2xl font-bold text-black dark:text-white">Pagamento</h1>
             </header>
@@ -153,7 +149,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                 {/* Total */}
                 <div className="text-center py-4">
                     <p className="text-black font-normal text-sm mb-1">Total a reter</p>
-                    <h2 className="text-5xl font-bold text-black dark:text-white">R$ {order?.total_amount?.toFixed(2)}</h2>
+                    <h2 className="text-5xl font-bold text-black dark:text-white">R$ {selectedOrder.total_amount?.toFixed(2)}</h2>
                 </div>
 
                 {/* Methods */}
@@ -202,7 +198,7 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                         <div className="space-y-1">
                             <label className="text-black font-normal !text-[9px] px-1">Nome no cartão</label>
                             <Input
-                                placeholder="José Silva"
+                                placeholder="JOSÉ SILVA"
                                 value={cardData.name}
                                 onChange={(e) => setCardData(prev => ({ ...prev, name: e.target.value.toUpperCase() }))}
                                 error={errors.name}
@@ -243,8 +239,11 @@ const Payment: React.FC<PaymentProps> = ({ order, onBack, onPaymentSuccess }) =>
                         className="w-full py-6 bg-primary-black text-white rounded-[24px] shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all font-normal"
                     >
                         {isProcessing ? <Loader2 size={20} className="animate-spin" /> : <Lock size={20} />}
-                        {isProcessing ? 'Processando...' : `Confirmar R$ ${order?.total_amount?.toFixed(2)}`}
+                        {isProcessing ? 'Processando...' : `Confirmar R$ ${selectedOrder.total_amount?.toFixed(2)}`}
                     </button>
+                    <p className="text-[9px] text-center text-neutral-400 mt-4">
+                        Ambiente de testes: Nenhum valor real será cobrado.
+                    </p>
                 </div>
             </div>
         </div>
