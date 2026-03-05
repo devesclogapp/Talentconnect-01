@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     User,
     MapPin,
@@ -23,18 +24,30 @@ import { useAppStore } from '../store';
 
 interface Props {
     user: any;
-    onLogout: () => void;
+    role?: string;
+    onSwitchRole?: () => void;
     onNavigate: (v: string) => void;
+    isDarkMode?: boolean;
+    onToggleDarkMode?: () => void;
 }
 
-const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
+const Profile: React.FC<Props> = ({ user, onNavigate }) => {
+    const navigate = useNavigate();
     const userName = resolveUserName(user);
     const userAvatar = resolveUserAvatar(user);
     const setUser = useAppStore((state) => state.setUser);
 
+    const { logout } = useAppStore();
+
     const handleLogout = async () => {
-        await signOut();
-        onLogout();
+        try {
+            await signOut();
+        } catch (e) {
+            console.warn('SignOut error (non-critical):', e);
+        } finally {
+            logout();
+            navigate('/login', { replace: true });
+        }
     };
 
     const [stats, setStats] = useState({

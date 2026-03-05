@@ -231,11 +231,16 @@ const ProviderDashboard: React.FC<Props> = ({
                                 className="cursor-pointer transition-opacity active:opacity-70"
                                 onClick={() => setShowFinancialDetails(!showFinancialDetails)}
                             >
-                                <div className="flex items-center gap-2 mb-2">
-                                    <p className="meta !text-[9px] text-neutral-400">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <p className="text-[11px] font-semibold text-neutral-200 tracking-wide uppercase">
                                         Valor Líquido do Portfolio
                                     </p>
-                                    <div className={`px-1.5 py-0.5 rounded text-[8px] font-normal tracking-normal ${showFinancialDetails ? 'bg-accent-primary text-white' : 'bg-white/10 text-neutral-300'}`}>
+                                    <div
+                                        className={`px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase cursor-pointer transition-all ${showFinancialDetails
+                                                ? 'bg-accent-primary text-white'
+                                                : 'bg-white/20 text-white border border-white/20'
+                                            }`}
+                                    >
                                         {showFinancialDetails ? 'Detalhado' : 'Resumo'}
                                     </div>
                                 </div>
@@ -259,29 +264,32 @@ const ProviderDashboard: React.FC<Props> = ({
                                     </div>
                                 )}
 
-                                <div className="flex items-center gap-3">
-                                    <span className={`flex items-center gap-1.5 text-[11px] font-normal ${stats.growth >= 0 ? 'text-success bg-success/10' : 'text-error bg-error/10'} px-3 py-1.5 rounded-full tracking-normal`}>
+                                <div className="flex items-center gap-3 mt-1">
+                                    <span className={`flex items-center gap-1.5 text-[12px] font-bold ${stats.growth >= 0
+                                            ? 'text-emerald-300 bg-emerald-500/20 border border-emerald-500/30'
+                                            : 'text-red-300 bg-red-500/20 border border-red-500/30'
+                                        } px-3 py-1.5 rounded-full`}>
                                         {stats.growth >= 0 ? <ArrowUpRight size={14} /> : <TrendingDown size={14} className="rotate-90" />}
                                         {Math.abs(stats.growth).toFixed(1)}%
                                     </span>
-                                    <span className="text-[10px] text-neutral-500 font-normal">vs mês anterior</span>
+                                    <span className="text-[11px] text-neutral-300 font-medium">vs mês anterior</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Revenue Breakdown Pills */}
-                        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                        <div className="flex gap-3 overflow-x-auto no-scrollbar pt-1 pb-2 mt-4 border-t border-white/10">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onNavigate('RECEIVED_ORDERS:pending');
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 whitespace-nowrap interactive hover:bg-white/10"
+                                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 rounded-full border border-white/20 whitespace-nowrap interactive hover:bg-white/15 transition-colors"
                             >
-                                <div className="w-2 h-2 rounded-full bg-warning animate-pulse"></div>
-                                <span className="meta !text-[9px] text-neutral-400 tracking-normal opacity-80">Pendentes</span>
-                                <span className="text-[10px] font-normal text-white">{stats.pendingCount}</span>
-                                <ArrowRight size={10} className="text-white ml-1 opacity-50" />
+                                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+                                <span className="text-[11px] font-semibold text-neutral-200">Pendentes</span>
+                                <span className="text-[12px] font-black text-white ml-0.5">{stats.pendingCount}</span>
+                                <ArrowRight size={11} className="text-neutral-300 ml-1" />
                             </button>
                         </div>
                     </div>

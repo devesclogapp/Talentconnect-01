@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, User, AlertCircle } from 'lucide-react';
 import { signIn } from '../services/authService';
 
 interface Props {
     onLoginSuccess: (user: any) => void;
-    onNavigate: (v: string) => void;
+    onNavigate?: (v: string) => void;
 }
 
-const AdminLogin: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
+const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,10 +29,17 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
                 throw new Error('Acesso restrito ao Painel Administrativo.');
             }
 
-            if (result.user) onLoginSuccess(result.user);
+            if (result.user) {
+                onLoginSuccess(result.user);
+                navigate('/admin', { replace: true });
+            }
         } catch (err: any) {
             console.error("Erro no login admin:", err);
-            setError(err.message || 'Falha na autenticação administrativa');
+            let msg = err.message || 'Falha na autenticação administrativa';
+            if (msg.includes('Invalid login credentials')) {
+                msg = 'Credenciais inválidas. Verifique e-mail e senha.';
+            }
+            setError(msg);
         } finally {
             setLoading(false);
         }
@@ -159,7 +168,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
 
                             <button
                                 type="button"
-                                onClick={() => onNavigate('LOGIN')}
+                                onClick={() => navigate('/login')}
                                 className="w-full py-4 text-[10px] font-black uppercase tracking-widest text-text-tertiary hover:text-text-primary transition-colors border border-dashed border-border-subtle rounded-2xl"
                             >
                                 Voltar ao Acesso Comum

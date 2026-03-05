@@ -227,6 +227,36 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                     <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)}></div>
                   )}
                 </div>
+
+                {/* Image Preview */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black tracking-widest text-text-tertiary ml-1">
+                    Imagem do Serviço
+                  </label>
+                  <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-border-subtle bg-bg-tertiary">
+                    <img
+                      key={formData.category}
+                      src={getCategoryImage(formData.category)}
+                      alt={formData.category}
+                      className="w-full h-full object-cover transition-all duration-700"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = getCategoryImage('Elite');
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute bottom-3 left-3">
+                      <span className="text-[9px] font-bold tracking-widest uppercase text-white/60">Categoria</span>
+                      <p className="text-base font-black text-white">{selectedCategoryObj.label}</p>
+                    </div>
+                    <div className="absolute top-3 right-3 px-2.5 py-1 bg-black/40 backdrop-blur-sm rounded-lg border border-white/10">
+                      <span className="text-[9px] font-bold text-white/80 uppercase tracking-wider">✦ IA Generated</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-text-tertiary ml-1">
+                    A imagem é definida automaticamente pela categoria. Ao trocar a categoria, a imagem muda.
+                  </p>
+                </div>
               </div>
             </div>
           )}

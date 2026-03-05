@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Search,
     TrendingUp,
@@ -24,7 +25,6 @@ import {
     Lock,
     Target
 } from 'lucide-react';
-import { useAppStore } from '../store';
 import { supabase } from '../services/supabaseClient';
 
 // --- Helpers de Auditoria ---
@@ -48,11 +48,23 @@ const logAdminAction = async (action: string, entityType: string, entityId: stri
     }
 };
 
-const AdminDashboard: React.FC = () => {
-    const setView = useAppStore(state => state.setView);
-    const setViewFilters = useAppStore(state => state.setViewFilters);
+const ADMIN_ROUTE_MAP: Record<string, string> = {
+    'ADMIN_DASHBOARD': '/admin',
+    'ADMIN_USERS': '/admin/users',
+    'ADMIN_SERVICES': '/admin/services',
+    'ADMIN_ORDERS': '/admin/orders',
+    'ADMIN_FINANCE': '/admin/finance',
+    'ADMIN_DISPUTES': '/admin/disputes',
+    'ADMIN_AUDIT': '/admin/audit',
+    'USER_MANAGEMENT': '/admin/users',
+    'AUDIT_LOGS': '/admin/audit',
+};
 
-    const [loading, setLoading] = useState(true);
+const AdminDashboard: React.FC = () => {
+    const navigate = useNavigate();
+
+    const [loading, setLoading] = useState(false); // optimistic: false so cards render immediately
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalOrders: 0,
@@ -83,40 +95,51 @@ const AdminDashboard: React.FC = () => {
     const [actionReason, setActionReason] = useState('');
 
     useEffect(() => {
+        // Populate live events immediately (no wait)
+        setLiveEvents([
+            { id: 1, type: 'order', action: 'Pedido Criado', name: 'Manutenção Elétrica', time: '2m', user: 'Ana Paula' },
+            { id: 2, type: 'payment', action: 'Garantia Retida', name: 'R$ 450.00', time: '12m', user: 'Sistema' },
+            { id: 3, type: 'dispute', action: 'Nova Disputa', name: 'Serviço não concluído', time: '45m', user: 'Pedro J.' },
+            { id: 4, type: 'kyc', action: 'KYC Aprovado', name: 'Dr. Roberto Santos', time: '1h', user: 'Admin' }
+        ]);
+        setRiskSignals([
+            { id: 'USR-MOCK-1', user: 'Marcos Silva', reason: 'Múltiplas contas via IP 189.22.x.x', score: 88, type: 'Fraude' },
+            { id: 'USR-MOCK-2', user: 'Clínica Pro', reason: 'Reincidência em disputas (3 nos últimos 30 dias)', score: 92, type: 'Compliance' }
+        ]);
         fetchDashboardStats();
-        fetchLiveEvents();
     }, []);
 
-    const fetchDashboardStats = async () => {
+    const fetchDashboardStats = async (refresh = false) => {
         try {
-            setLoading(true);
+            if (refresh) setIsRefreshing(true);
 
-            // 1. Fetch Global Metrics
-            const { data: userData } = await supabase.from('users').select('id, kyc_status');
-            const { data: profileData } = await supabase.from('provider_profiles').select('documents_status');
-            const { data: orderData } = await supabase.from('orders').select('id, status, created_at');
-            const { data: paymentData } = await supabase.from('payments').select('amount_total, operator_fee, escrow_status, provider_amount');
-            const { data: disputeData } = await supabase.from('disputes').select('id, status');
+            // ⚡ Parallel fetch — all 5 queries fire simultaneously
+            const [
+                { data: userData },
+                { data: profileData },
+                { data: orderData },
+                { data: paymentData },
+                { data: disputeData }
+            ] = await Promise.all([
+                supabase.from('users').select('id, kyc_status'),
+                supabase.from('provider_profiles').select('documents_status'),
+                supabase.from('orders').select('id, status, created_at'),
+                supabase.from('payments').select('amount_total, operator_fee, escrow_status, provider_amount'),
+                supabase.from('disputes').select('id, status'),
+            ]);
 
-            // 2. Calculate Aggregates
             const uData = (userData || []) as any[];
             const oData = (orderData || []) as any[];
             const pData = (paymentData || []) as any[];
             const dData = (disputeData || []) as any[];
             const profData = (profileData || []) as any[];
 
-            const totalUsersCount = uData.length;
-            const openOrdersCount = oData.filter(o => o.status === 'sent' || o.status === 'accepted' || o.status === 'in_execution').length;
             const openDisputesCount = dData.filter(d => d.status === 'open' || d.status === 'in_review').length;
-
-            // Real Pending Verifications Count
             const pendingKYCCount = profData.filter(p => p.documents_status === 'submitted').length;
-
             const inEscrowVolume = pData.filter(p => p.escrow_status === 'held').reduce((acc, p) => acc + (p.amount_total || 0), 0);
             const earningsTotal = pData.filter(p => p.escrow_status === 'released').reduce((acc, p) => acc + (p.operator_fee || 0), 0);
             const payoutsPending = pData.filter(p => p.escrow_status === 'pending').reduce((acc, p) => acc + (p.provider_amount || 0), 0);
 
-            // 3. Detect SLA Alerts
             const now = new Date();
             const delayed = oData.filter(o => {
                 if (o.status !== 'sent') return false;
@@ -125,7 +148,7 @@ const AdminDashboard: React.FC = () => {
             }).length;
 
             setStats({
-                totalUsers: totalUsersCount,
+                totalUsers: uData.length,
                 totalOrders: oData.length,
                 activeServices: 0,
                 pendingVerifications: pendingKYCCount,
@@ -137,35 +160,22 @@ const AdminDashboard: React.FC = () => {
                 ordersAwaitingAccept: oData.filter(o => o.status === 'sent').length,
                 ordersInExecution: oData.filter(o => o.status === 'in_execution').length,
                 ordersDelayed: delayed,
-                highRiskUsers: uData.filter(u => u.kyc_status === 'rejected').length, // Simple risk logic
+                highRiskUsers: uData.filter(u => u.kyc_status === 'rejected').length,
                 agingEscrow: 'R$ 1.2k > 7d' as any,
                 agingPayouts: '3 atrasados' as any,
                 agingDisputes: '1 violado' as any,
                 revenueVariaction: '+12.5%'
             });
 
-            // Mock Risk Signals
-            setRiskSignals([
-                { id: 'USR-MOCK-1', user: 'Marcos Silva', reason: 'Múltiplas contas via IP 189.22.x.x', score: 88, type: 'Fraude' },
-                { id: 'USR-MOCK-2', user: 'Clínica Pro', reason: 'Reincidência em disputas (3 nos últimos 30 dias)', score: 92, type: 'Compliance' }
-            ]);
-
         } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
+            setIsRefreshing(false);
         }
     };
 
-    const fetchLiveEvents = async () => {
-        // Mock Live Events (Simulating real-time feed)
-        setLiveEvents([
-            { id: 1, type: 'order', action: 'Pedido Criado', name: 'Manutenção Elétrica', time: '2m', user: 'Ana Paula' },
-            { id: 2, type: 'payment', action: 'Garantia Retida', name: 'R$ 450.00', time: '12m', user: 'Sistema' },
-            { id: 3, type: 'dispute', action: 'Nova Disputa', name: 'Serviço não concluído', time: '45m', user: 'Pedro J.' },
-            { id: 4, type: 'kyc', action: 'KYC Aprovado', name: 'Dr. Roberto Santos', time: '1h', user: 'Admin' }
-        ]);
-    };
+    // Live events populated synchronously in useEffect above
 
     const handleUniversalSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -191,9 +201,9 @@ const AdminDashboard: React.FC = () => {
         setActionReason('');
     };
 
-    const handleDrillDown = (targetView: string, filters: any) => {
-        setViewFilters(filters);
-        setView(targetView);
+    const handleDrillDown = (targetView: string, _filters?: any) => {
+        const route = ADMIN_ROUTE_MAP[targetView] || '/admin';
+        navigate(route);
     };
 
     return (
@@ -246,12 +256,12 @@ const AdminDashboard: React.FC = () => {
 
             <div className="flex justify-between items-end">
                 <div className="animate-slide-up">
-                    <div className="flex items-center gap-2 mb-1">
-                        <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-                        <span className="text-[9px] font-black text-success uppercase tracking-widest">Servidor Operacional</span>
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                        <span className="text-[10px] font-medium text-success uppercase tracking-widest">Servidor Operacional</span>
                     </div>
-                    <h1 className="text-3xl font-black text-text-primary tracking-tight leading-none mb-1">Centro de Comando</h1>
-                    <p className="text-xs text-text-tertiary font-medium">Orquestração e inteligência operacional</p>
+                    <h1 className="text-2xl font-semibold text-text-primary tracking-tight leading-none mb-1">Centro de Comando</h1>
+                    <p className="text-[13px] text-text-secondary">Orquestração e inteligência operacional</p>
                 </div>
                 <div className="flex gap-4">
                     <button
@@ -267,7 +277,14 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* --- Top KPIs --- */}
+            {/* Refresh bar: only visible during manual refresh, not on initial load */}
+            {isRefreshing && (
+                <div className="h-0.5 w-full rounded-full overflow-hidden bg-bg-secondary -mt-1 mb-1">
+                    <div className="h-full bg-accent-primary/60 animate-pulse w-full" />
+                </div>
+            )}
+
+            {/* --- Top KPIs — render immediately, values fill in as data arrives --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <StatCard
                     label="Volume em Garantia"
@@ -312,6 +329,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* --- Main Operational Layer --- */}
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0">
 
                 {/* Left Column (Inbox & Discovery) */}
@@ -320,10 +338,10 @@ const AdminDashboard: React.FC = () => {
                     <div className="bg-bg-primary border border-border-subtle rounded-[24px] p-5 shadow-sm relative overflow-hidden flex flex-col flex-[1.2]">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h3 className="text-lg font-black text-text-primary uppercase tracking-tight flex items-center gap-2">
-                                    <Target className="text-accent-primary" size={18} /> Fila de Decisão
+                                <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
+                                    <Target className="text-accent-primary" size={16} /> Fila de Decisão
                                 </h3>
-                                <p className="text-[9px] text-text-tertiary font-medium">Triagem operacional por prioridade e SLA</p>
+                                <p className="text-[11px] text-text-secondary mt-0.5">Triagem operacional por prioridade e SLA</p>
                             </div>
                             <div className="flex gap-2">
                                 <span className="px-4 py-2 bg-error text-white text-[10px] font-black rounded-full uppercase tracking-widest">{stats.openDisputes} Críticos</span>
@@ -352,7 +370,7 @@ const AdminDashboard: React.FC = () => {
                                     priority="Média"
                                     sla="há 1 dia"
                                     action="Validar"
-                                    onClick={() => setView('USER_MANAGEMENT')}
+                                    onClick={() => navigate(ADMIN_ROUTE_MAP['USER_MANAGEMENT']!)}
                                 />
                             )}
                             {stats.ordersDelayed > 0 && (
@@ -373,12 +391,12 @@ const AdminDashboard: React.FC = () => {
                     <div className="bg-bg-primary border border-border-subtle rounded-[24px] p-5 shadow-sm flex-1 flex flex-col">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h3 className="text-base font-black text-text-primary uppercase tracking-tight flex items-center gap-2">
-                                    <ShieldAlert className="text-error" size={18} /> Risco & Fraude
+                                <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
+                                    <ShieldAlert className="text-error" size={16} /> Risco & Fraude
                                 </h3>
-                                <p className="text-[9px] text-text-tertiary font-medium">Detecção de padrões e comportamento anômalo</p>
+                                <p className="text-[11px] text-text-secondary mt-0.5">Detecção de padrões e comportamento anômalo</p>
                             </div>
-                            <button onClick={() => setView('USER_MANAGEMENT')} className="text-[10px] font-black uppercase text-accent-primary hover:underline">Ver Tabela Completa</button>
+                            <button onClick={() => navigate(ADMIN_ROUTE_MAP['USER_MANAGEMENT']!)} className="text-[10px] font-black uppercase text-accent-primary hover:underline">Ver Tabela Completa</button>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto custom-scrollbar">
@@ -414,7 +432,7 @@ const AdminDashboard: React.FC = () => {
                     {/* Live Event Feed */}
                     <div className="bg-bg-primary border border-border-subtle rounded-[24px] p-5 flex flex-col flex-1 overflow-hidden min-h-[250px]">
                         <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-[9px] font-black text-text-primary uppercase tracking-widest flex items-center gap-2">
+                            <h4 className="text-[11px] font-semibold text-text-primary flex items-center gap-1.5">
                                 <Zap size={12} className="text-accent-primary fill-accent-primary" /> Eventos Ao Vivo
                             </h4>
                             <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
@@ -440,7 +458,7 @@ const AdminDashboard: React.FC = () => {
                             ))}
                         </div>
 
-                        <button onClick={() => setView('AUDIT_LOGS')} className="w-full mt-4 py-3 border border-dashed border-border-subtle rounded-xl text-[9px] font-black text-text-tertiary uppercase tracking-widest hover:bg-bg-secondary transition-all">
+                        <button onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)} className="w-full mt-4 py-3 border border-dashed border-border-subtle rounded-xl text-[9px] font-black text-text-tertiary uppercase tracking-widest hover:bg-bg-secondary transition-all">
                             Ver Logs de Auditoria
                         </button>
                     </div>
@@ -450,7 +468,7 @@ const AdminDashboard: React.FC = () => {
                         <SimpleShortcut icon={<Plus size={16} />} label="Admin" />
                         <SimpleShortcut icon={<RefreshCw size={16} />} label="Sync" onClick={fetchDashboardStats} />
                         <SimpleShortcut icon={<Smartphone size={16} />} label="Mobile" />
-                        <SimpleShortcut icon={<History size={16} />} label="Logs" onClick={() => setView('AUDIT_LOGS')} />
+                        <SimpleShortcut icon={<History size={16} />} label="Logs" onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)} />
                     </div>
                 </div>
             </div>
@@ -463,55 +481,71 @@ const AdminDashboard: React.FC = () => {
 const StatCard = ({ label, value, icon, aging, color, bg, trend, onClick }: any) => (
     <div
         onClick={onClick}
-        className="bg-bg-primary border border-border-subtle p-5 rounded-[32px] shadow-sm hover:shadow-lg transition-all group cursor-pointer relative overflow-hidden active:scale-95"
+        className="border rounded-[10px] p-5 hover:shadow-md transition-all duration-[120ms] cursor-pointer relative overflow-hidden active:scale-[0.99]"
+        style={{
+            background: 'var(--bg-card, #FFFFFF)',
+            borderColor: 'rgba(0,0,0,0.06)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        }}
     >
+        {/* Analytical gradient accent */}
+        <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-[10px] opacity-60"
+            style={{
+                background: color.includes('accent') ? 'linear-gradient(90deg, #6366F1, #818CF8)'
+                    : color.includes('success') ? 'linear-gradient(90deg, #22C55E, #4ADE80)'
+                        : color.includes('warning') ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+                            : 'linear-gradient(90deg, #EF4444, #F87171)'
+            }} />
         <div className="flex items-start justify-between mb-4">
-            <div className={`p-3 rounded-xl ${bg} ${color}`}>
-                {React.cloneElement(icon, { size: 20 })}
+            <div className={`p-2.5 rounded-[6px] ${bg} ${color}`}>
+                {React.cloneElement(icon, { size: 16 })}
             </div>
             <div className="flex flex-col items-end gap-1">
-                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-lg uppercase tracking-widest ${trend.includes('Ação') || trend.includes('Urgente') ? 'bg-error text-white' : 'bg-bg-secondary text-text-tertiary'}`}>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wide ${trend.includes('Ação') || trend.includes('Urgente')
+                    ? 'bg-error/10 text-error'
+                    : 'bg-bg-secondary text-text-tertiary'
+                    }`}>
                     {trend}
                 </span>
-                <span className="text-[7px] font-bold text-text-tertiary uppercase opacity-60">{aging}</span>
+                <span className="text-[10px] font-medium text-text-tertiary opacity-70">{aging}</span>
             </div>
         </div>
-        <p className="text-[9px] text-text-tertiary font-black uppercase tracking-[0.1em] mb-0.5">{label}</p>
-        <h3 className="text-2xl font-black text-text-primary leading-tight tracking-tighter">{value}</h3>
-
-        {/* Progress Hint */}
-        <div className="mt-4 h-1 w-full bg-bg-secondary rounded-full overflow-hidden opacity-30">
-            <div className={`h-full ${bg.replace('/10', '')} w-[65%]`}></div>
-        </div>
+        <p className="text-[11px] font-medium text-text-secondary uppercase tracking-wide mb-0.5">{label}</p>
+        <h3 className="text-xl font-semibold text-text-primary leading-tight tracking-tight">{value}</h3>
+        <div className="mt-3 h-px w-full opacity-20" style={{ background: 'currentColor' }} />
     </div>
 );
 
 const InboxItem = ({ title, desc, count, priority, sla, action, onClick }: any) => (
     <div
         onClick={onClick}
-        className="flex items-center gap-4 p-4 bg-bg-secondary/30 border border-border-subtle/40 rounded-[24px] hover:bg-bg-secondary hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
+        className="flex items-center gap-3 p-3.5 rounded-[10px] border transition-all duration-[120ms] cursor-pointer group active:scale-[0.99]"
+        style={{
+            background: 'transparent',
+            borderColor: 'rgba(0,0,0,0.06)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        }}
     >
-        <div className="w-12 h-12 rounded-[18px] bg-bg-primary border border-border-subtle flex items-center justify-center relative shadow-sm group-hover:scale-105 transition-transform">
-            <Activity className="text-accent-primary" size={24} />
-            <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-error text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-bg-secondary shadow-lg">
+        <div className="w-10 h-10 rounded-[10px] bg-bg-primary border border-border-subtle flex items-center justify-center relative shadow-sm shrink-0">
+            <Activity className="text-accent-primary" size={18} />
+            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-error text-white text-[9px] font-semibold flex items-center justify-center rounded-full border-2 border-bg-secondary">
                 {count}
             </div>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-                <h5 className="text-sm font-black text-text-primary uppercase tracking-tight">{title}</h5>
-                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest ${priority === 'Alta' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'}`}>
-                    {priority}
-                </span>
+                <h5 className="text-[13px] font-semibold text-text-primary truncate">{title}</h5>
+                <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-md uppercase tracking-wide shrink-0 ${priority === 'Alta' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'
+                    }`}>{priority}</span>
             </div>
-            <p className="text-[10px] text-text-tertiary font-medium mb-0.5">{desc}</p>
-            <div className="flex items-center gap-3">
-                <span className="text-[9px] font-black text-accent-primary uppercase tracking-widest flex items-center gap-1">
-                    <Clock size={10} /> SLA: {sla}
-                </span>
+            <p className="text-[11px] text-text-secondary truncate">{desc}</p>
+            <div className="flex items-center gap-1 mt-0.5">
+                <Clock size={9} className="text-accent-primary" />
+                <span className="text-[10px] font-medium text-accent-primary uppercase tracking-wide">SLA: {sla}</span>
             </div>
         </div>
-        <button className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-accent-primary hover:text-white transition-all shadow-sm">
+        <button className="shrink-0 px-3 py-1.5 rounded-[6px] text-[10px] font-semibold uppercase tracking-wide border transition-all duration-[120ms] hover:bg-accent-primary hover:text-white hover:border-accent-primary"
+            style={{ borderColor: 'rgba(0,0,0,0.08)', color: 'var(--text-secondary)' }}>
             {action}
         </button>
     </div>
@@ -541,12 +575,17 @@ const SearchResultBox = ({ title, icon, results }: any) => (
 const SimpleShortcut = ({ icon, label, onClick }: any) => (
     <button
         onClick={onClick}
-        className="flex flex-col items-center justify-center gap-1.5 p-3 bg-bg-primary border border-border-subtle rounded-[20px] hover:bg-bg-secondary hover:shadow-md transition-all group active:scale-95"
+        className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-[10px] border transition-all duration-[120ms] group active:scale-95"
+        style={{
+            background: 'var(--bg-card, #FFFFFF)',
+            borderColor: 'rgba(0,0,0,0.06)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        }}
     >
-        <div className="text-text-tertiary group-hover:text-accent-primary transition-all scale-90">
+        <div className="text-text-secondary group-hover:text-accent-primary transition-colors duration-[120ms]">
             {icon}
         </div>
-        <span className="text-[8px] font-black text-text-tertiary uppercase tracking-widest">{label}</span>
+        <span className="text-[10px] font-medium text-text-secondary uppercase tracking-wide">{label}</span>
     </button>
 );
 

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Zap, User, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { signIn } from '../services/authService';
 
 interface Props {
     onLoginSuccess: (user: any) => void;
-    onNavigate: (v: string) => void;
+    onRegister: () => void;
+    onForgotPassword: () => void;
 }
 
-const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
+const Login: React.FC<Props> = ({ onLoginSuccess, onRegister, onForgotPassword }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -15,18 +17,41 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const navigate = useNavigate();
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         try {
             const result = await signIn({ email, password });
-            if (result.user) onLoginSuccess(result.user);
+            if (result.user) {
+                onLoginSuccess(result.user);
+
+                // Navigate based on user role from metadata
+                const userRole = (result.user.user_metadata?.role || 'client').toLowerCase();
+                if (userRole === 'provider') {
+                    navigate('/provider', { replace: true });
+                } else if (userRole === 'operator') {
+                    navigate('/admin', { replace: true });
+                } else {
+                    navigate('/client', { replace: true });
+                }
+            }
         } catch (err: any) {
             console.error("Erro no login:", err);
-            const msg = err.message || 'Falha na autenticação';
+            let msg = err.message || 'Falha na autenticação';
+
+            // Friendlier error messages in Portuguese
+            if (msg.includes('Invalid login credentials')) {
+                msg = 'E-mail ou senha incorretos. Verifique e tente novamente.';
+            } else if (msg.includes('Email not confirmed')) {
+                msg = 'E-mail não confirmado. Verifique sua caixa de entrada.';
+            } else if (msg.includes('Too many requests')) {
+                msg = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+            }
+
             setError(msg);
-            alert(`Erro ao entrar: ${msg}`);
         } finally {
             setLoading(false);
         }
@@ -108,8 +133,8 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
 
                     {error && (
                         <div className="p-4 bg-error/10 border border-error/20 rounded-xl flex items-center gap-3 animate-fade-in">
-                            <AlertCircle size={18} className="text-error" />
-                            <p className="text-[10px] font-black text-error uppercase">{error}</p>
+                            <AlertCircle size={18} className="text-error flex-shrink-0" />
+                            <p className="text-[11px] font-bold text-error">{error}</p>
                         </div>
                     )}
 
@@ -129,20 +154,20 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onNavigate }) => {
 
                 <div className="mt-auto pt-10 text-center relative z-10">
                     <button
-                        onClick={() => onNavigate('onboarding')}
+                        onClick={onForgotPassword}
                         className="text-[10px] font-black uppercase tracking-widest text-text-tertiary hover:text-text-primary transition-colors"
                     >
                         Esqueceu a senha?
                     </button>
                     <div className="mt-6 flex flex-col gap-4">
                         <button
-                            onClick={() => onNavigate('register')}
+                            onClick={onRegister}
                             className="text-sm font-black text-text-primary border-b-2 border-accent-primary uppercase tracking-tighter self-center"
                         >
                             Criar Nova Conta
                         </button>
                         <button
-                            onClick={() => onNavigate('ADMIN_LOGIN')}
+                            onClick={() => navigate('/admin-login')}
                             className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity mt-4 flex items-center justify-center gap-2"
                         >
                             <ShieldCheck size={10} /> Acesso Administrativo
