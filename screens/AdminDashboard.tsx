@@ -92,7 +92,8 @@ const AdminDashboard: React.FC = () => {
             setLoading(true);
 
             // 1. Fetch Global Metrics
-            const { data: userData } = await supabase.from('users').select('id');
+            const { data: userData } = await supabase.from('users').select('id, kyc_status');
+            const { data: profileData } = await supabase.from('provider_profiles').select('documents_status');
             const { data: orderData } = await supabase.from('orders').select('id, status, created_at');
             const { data: paymentData } = await supabase.from('payments').select('amount_total, operator_fee, escrow_status, provider_amount');
             const { data: disputeData } = await supabase.from('disputes').select('id, status');
@@ -102,10 +103,14 @@ const AdminDashboard: React.FC = () => {
             const oData = (orderData || []) as any[];
             const pData = (paymentData || []) as any[];
             const dData = (disputeData || []) as any[];
+            const profData = (profileData || []) as any[];
 
             const totalUsersCount = uData.length;
             const openOrdersCount = oData.filter(o => o.status === 'sent' || o.status === 'accepted' || o.status === 'in_execution').length;
             const openDisputesCount = dData.filter(d => d.status === 'open' || d.status === 'in_review').length;
+
+            // Real Pending Verifications Count
+            const pendingKYCCount = profData.filter(p => p.documents_status === 'submitted').length;
 
             const inEscrowVolume = pData.filter(p => p.escrow_status === 'held').reduce((acc, p) => acc + (p.amount_total || 0), 0);
             const earningsTotal = pData.filter(p => p.escrow_status === 'released').reduce((acc, p) => acc + (p.operator_fee || 0), 0);
@@ -123,7 +128,7 @@ const AdminDashboard: React.FC = () => {
                 totalUsers: totalUsersCount,
                 totalOrders: oData.length,
                 activeServices: 0,
-                pendingVerifications: totalUsersCount > 0 ? 2 : 0,
+                pendingVerifications: pendingKYCCount,
                 openDisputes: openDisputesCount,
                 totalVolume: pData.reduce((acc, p) => acc + (p.amount_total || 0), 0),
                 operatorEarnings: earningsTotal,
@@ -132,7 +137,7 @@ const AdminDashboard: React.FC = () => {
                 ordersAwaitingAccept: oData.filter(o => o.status === 'sent').length,
                 ordersInExecution: oData.filter(o => o.status === 'in_execution').length,
                 ordersDelayed: delayed,
-                highRiskUsers: 2,
+                highRiskUsers: uData.filter(u => u.kyc_status === 'rejected').length, // Simple risk logic
                 agingEscrow: 'R$ 1.2k > 7d' as any,
                 agingPayouts: '3 atrasados' as any,
                 agingDisputes: '1 violado' as any,

@@ -75,14 +75,11 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
           {userRole === 'client' ? (
             <button
-              onClick={() => {
-                setSelectedCategory(undefined);
-                navigate('/client/services');
-              }}
-              className={`bottom-nav__item interactive ${pathname === '/client/services' ? 'bottom-nav__item--active' : ''}`}
+              onClick={() => navigate('/notifications')}
+              className={`bottom-nav__item interactive ${pathname === '/notifications' ? 'bottom-nav__item--active' : ''}`}
             >
               <Bell size={24} />
-              <span className="sr-only">Descobrir</span>
+              <span className="sr-only">Notificações</span>
             </button>
           ) : (
             <>
@@ -143,6 +140,11 @@ const App: React.FC = () => {
   // Supabase Auth Listener & Initial Check
   useEffect(() => {
     const checkUser = async () => {
+      // Fallback timeout to ensure app doesn't stick in loading
+      const timeoutId = setTimeout(() => {
+        setLoading(false);
+      }, 5000);
+
       try {
         const currentUser = await getCurrentUser();
         if (currentUser) {
@@ -158,6 +160,7 @@ const App: React.FC = () => {
       } catch (error) {
         console.error("❌ App: Erro fatal no check de auth:", error);
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };

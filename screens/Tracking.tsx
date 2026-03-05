@@ -232,9 +232,14 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                 </div>
               </div>
               <div className="bg-white/5 p-4 rounded-2xl">
-                <div className="flex justify-between items-center text-sm mb-2">
-                  <span className="text-white/60">Total do serviço</span>
-                  <span className="font-bold text-white">R$ {activeOrder.total_amount?.toFixed(2)}</span>
+                <div className="flex justify-between items-baseline mb-2">
+                  <span className="text-[10px] font-black text-white uppercase tracking-[0.12em] opacity-40">Total à pagar</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xs font-bold text-white opacity-40">R$</span>
+                    <span className="text-2xl font-bold text-white tracking-tighter">
+                      {activeOrder.total_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-[10px] text-white/30 font-normal">O valor ficará retido com segurança até a conclusão.</p>
               </div>

@@ -121,9 +121,14 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                             <p className="meta !text-text-tertiary flex items-center gap-1.5">
                                 <MapPin size={12} className="text-accent-primary" /> {providerData.location}
                             </p>
-                            <p className="meta !text-text-tertiary flex items-center gap-1.5 font-normal">
-                                <Star size={12} className="text-warning" fill="currentColor" /> {providerData.rating} ({providerData.reviewCount} avaliações)
-                            </p>
+                            <div className="meta !text-text-tertiary flex items-center gap-1.5 font-normal">
+                                <div className="flex items-center gap-0.5">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} size={12} className="text-warning" fill="currentColor" />
+                                    ))}
+                                </div>
+                                <span>({providerData.reviewCount} avaliações)</span>
+                            </div>
                         </div>
                     </div>
                     <button
@@ -264,9 +269,10 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ provider, onBack, onB
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-1 text-warning">
-                                            <Star size={10} fill="currentColor" />
-                                            <span className="text-[10px] font-normal">{review.rating}</span>
+                                        <div className="flex items-center gap-0.5">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={10} className="text-warning" fill="currentColor" />
+                                            ))}
                                         </div>
                                     </div>
                                     <p className="body !text-xs !leading-snug text-text-secondary italic font-normal">

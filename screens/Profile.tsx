@@ -263,16 +263,13 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                             icon: <Shield size={20} />,
                             label: 'Segurança & Privacidade',
                             sub: '2FA e Chaves de Acesso',
-                            action: () => alert('Funcionalidade em desenvolvimento: Segurança')
+                            action: () => onNavigate('SECURITY')
                         },
                         {
                             icon: <CreditCard size={20} />,
                             label: 'Métodos de Pagamento',
                             sub: 'Carteira e Repasses',
-                            action: () => {
-                                if (user?.role === 'provider') onNavigate('EARNINGS');
-                                else alert('Gerenciamento de cartões em desenvolvimento');
-                            }
+                            action: () => onNavigate('PAYMENT_METHODS')
                         },
                         {
                             icon: <Bell size={20} />,
@@ -284,7 +281,7 @@ const Profile: React.FC<Props> = ({ user, onLogout, onNavigate }) => {
                             icon: <Activity size={20} />,
                             label: 'Atividade na Plataforma',
                             sub: 'Histórico de operações',
-                            action: () => onNavigate(user?.role === 'provider' ? 'RECEIVED_ORDERS' : 'ORDER_HISTORY')
+                            action: () => onNavigate('ACTIVITY')
                         },
                         {
                             icon: <LifeBuoy size={20} />,

@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Zap
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { getActiveServices } from '../services/servicesService';
 import { CATEGORIES_LIST, CATEGORY_MAP } from '../constants';
 import ServiceCard from '../components/ServiceCard';
@@ -27,10 +28,14 @@ interface Props {
 
 
 const ServiceListing: React.FC<Props> = ({ onBack, onSelectService, initialCategory }) => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialQuery = queryParams.get('q') || '';
+
   const [filter, setFilter] = useState(initialCategory || 'Todos');
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
 
   useEffect(() => {
     const fetchServices = async () => {

@@ -18,7 +18,8 @@ import {
     Users,
     Award,
     Target,
-    ArrowRight
+    ArrowRight,
+    Shield
 } from 'lucide-react';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { getProviderOrders } from '../services/ordersService';
@@ -160,8 +161,65 @@ const ProviderDashboard: React.FC<Props> = ({
                             </div>
                         </div>
                     </div>
+                    <div className="flex gap-2">
+                        <button onClick={() => onNavigate('NOTIFICATIONS')} className="btn-icon relative">
+                            <Bell size={18} className="text-text-secondary" />
+                            <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-accent-primary rounded-full shadow-glow"></span>
+                        </button>
+                        <button className="btn-icon">
+                            <Search size={18} className="text-text-secondary" />
+                        </button>
+                    </div>
                 </div>
             </header>
+
+            {/* Verification Status Banner */}
+            <div className="px-6 mb-6">
+                {(() => {
+                    const status = user?.user_metadata?.documents_status || 'pending';
+                    const isVerified = status === 'approved';
+                    const isSubmitted = status === 'submitted';
+
+                    if (isVerified) return null; // No need for banner if already verified
+
+                    const bgColor = isSubmitted ? 'bg-blue-500/5 border-blue-500/20' : 'bg-warning/5 border-warning/20';
+                    const iconColor = isSubmitted ? 'bg-blue-500/10 text-blue-500' : 'bg-warning/10 text-warning';
+                    const textColor = isSubmitted ? 'text-blue-500' : 'text-warning';
+                    const title = isSubmitted ? 'Verificação em Análise' : 'Verificação Necessária';
+                    const description = isSubmitted ? 'Seus documentos estão sendo revisados.' : 'Envie seus documentos para desbloquear recursos.';
+                    const Icon = isSubmitted ? Shield : Shield;
+                    const isInteractive = !isVerified && !isSubmitted;
+
+                    return (
+                        <div
+                            className={`p-4 rounded-2xl border ${bgColor} flex items-center justify-between group ${isInteractive ? 'interactive' : ''}`}
+                            onClick={() => {
+                                if (isVerified) return;
+                                if (isSubmitted) {
+                                    alert('Seus documentos já foram enviados e estão em análise.');
+                                    return;
+                                }
+                                onNavigate('DOCUMENT_SUBMISSION');
+                            }}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconColor}`}>
+                                    <Shield size={20} />
+                                </div>
+                                <div>
+                                    <h3 className={`font-bold text-sm ${textColor}`}>
+                                        {title}
+                                    </h3>
+                                    <p className="text-[10px] text-text-tertiary max-w-[200px] leading-tight mt-0.5">
+                                        {description}
+                                    </p>
+                                </div>
+                            </div>
+                            {isInteractive && <ChevronRight size={18} className="text-warning/50" />}
+                        </div>
+                    );
+                })()}
+            </div>
 
             {/* Financial Card */}
             <div className="px-6 mb-8">

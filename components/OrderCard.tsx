@@ -86,15 +86,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
             onClick={() => onClick(order)}
             className="w-full group relative bg-white dark:bg-neutral-900 border border-border-subtle dark:border-neutral-800 rounded-[32px] p-5 text-left transition-all duration-300 hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1 active:scale-[0.98] overflow-hidden"
         >
-            {/* Status Indicator Floating */}
-            <div className={`absolute top-5 right-5 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${statusConfig.colorClass}`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor}`} />
-                {statusConfig.label}
-            </div>
-
             {/* Profile & Service Header */}
-            <div className="flex items-center gap-4 mb-6">
-                <div className="relative">
+            <div className="flex items-start gap-4 mb-6">
+                <div className="relative shrink-0">
                     <div className="w-16 h-16 rounded-[22px] bg-bg-secondary dark:bg-neutral-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-neutral-900 shadow-md">
                         {userAvatar ? (
                             <img src={userAvatar} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt={userName} />
@@ -104,10 +98,18 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     </div>
                 </div>
 
-                <div className="flex-1 min-w-0 pr-20"> {/* pr-20 to clear status badge */}
-                    <h3 className="text-lg font-bold text-text-primary dark:text-white truncate mb-0.5 leading-tight">
-                        {order.service_title_snapshot || order.service?.title || 'Serviço Personalizado'}
-                    </h3>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 mb-1.5">
+                        <h3 className="text-lg font-bold text-text-primary dark:text-white truncate leading-tight">
+                            {order.service_title_snapshot || order.service?.title || 'Serviço Personalizado'}
+                        </h3>
+
+                        {/* Status Indicator Inline */}
+                        <div className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold uppercase tracking-wider ${statusConfig.colorClass}`}>
+                            <div className={`w-1 h-1 rounded-full ${statusConfig.dotColor}`} />
+                            {statusConfig.label}
+                        </div>
+                    </div>
                     <p className="text-sm font-medium text-text-secondary dark:text-neutral-400">
                         {userName}
                     </p>
@@ -148,10 +150,10 @@ const OrderCard: React.FC<OrderCardProps> = ({
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t border-border-subtle dark:border-neutral-800">
                 <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-wider mb-0.5">Total à pagar</span>
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-xs font-bold text-text-primary">R$</span>
-                        <span className="text-2xl font-black text-text-primary dark:text-white tracking-tight leading-none">
+                    <span className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.12em] mb-1 opacity-60">Total à pagar</span>
+                    <div className="flex items-baseline gap-1.5">
+                        <span className="text-[14px] font-bold text-text-secondary opacity-40">R$</span>
+                        <span className="text-2xl font-bold text-text-primary dark:text-white tracking-tight leading-none">
                             {order.total_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                     </div>

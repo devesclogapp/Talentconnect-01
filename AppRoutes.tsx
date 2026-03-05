@@ -37,6 +37,9 @@ import EditProfile from './screens/EditProfile';
 import ClientsList from './screens/ClientsList';
 import DocumentSubmission from './screens/DocumentSubmission';
 import OpenDispute from './screens/OpenDispute';
+import Security from './screens/Security';
+import PlatformActivity from './screens/PlatformActivity';
+import PaymentMethods from './screens/PaymentMethods';
 
 // Import Admin Screens
 import AdminDashboard from './screens/AdminDashboard';
@@ -73,12 +76,44 @@ const AppRoutes: React.FC = () => {
 
     const navigate = useNavigate();
 
+    const handleNavigate = (path: string) => {
+        // Map legacy keys to paths
+        switch (path) {
+            case 'DOCUMENT_SUBMISSION': navigate('/provider/documents'); break;
+            case 'EDIT_PROFILE': navigate('/provider/edit-profile'); break;
+            case 'EARNINGS': navigate('/provider/earnings'); break;
+            case 'AGENDA': navigate('/provider/agenda'); break;
+            case 'MY_SERVICES': navigate('/provider/my-services'); break;
+            case 'RECEIVED_ORDERS': navigate('/provider/received-orders'); break;
+            case 'CLIENTS_LIST': navigate('/provider/clients'); break;
+            case 'SUPPORT': navigate('/support'); break;
+            case 'SECURITY': navigate('/security'); break;
+            case 'PAYMENT_METHODS': navigate('/profile/payment-methods'); break;
+            case 'ACTIVITY': navigate('/activity'); break;
+            case 'NOTIFICATIONS': navigate('/notifications'); break;
+            case 'ORDER_HISTORY': navigate('/client/orders'); break;
+            default:
+                // Handle complex keys like RECEIVED_ORDERS:pending
+                if (path.startsWith('RECEIVED_ORDERS:')) {
+                    navigate('/provider/received-orders');
+                } else {
+                    navigate(path);
+                }
+        }
+    };
+
     if (loading) return <SplashScreen />;
 
     return (
         <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<SplashScreen />} />
+            <Route path="/" element={
+                user ? (
+                    <Navigate to={user.role.toUpperCase() === 'CLIENT' ? '/client' : '/provider'} replace />
+                ) : (
+                    <Navigate to="/login" replace />
+                )
+            } />
             <Route path="/onboarding" element={<Onboarding onNavigate={(path) => navigate(path)} />} />
             <Route path="/login" element={
                 <Login
@@ -92,7 +127,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/admin-login" element={<AdminLogin onLoginSuccess={() => { }} onNavigate={(path) => navigate(path)} />} />
 
             {/* Client Routes */}
-            <Route path="/client" element={user && (user.role as any).toUpperCase() === 'CLIENT' ? <ClientDashboard onSelectCategory={(cat) => { setSelectedCategory(cat); navigate('/client/services'); }} onSelectService={(s) => { setSelectedService(s); navigate('/client/service-details'); }} onNavigate={(path) => navigate(path)} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} user={user} /> : <Navigate to="/login" />} />
+            <Route path="/client" element={user && (user.role as any).toUpperCase() === 'CLIENT' ? <ClientDashboard onSelectCategory={(cat) => { setSelectedCategory(cat); handleNavigate('/client/services'); }} onSelectService={(s) => { setSelectedService(s); handleNavigate('/client/service-details'); }} onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} user={user} /> : <Navigate to="/login" />} />
             <Route path="/client/services" element={<ServiceListing initialCategory={selectedCategory} onBack={() => navigate(-1)} onSelectService={(s) => { setSelectedService(s); navigate('/client/service-details'); }} />} />
             <Route path="/client/service-details" element={<ServiceDetails service={selectedService} onBack={() => navigate(-1)} onBook={(s) => { setSelectedService(s); setSelectedProvider(s.provider); navigate('/client/create-order'); }} />} />
             <Route path="/client/providers" element={<ProviderListing onBack={() => navigate(-1)} onSelectProvider={(p) => { setSelectedProvider(p); navigate('/client/provider-profile'); }} />} />
@@ -105,10 +140,10 @@ const AppRoutes: React.FC = () => {
             <Route path="/client/order-detail" element={<OrderDetail order={selectedOrder} onBack={() => navigate(-1)} onViewProfile={(p) => { setSelectedProvider(p); navigate('/client/provider-profile'); }} onPay={(o) => { setSelectedOrder(o); navigate('/client/payment'); }} onSupport={() => navigate('/client/open-dispute')} onRate={() => navigate('/client/rate-provider')} viewingAs="client" onConfirmCompletion={() => { }} onContact={() => { }} />} />
             <Route path="/client/rate-provider" element={<ProviderRating provider={selectedProvider} order={selectedOrder} onBack={() => navigate(-1)} onSubmit={async () => navigate('/client/orders')} />} />
             <Route path="/client/open-dispute" element={<OpenDispute order={selectedOrder} user={user} onBack={() => navigate(-1)} onSuccess={() => navigate(-1)} />} />
-            <Route path="/client/profile" element={<Profile role="CLIENT" onSwitchRole={() => { }} onNavigate={(path) => navigate(path)} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} user={user} />} />
+            <Route path="/client/profile" element={<Profile role="CLIENT" onSwitchRole={() => { }} onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} user={user} />} />
 
             {/* Provider Routes */}
-            <Route path="/provider" element={user && (user.role as any).toUpperCase() === 'PROVIDER' ? <ProviderDashboard user={user} onNavigate={(path) => navigate(path)} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onOpenNegotiation={(n) => { setSelectedOrder(n); navigate('/provider/negotiation'); }} onAddService={() => navigate('/provider/service-registration')} /> : <Navigate to="/login" />} />
+            <Route path="/provider" element={user && (user.role as any).toUpperCase() === 'PROVIDER' ? <ProviderDashboard user={user} onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onOpenNegotiation={(n) => { setSelectedOrder(n); handleNavigate('/provider/negotiation'); }} onAddService={() => handleNavigate('/provider/service-registration')} /> : <Navigate to="/login" />} />
             <Route path="/provider/my-services" element={<MyServices onBack={() => navigate(-1)} onNavigate={(path, id) => { if (id) setSelectedServiceId(id); navigate(path); }} />} />
             <Route path="/provider/service-registration" element={<ServiceRegistration serviceId={selectedServiceId} onBack={() => { setSelectedServiceId(undefined); navigate(-1); }} onComplete={() => { setSelectedServiceId(undefined); navigate('/provider/my-services'); }} />} />
             <Route path="/provider/received-orders" element={<ReceivedOrders onBack={() => navigate(-1)} onSelectOrder={(o) => { setSelectedOrder(o); navigate('/provider/order-detail'); }} />} />
@@ -117,15 +152,18 @@ const AppRoutes: React.FC = () => {
             <Route path="/provider/negotiation" element={<NegotiationFlow negotiation={selectedOrder} onBack={() => navigate(-1)} onComplete={() => navigate('/provider/received-orders')} />} />
             <Route path="/provider/order-accept-reject" element={<OrderAcceptReject order={selectedOrder} onBack={() => navigate(-1)} onAccept={() => navigate('/provider/service-execution')} onReject={() => navigate('/provider/received-orders')} onNegotiate={() => navigate('/provider/negotiation')} />} />
             <Route path="/provider/service-execution" element={<ServiceExecution order={selectedOrder} onBack={() => navigate(-1)} onComplete={() => navigate('/provider')} />} />
-            <Route path="/provider/earnings" element={<Earnings onBack={() => navigate(-1)} onNavigate={(path) => navigate(path)} />} />
-            <Route path="/provider/agenda" element={<Agenda onBack={() => navigate(-1)} onNavigate={(path) => navigate(path)} />} />
+            <Route path="/provider/earnings" element={<Earnings onBack={() => navigate(-1)} onNavigate={handleNavigate} />} />
+            <Route path="/provider/agenda" element={<Agenda onBack={() => navigate(-1)} onNavigate={handleNavigate} />} />
             <Route path="/provider/clients" element={<ClientsList onBack={() => navigate(-1)} onClientSelect={(c) => { setSelectedClient(c); navigate('/provider/client-profile'); }} />} />
-            <Route path="/provider/profile" element={<Profile role="PROVIDER" onSwitchRole={() => { }} onNavigate={(path) => navigate(path)} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} user={user} />} />
+            <Route path="/provider/profile" element={<Profile role="PROVIDER" onSwitchRole={() => { }} onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} user={user} />} />
             <Route path="/provider/edit-profile" element={<EditProfile user={user} onBack={() => navigate(-1)} onUpdate={() => { }} />} />
             <Route path="/provider/documents" element={<DocumentSubmission onBack={() => navigate(-1)} onSubmissionSuccess={() => navigate('/provider/profile')} />} />
 
             {/* Shared Routes */}
             <Route path="/support" element={<Support onBack={() => navigate(-1)} />} />
+            <Route path="/security" element={<Security onBack={() => navigate(-1)} />} />
+            <Route path="/profile/payment-methods" element={<PaymentMethods onBack={() => navigate(-1)} />} />
+            <Route path="/activity" element={<PlatformActivity onBack={() => navigate(-1)} />} />
             <Route path="/notifications" element={<NotificationCenter onBack={() => navigate(-1)} />} />
 
             {/* Admin Routes */}

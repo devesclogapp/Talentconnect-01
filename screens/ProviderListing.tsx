@@ -188,13 +188,12 @@ const ProviderListing: React.FC<ProviderListingProps> = ({ onBack, onSelectProvi
 
                                     {/* Rating */}
                                     <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex items-center gap-1">
-                                            <Star size={14} className="text-accent-yellow fill-accent-yellow" />
-                                            <span className="text-sm font-normal text-black dark:text-white">
-                                                {provider.rating.toFixed(1)}
-                                            </span>
+                                        <div className="flex items-center gap-0.5">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={12} className="text-warning fill-warning" />
+                                            ))}
                                         </div>
-                                        <span className="text-xs text-black dark:text-black">
+                                        <span className="text-xs text-text-tertiary">
                                             ({provider.reviewCount} avaliações)
                                         </span>
                                     </div>

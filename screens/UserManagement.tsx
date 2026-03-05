@@ -195,15 +195,35 @@ const UserManagement: React.FC = () => {
             if (type === 'BLOCK') updates.status = 'blocked';
             if (type === 'SUSPEND') updates.status = 'suspended';
             if (type === 'ACTIVATE') updates.status = 'active';
-            if (type === 'APPROVE_KYC') updates.kyc_status = 'approved';
-            if (type === 'REJECT_KYC') updates.kyc_status = 'rejected';
+            if (type === 'APPROVE_KYC') {
+                updates.kyc_status = 'approved';
+                await (supabase as any).from('provider_profiles').update({ documents_status: 'approved', active: true }).eq('user_id', user.id);
+            }
+            if (type === 'REJECT_KYC') {
+                updates.kyc_status = 'rejected';
+                await (supabase as any).from('provider_profiles').update({ documents_status: 'rejected' }).eq('user_id', user.id);
+            }
 
             const { error } = await (supabase as any).from('users').update(updates).eq('id', user.id);
             if (error) throw error;
 
             await logAdminAction(`GOVERNANCE_${type}`, 'USER', user.id, `Ação de governança: ${type}`, actionReason);
+
+            // Update local lists
             setUsers(prev => prev.map(u => u.id === user.id ? { ...u, ...updates } : u));
-            if (selectedUser?.id === user.id) setSelectedUser({ ...selectedUser, ...updates });
+
+            // Update selected user for immediate feedback in the UI
+            if (selectedUser?.id === user.id) {
+                const updatedSelectedUser = {
+                    ...selectedUser,
+                    ...updates,
+                    provider_profiles: selectedUser.provider_profiles?.map((p: any) => ({
+                        ...p,
+                        documents_status: updates.kyc_status
+                    }))
+                };
+                setSelectedUser(updatedSelectedUser);
+            }
 
             alert('Ação executada com sucesso.');
             setActionModal(null);
@@ -289,9 +309,9 @@ const UserManagement: React.FC = () => {
                             </div>
 
                             <div className="flex px-8 bg-bg-secondary/10 border-b border-border-subtle overflow-x-auto">
-                                {['summary', 'orders', 'financial', 'disputes', 'services', 'logs', 'penalties'].map((tab) => (
+                                {['summary', 'documents', 'orders', 'financial', 'disputes', 'services', 'logs', 'penalties'].map((tab) => (
                                     <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all shrink-0 ${activeTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}>
-                                        {tab === 'summary' ? 'Dossiê' : tab === 'orders' ? 'Pedidos' : tab === 'financial' ? 'Finanças' : tab === 'disputes' ? 'Disputas' : tab === 'services' ? 'Serviços' : tab === 'logs' ? 'Logs' : 'Penalidades'}
+                                        {tab === 'summary' ? 'Dossiê' : tab === 'documents' ? 'Documentação' : tab === 'orders' ? 'Pedidos' : tab === 'financial' ? 'Finanças' : tab === 'disputes' ? 'Disputas' : tab === 'services' ? 'Serviços' : tab === 'logs' ? 'Logs' : 'Penalidades'}
                                     </button>
                                 ))}
                             </div>
@@ -324,7 +344,59 @@ const UserManagement: React.FC = () => {
                                         </div>
                                     </div>
                                 )}
-                                {activeTab !== 'summary' && <div className="h-full flex flex-col items-center justify-center opacity-20"><History size={64} /><p className="mt-4 font-black uppercase tracking-widest">Dados em Processamento...</p></div>}
+
+                                {activeTab === 'documents' && (
+                                    <div className="space-y-8 animate-fade-in">
+                                        <div className="flex items-center justify-between bg-bg-secondary/20 p-6 rounded-3xl border border-border-subtle">
+                                            <div>
+                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-1">Status de Verificação</h4>
+                                                <p className="text-xl font-black text-text-primary uppercase">{selectedUser.kyc_status || 'Pendente'}</p>
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => setActionModal({ open: true, type: 'REJECT_KYC', user: selectedUser })}
+                                                    className="px-6 py-3 bg-error/10 text-error rounded-xl text-[10px] font-black uppercase hover:bg-error hover:text-white transition-all">Reprovar</button>
+                                                <button
+                                                    onClick={() => setActionModal({ open: true, type: 'APPROVE_KYC', user: selectedUser })}
+                                                    className="px-6 py-3 bg-success/10 text-success rounded-xl text-[10px] font-black uppercase hover:bg-success hover:text-white transition-all shadow-glow-green">Aprovar Identidade</button>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {selectedUser.provider_profiles?.[0] ? (
+                                                <>
+                                                    <DocumentCard
+                                                        title="Frente do Documento"
+                                                        path={selectedUser.provider_profiles[0].doc_front_path}
+                                                    />
+                                                    {selectedUser.provider_profiles[0].doc_back_path && (
+                                                        <DocumentCard
+                                                            title="Verso do Documento"
+                                                            path={selectedUser.provider_profiles[0].doc_back_path}
+                                                        />
+                                                    )}
+                                                    <DocumentCard
+                                                        title="Selfie de Verificação"
+                                                        path={selectedUser.provider_profiles[0].selfie_path}
+                                                        isFullWidth
+                                                    />
+                                                </>
+                                            ) : (
+                                                <div className="col-span-2 p-12 text-center opacity-30">
+                                                    <FileText size={48} className="mx-auto mb-4" />
+                                                    <p className="font-black uppercase tracking-widest text-xs">Nenhum perfil de profissional vinculado</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab !== 'summary' && activeTab !== 'documents' && (
+                                    <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
+                                        <History size={64} />
+                                        <p className="mt-4 font-black uppercase tracking-widest">Dados em Processamento...</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -444,5 +516,43 @@ const InfoRow = ({ label, value }: any) => (
         <span className="text-text-primary">{value || 'N/A'}</span>
     </div>
 );
+
+const DocumentCard = ({ title, path, isFullWidth }: { title: string, path: string, isFullWidth?: boolean }) => {
+    const [imgUrl, setImgUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!path) return;
+        const { data } = supabase.storage.from('documents').getPublicUrl(path);
+        setImgUrl(data.publicUrl);
+    }, [path]);
+
+    return (
+        <div className={`bg-bg-secondary/20 p-6 rounded-[32px] border border-border-subtle flex flex-col gap-4 ${isFullWidth ? 'md:col-span-2' : ''}`}>
+            <div className="flex items-center justify-between">
+                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest leading-none">{title}</h4>
+                {path && (
+                    <a href={imgUrl || '#'} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
+                        <ExternalLink size={14} className="text-text-tertiary" />
+                    </a>
+                )}
+            </div>
+
+            <div className="relative aspect-video bg-black/40 rounded-2xl overflow-hidden group border border-white/5">
+                {path ? (
+                    imgUrl ? (
+                        <img src={imgUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center"><Clock className="animate-spin text-text-tertiary" /></div>
+                    )
+                ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 bg-bg-secondary">
+                        <AlertTriangle size={32} className="mb-2" />
+                        <p className="text-[10px] font-black uppercase tracking-widest">Aguardando Envio</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 export default UserManagement;

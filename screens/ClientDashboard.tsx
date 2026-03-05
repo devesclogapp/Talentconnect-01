@@ -90,7 +90,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button className="btn-icon relative">
+                    <button onClick={() => onNavigate('NOTIFICATIONS')} className="btn-icon relative">
                         <Bell size={18} className="text-text-secondary" />
                         <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-accent-primary rounded-full shadow-glow"></span>
                     </button>
@@ -112,6 +112,11 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                         className="input !pl-10 !pr-10 !h-12 !text-sm !bg-bg-secondary/30 border-transparent  focus:bg-bg-primary focus:border-border-subtle focus:shadow-sm transition-all rounded-xl font-normal"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && searchQuery.trim()) {
+                                onNavigate(`/client/services?q=${encodeURIComponent(searchQuery.trim())}`);
+                            }
+                        }}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
                         <Filter size={14} className="text-text-tertiary opacity-50 cursor-pointer transition-opacity" />
@@ -129,7 +134,10 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                     >
                         {/* Slide 1 - VIP Platinum */}
                         <div className="min-w-full">
-                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group">
+                            <div
+                                onClick={() => onNavigate('PROFILE')}
+                                className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group active:scale-[0.98] transition-all"
+                            >
                                 <div className="absolute inset-0 z-0">
                                     <img src="/banner1.png" className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-110" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
@@ -154,7 +162,10 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
                         {/* Slide 2 - Expert Network */}
                         <div className="min-w-full">
-                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group">
+                            <div
+                                onClick={() => onNavigate('SERVICES')}
+                                className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group active:scale-[0.98] transition-all"
+                            >
                                 <div className="absolute inset-0 z-0">
                                     <img src="/banner2.png" className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-110" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
@@ -179,7 +190,10 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
                         {/* Slide 3 - Premium Services */}
                         <div className="min-w-full">
-                            <div className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group">
+                            <div
+                                onClick={() => onNavigate('SERVICES')}
+                                className="card-credit !rounded-[20px] shadow-glow cursor-pointer relative group active:scale-[0.98] transition-all"
+                            >
                                 <div className="absolute inset-0 z-0">
                                     <img src="/banner3.png" className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-110" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>

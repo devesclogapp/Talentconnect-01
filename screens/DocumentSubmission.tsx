@@ -34,10 +34,11 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
     const uploadFile = async (file: File, path: string) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        // Path structure: userid/type/filename
         const filePath = `${user.id}/${path}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-            .from('documents') // Assuming a 'documents' bucket exists and is private/secure
+            .from('documents')
             .upload(filePath, file);
 
         if (uploadError) throw uploadError;
@@ -54,42 +55,65 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
         setError('');
 
         try {
-            // 1. Upload Document Front
-            await uploadFile(docFront, 'document_front');
+            const paths: Record<string, string> = {};
 
-            // 2. Upload Document Back (if RG)
-            if (documentType === 'rg' && docBack) {
-                await uploadFile(docBack, 'document_back');
-            }
-
-            // 3. Upload Selfie
-            await uploadFile(selfie, 'selfie_verification');
-
-            // 4. Update User Metadata status
-            const { data, error: updateError } = await supabase.auth.updateUser({
-                data: {
-                    documents_status: 'submitted',
-                    documents_submitted_at: new Date().toISOString()
+            // 1. Upload files (Safe-try)
+            const tryUpload = async (file: File, p: string, key: string) => {
+                try {
+                    const filePath = await uploadFile(file, p);
+                    paths[key] = filePath;
+                } catch (e) {
+                    console.warn(`Upload skipped/failed for ${p}:`, e);
                 }
+            };
+
+            await tryUpload(docFront, 'document_front', 'doc_front_path');
+            if (documentType === 'rg' && docBack) {
+                await tryUpload(docBack, 'document_back', 'doc_back_path');
+            }
+            await tryUpload(selfie, 'selfie_verification', 'selfie_path');
+
+            // 2. Update User Metadata (includes status and paths)
+            const metadataUpdates = {
+                documents_status: 'submitted',
+                documents_submitted_at: new Date().toISOString(),
+                ...paths
+            };
+
+            const { error: updateError } = await supabase.auth.updateUser({
+                data: metadataUpdates
             });
 
             if (updateError) throw updateError;
 
-            // 5. Update local state
+            // 3. Update public.provider_profiles table (for Admin ERP)
+            const { error: profileError } = await supabase
+                .from('provider_profiles')
+                .update({
+                    documents_status: 'submitted',
+                    ...paths
+                })
+                .eq('user_id', user.id);
+
+            if (profileError) {
+                console.warn('Could not update provider_profiles, metadata used as fallback:', profileError);
+            }
+
+            // 4. Update local state
             setUser({
                 ...user,
                 user_metadata: {
-                    ...user.user_metadata,
-                    documents_status: 'submitted'
+                    ...(user as any).user_metadata,
+                    ...metadataUpdates
                 }
-            });
+            } as any);
 
-            // 6. Navigate Back/Success
+            // 5. Navigate Success
             onSubmissionSuccess();
 
         } catch (err: any) {
-            console.error('Error submitting documents:', err);
-            setError('Erro ao enviar documentos. Tente novamente.');
+            console.error('Error submitting verification:', err);
+            setError('Erro ao processar verificação. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -131,8 +155,8 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
                             <button
                                 onClick={() => setDocumentType('chn')}
                                 className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all text-sm font-medium ${documentType === 'chn'
-                                        ? 'border-accent-primary bg-accent-primary/5 text-accent-primary'
-                                        : 'border-border-subtle bg-bg-secondary text-text-tertiary hover:border-border-medium'
+                                    ? 'border-accent-primary bg-accent-primary/5 text-accent-primary'
+                                    : 'border-border-subtle bg-bg-secondary text-text-tertiary hover:border-border-medium'
                                     }`}
                             >
                                 CNH (Carteira Motorista)
@@ -140,8 +164,8 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
                             <button
                                 onClick={() => setDocumentType('rg')}
                                 className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all text-sm font-medium ${documentType === 'rg'
-                                        ? 'border-accent-primary bg-accent-primary/5 text-accent-primary'
-                                        : 'border-border-subtle bg-bg-secondary text-text-tertiary hover:border-border-medium'
+                                    ? 'border-accent-primary bg-accent-primary/5 text-accent-primary'
+                                    : 'border-border-subtle bg-bg-secondary text-text-tertiary hover:border-border-medium'
                                     }`}
                             >
                                 RG (Identidade)

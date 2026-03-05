@@ -1,6 +1,6 @@
 import React from 'react';
-import { Heart, Star, MapPin, ShieldCheck, ChevronRight } from 'lucide-react';
-import { CATEGORY_MAP, getCategoryImage } from '../constants';
+import { Heart, Star, MapPin } from 'lucide-react';
+import { getCategoryImage } from '../constants';
 
 interface ServiceCardProps {
     service: any;
@@ -27,10 +27,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick, resolveUser
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     alt={service.title}
                 />
-                {/* Rating badge on image */}
-                <div className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 bg-white/90 backdrop-blur rounded shadow-sm text-[10px] font-bold">
-                    <Star size={10} className="text-black" fill="currentColor" />
-                    <span>4.9</span>
+                {/* Rating badge on image - Now with 5 stars as requested */}
+                <div className="absolute bottom-2 left-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-white/90 backdrop-blur rounded shadow-sm">
+                    {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={10} className="text-warning" fill="currentColor" />
+                    ))}
                 </div>
             </div>
 
