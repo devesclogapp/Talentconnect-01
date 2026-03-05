@@ -1,66 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import {
+    Users,
     Search,
     Filter,
-    UserCheck,
-    UserX,
-    Shield,
+    ShieldCheck,
+    ShieldAlert,
+    ShieldX,
+    User,
     Mail,
-    Calendar,
-    ChevronLeft,
-    ChevronRight,
-    Eye,
-    X,
-    CheckCircle,
-    Slash,
-    Download,
-    Ban,
-    Unlock,
-    History,
-    Briefcase as BriefcaseIcon,
-    DollarSign,
-    MessageCircle,
-    FileText,
-    AlertCircle,
     Clock,
-    Gavel,
-    MoreVertical,
     Activity,
     AlertTriangle,
-    ShieldAlert,
-    Target,
-    Zap,
-    Scale,
-    ShieldCheck,
-    ArrowRightCircle,
-    ExternalLink,
-    Lock
+    CheckCircle2,
+    XCircle,
+    Lock,
+    Unlock,
+    ChevronRight,
+    RefreshCw,
+    FileText,
+    TrendingUp,
+    Star,
+    X,
+    ArrowUp,
+    ArrowDown,
+    Eye
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
+import { resolveUserName } from '../utils/userUtils';
 
-// --- Helpers de Governança ---
 const logAdminAction = async (action: string, entityType: string, entityId: string, details: string, reason: string) => {
     try {
+        const { data: { user } } = await supabase.auth.getUser();
         await (supabase as any).from('audit_logs').insert({
             action,
             entity_type: entityType,
             entity_id: entityId,
-            details,
-            reason,
-            timestamp: new Date().toISOString(),
-            origin: 'User Governance'
+            actor_user_id: user?.id,
+            payload_json: { details, reason, origin: 'ERP UserManagement' }
         });
-    } catch (err) {
-        console.error("Audit Log Failure:", err);
-    }
+    } catch (err) { console.error("Audit log failed:", err); }
 };
 
-const calculateUserScore = (stats: any) => {
+const calculateUserRisk = (user: any) => {
     let score = 5;
-    if (stats.disputes > 0) score += (stats.disputes * 15);
-    if (stats.cancellationRate > 10) score += 20;
-    if (stats.negativeRatings > 0) score += (stats.negativeRatings * 10);
-    if (stats.frequentDataChanges) score += 10;
+    if (user.kyc_status === 'rejected') score += 50;
+    if (user.kyc_status === 'pending' || user.kyc_status === 'none') score += 10;
+    if (user.openDisputes > 0) score += user.openDisputes * 20;
+    if (user.cancelledOrders > 2) score += 15;
     return Math.min(score, 100);
 };
 
@@ -69,490 +55,525 @@ const UserManagement: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('all');
+    const [filterRisk, setFilterRisk] = useState('all');
     const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [activeTab, setActiveTab] = useState('summary');
-    const [userStats, setUserStats] = useState({
-        orders: 0,
-        disputes: 0,
-        revenue: 0,
-        cancellationRate: 0,
-        negativeRatings: 0,
-        activePenalties: 0,
-        refunds: 0
-    });
-    const [actionModal, setActionModal] = useState<{ open: boolean, type: string, user: any } | null>(null);
+    const [dossierTab, setDossierTab] = useState('profile');
+    const [actionModal, setActionModal] = useState<{ type: string; user: any } | null>(null);
     const [actionReason, setActionReason] = useState('');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [sortField, setSortField] = useState<'risk' | 'created' | null>(null);
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-    const [filters, setFilters] = useState({
-        score: 'all',
-        kyc: 'all',
-        dispute: 'all',
-        penalty: 'all'
-    });
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
+    useEffect(() => { fetchUsers(); }, []);
 
     const fetchUsers = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
-            // 1. Fetch Users
-            const { data: usersData, error: usersError } = await supabase.from('users').select('*, provider_profiles(*)');
-            if (usersError) throw usersError;
+            const { data, error } = await supabase.from('users').select('*');
+            if (error) throw error;
 
-            // 2. Fetch Aggregates (Para evitar múltiplas queries por linha, carregamos em lote)
-            const { data: allOrders } = await supabase.from('orders').select('id, client_id, provider_id, status');
-            const { data: allPayments } = await supabase.from('payments').select('order_id, amount_total, escrow_status');
-            const { data: allDisputes } = await supabase.from('disputes').select('order_id');
+            const allOrdersRes = await supabase.from('orders').select('id, client_id, provider_id, status');
+            const allDisputesRes = await supabase.from('disputes').select('id, order_id, status');
+            let allRatingsRes: { data: any[] | null } = { data: null };
+            try { allRatingsRes = await supabase.from('ratings').select('provider_id, score') as any; } catch (_) { /* ratings table may not exist */ }
+            const profilesRes = await supabase.from('provider_profiles').select('user_id, documents_status, bio');
 
-            const processedUsers = (usersData as any[] || []).map((u: any) => {
-                const userOrders = (allOrders as any[] || []).filter(o => o.client_id === u.id || o.provider_id === u.id);
-                const orderIds = userOrders.map(o => o.id);
+            const allOrders = (allOrdersRes.data || []) as any[];
+            const allDisputes = (allDisputesRes.data || []) as any[];
+            const allRatings = (allRatingsRes.data || []) as any[];
+            const allProfiles = (profilesRes.data || []) as any[];
 
-                const userDisputes = (allDisputes as any[] || []).filter(d => orderIds.includes(d.order_id)).length;
-                const userCancellations = userOrders.filter(o => o.status === 'cancelled').length;
-                const userRevenue = (allPayments as any[] || [])
-                    .filter(p => orderIds.includes(p.order_id) && p.escrow_status === 'released')
-                    .reduce((acc, p) => acc + (p.amount_total || 0), 0);
+            const enriched = (data || []).map((u: any) => {
+                const clientOrders = allOrders.filter(o => o.client_id === u.id);
+                const providerOrders = allOrders.filter(o => o.provider_id === u.id);
+                const clientOrderIds = clientOrders.map(o => o.id);
+                const providerOrderIds = providerOrders.map(o => o.id);
 
-                const kyc = u.provider_profiles?.[0]?.documents_status || u.kyc_status || 'pending';
+                const openDisputes = allDisputes.filter(d => clientOrderIds.includes(d.order_id) && d.status === 'open').length;
+                const cancelledOrders = clientOrders.filter(o => o.status === 'cancelled').length;
+                const completedOrders = clientOrders.filter(o => o.status === 'completed').length + providerOrders.filter(o => o.status === 'completed').length;
 
-                const stats = {
-                    disputes: userDisputes,
-                    cancellationRate: userOrders.length > 0 ? (userCancellations / userOrders.length) * 100 : 0,
-                    negativeRatings: 0, // Fallback até termos ratings reais por usuário
-                    frequentDataChanges: false
-                };
+                const userRatings = allRatings.filter(r => r.provider_id === u.id);
+                const avgRating = userRatings.length > 0 ? userRatings.reduce((s: number, r: any) => s + (r.score || 0), 0) / userRatings.length : null;
 
-                const score = calculateUserScore(stats);
+                const profile = allProfiles.find(p => p.user_id === u.id);
+
+                const riskData = { ...u, openDisputes, cancelledOrders };
+                const riskScore = calculateUserRisk(riskData);
 
                 return {
                     ...u,
-                    kyc_status: kyc,
-                    status: u.status || 'active',
-                    risk_score: score,
-                    risk_level: score > 70 ? 'high' : score > 30 ? 'medium' : 'low',
-                    total_orders: userOrders.length,
-                    revenue: userRevenue,
-                    disputes_30d: userDisputes,
-                    cancellation_rate: Math.round(stats.cancellationRate)
+                    openDisputes,
+                    cancelledOrders,
+                    completedOrders,
+                    totalClientOrders: clientOrders.length,
+                    totalProviderOrders: providerOrders.length,
+                    avgRating,
+                    profile,
+                    riskScore,
+                    riskLevel: riskScore > 60 ? 'high' : riskScore > 30 ? 'medium' : 'low'
                 };
-            }).sort((a, b) => b.risk_score - a.risk_score);
+            });
 
-            setUsers(processedUsers);
-        } catch (error) {
-            console.error('Error fetching users:', error);
+            setUsers(enriched);
+        } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchUserStats = async (userId: string) => {
-        try {
-            const { count: orderCount } = await supabase.from('orders').select('*', { count: 'exact', head: true }).or(`client_id.eq.${userId},provider_id.eq.${userId}`);
-            const { data: userOrders } = await supabase.from('orders').select('id').or(`client_id.eq.${userId},provider_id.eq.${userId}`);
-            const orderIds = (userOrders || [])?.map(o => o.id);
-            let disputeCount = 0;
-            if (orderIds && orderIds.length > 0) {
-                const { count } = await supabase.from('disputes').select('*', { count: 'exact', head: true }).in('order_id', orderIds);
-                disputeCount = count || 0;
-            }
-
-            const { data: payments } = await supabase.from('payments').select('*').in('order_id', orderIds || []);
-            const revenue = (payments || []).filter(p => p.escrow_status === 'released').reduce((acc, p) => acc + (p.amount_total || 0), 0);
-            const refunds = (payments || []).filter(p => p.escrow_status === 'refunded').reduce((acc, p) => acc + (p.amount_total || 0), 0);
-            const { count: cancelledCount } = await supabase.from('orders').select('*', { count: 'exact', head: true }).or(`client_id.eq.${userId},provider_id.eq.${userId}`).eq('status', 'cancelled');
-
-            setUserStats({
-                orders: orderCount || 0,
-                disputes: disputeCount,
-                revenue,
-                cancellationRate: orderCount ? (cancelledCount || 0) / orderCount * 100 : 0,
-                negativeRatings: 1,
-                activePenalties: 0,
-                refunds
-            });
-        } catch (error) {
-            console.error('Error fetching user stats:', error);
-        }
-    };
-
-    const handleSelectUser = (user: any) => {
-        setSelectedUser(user);
-        setActiveTab('summary');
-        fetchUserStats(user.id);
-    };
-
-    const performGlobalAction = async () => {
-        if (!actionModal || !actionReason) return;
-        setIsUpdating(true);
+    const performAction = async () => {
+        if (!actionModal || !actionReason || isProcessing) return;
+        setIsProcessing(true);
         try {
             const { type, user } = actionModal;
             const updates: any = {};
-            if (type === 'BLOCK') updates.status = 'blocked';
-            if (type === 'SUSPEND') updates.status = 'suspended';
-            if (type === 'ACTIVATE') updates.status = 'active';
-            if (type === 'APPROVE_KYC') {
-                updates.kyc_status = 'approved';
-                await (supabase as any).from('provider_profiles').update({ documents_status: 'approved', active: true }).eq('user_id', user.id);
-            }
-            if (type === 'REJECT_KYC') {
-                updates.kyc_status = 'rejected';
-                await (supabase as any).from('provider_profiles').update({ documents_status: 'rejected' }).eq('user_id', user.id);
-            }
+            if (type === 'BLOCK') updates.active = false;
+            if (type === 'ACTIVATE') updates.active = true;
+            if (type === 'KYC_APPROVE') updates.kyc_status = 'approved';
+            if (type === 'KYC_REJECT') updates.kyc_status = 'rejected';
 
-            const { error } = await (supabase as any).from('users').update(updates).eq('id', user.id);
-            if (error) throw error;
-
+            await (supabase as any).from('users').update(updates).eq('id', user.id);
             await logAdminAction(`GOVERNANCE_${type}`, 'USER', user.id, `Ação de governança: ${type}`, actionReason);
 
-            // Update local lists
             setUsers(prev => prev.map(u => u.id === user.id ? { ...u, ...updates } : u));
+            if (selectedUser?.id === user.id) setSelectedUser({ ...selectedUser, ...updates });
 
-            // Update selected user for immediate feedback in the UI
-            if (selectedUser?.id === user.id) {
-                const updatedSelectedUser = {
-                    ...selectedUser,
-                    ...updates,
-                    provider_profiles: selectedUser.provider_profiles?.map((p: any) => ({
-                        ...p,
-                        documents_status: updates.kyc_status
-                    }))
-                };
-                setSelectedUser(updatedSelectedUser);
-            }
-
-            alert('Ação executada com sucesso.');
+            alert('Ação aplicada com sucesso.');
             setActionModal(null);
             setActionReason('');
         } catch (err: any) {
             alert('Erro: ' + err.message);
         } finally {
-            setIsUpdating(false);
+            setIsProcessing(false);
         }
     };
 
-    const filteredUsers = users.filter(user => {
-        const name = (user.name || user.user_metadata?.name || '').toLowerCase();
-        const email = (user.email || '').toLowerCase();
-        const matchesSearch = email.includes(searchTerm.toLowerCase()) || name.includes(searchTerm.toLowerCase());
-        const matchesRole = filterRole === 'all' || (user.role || user.user_metadata?.role || 'client').toLowerCase() === filterRole.toLowerCase();
-        const matchesScore = filters.score === 'all' || (filters.score === 'high' && user.risk_score > 70) || (filters.score === 'medium' && user.risk_score > 30 && user.risk_score <= 70) || (filters.score === 'low' && user.risk_score <= 30);
-        const matchesKYC = filters.kyc === 'all' || user.kyc_status === filters.kyc;
-        return matchesSearch && matchesRole && matchesScore && matchesKYC;
-    });
+    const toggleSort = (field: 'risk' | 'created') => {
+        if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        else { setSortField(field); setSortDir('desc'); }
+    };
+
+    const filteredUsers = users
+        .filter(u => {
+            const name = resolveUserName(u).toLowerCase();
+            const email = (u.email || '').toLowerCase();
+            const matchesSearch = name.includes(searchTerm.toLowerCase()) || email.includes(searchTerm.toLowerCase());
+            const matchesRole = filterRole === 'all' || u.role === filterRole;
+            const matchesRisk = filterRisk === 'all' || u.riskLevel === filterRisk;
+            return matchesSearch && matchesRole && matchesRisk;
+        })
+        .sort((a, b) => {
+            if (!sortField) return 0;
+            if (sortField === 'risk') return sortDir === 'desc' ? b.riskScore - a.riskScore : a.riskScore - b.riskScore;
+            if (sortField === 'created') return sortDir === 'desc'
+                ? new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                : new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            return 0;
+        });
+
+    const getRoleStyle = (role: string) => {
+        if (role === 'provider') return 'bg-accent-primary/10 text-accent-primary';
+        if (role === 'operator') return 'bg-info/10 text-info';
+        return 'bg-bg-secondary text-text-tertiary';
+    };
+
+    const getKycStyle = (status: string) => {
+        if (status === 'approved') return 'bg-success/10 text-success';
+        if (status === 'rejected') return 'bg-error/10 text-error';
+        if (status === 'submitted') return 'bg-warning/10 text-warning';
+        return 'bg-bg-secondary text-text-tertiary';
+    };
+
+    const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
 
     return (
-        <div className="flex gap-8 animate-fade-in relative pb-12 h-screen overflow-hidden">
-            {/* Sidebar Filtros */}
-            {isSidebarOpen && (
-                <div className="w-80 bg-bg-primary border-r border-border-subtle h-full p-8 space-y-10 animate-slide-in-left overflow-y-auto">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-xs font-black text-text-primary uppercase tracking-widest flex items-center gap-2">
-                            <Filter size={16} className="text-accent-primary" /> Governança
-                        </h3>
-                        <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-bg-secondary rounded-lg transition-all"><ChevronLeft size={20} /></button>
+        <div className="space-y-6 animate-fade-in pb-12">
+
+            {/* Action Modal */}
+            {actionModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+                    <div
+                        className="w-full max-w-md overflow-hidden animate-in zoom-in-95"
+                        style={{
+                            background: 'var(--bg-primary)',
+                            borderRadius: '14px',
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            boxShadow: '0 12px 32px rgba(0,0,0,0.15)'
+                        }}
+                    >
+                        <div className="p-7 border-b border-border-subtle" style={{ background: 'var(--bg-secondary)' }}>
+                            <h2 className="text-[18px] font-semibold text-text-primary">Intervenção de Usuário</h2>
+                            <p className="text-xs text-text-tertiary mt-1">Usuário: <strong>{resolveUserName(actionModal.user)}</strong></p>
+                        </div>
+                        <div className="p-7 space-y-5">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Justificativa (Auditoria)</label>
+                                <textarea
+                                    value={actionReason}
+                                    onChange={e => setActionReason(e.target.value)}
+                                    className="w-full h-28 rounded-[8px] p-4 text-xs outline-none focus:border-accent-primary transition-all resize-none"
+                                    style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)', color: 'var(--text-primary)' }}
+                                    placeholder="Descreva o motivo para auditoria..."
+                                />
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setActionModal(null)}
+                                    className="flex-1 py-3 rounded-[8px] text-[10px] font-semibold uppercase text-text-primary transition-all hover:bg-bg-tertiary"
+                                    style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)' }}
+                                >Cancelar</button>
+                                <button
+                                    disabled={!actionReason || isProcessing}
+                                    onClick={performAction}
+                                    className="flex-1 py-3 rounded-[8px] text-[10px] font-semibold uppercase text-white transition-all hover:opacity-90 disabled:opacity-30"
+                                    style={{ background: actionModal.type === 'BLOCK' || actionModal.type === 'KYC_REJECT' ? 'var(--error)' : 'var(--text-primary)', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
+                                >
+                                    {isProcessing ? 'Processando...' : 'Confirmar & Logar'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <FilterGroup label="Score de Risco">
-                        <FilterButton active={filters.score === 'all'} label="Todos" onClick={() => setFilters({ ...filters, score: 'all' })} />
-                        <FilterButton active={filters.score === 'high'} label="Alto Risco" color="text-error" onClick={() => setFilters({ ...filters, score: 'high' })} />
-                        <FilterButton active={filters.score === 'medium'} label="Atenção" color="text-warning" onClick={() => setFilters({ ...filters, score: 'medium' })} />
-                        <FilterButton active={filters.score === 'low'} label="Seguro" color="text-success" onClick={() => setFilters({ ...filters, score: 'low' })} />
-                    </FilterGroup>
-                    <FilterGroup label="Status KYC">
-                        <FilterButton active={filters.kyc === 'all'} label="Todos" onClick={() => setFilters({ ...filters, kyc: 'all' })} />
-                        <FilterButton active={filters.kyc === 'pending'} label="Pendente" color="text-warning" onClick={() => setFilters({ ...filters, kyc: 'pending' })} />
-                        <FilterButton active={filters.kyc === 'approved'} label="Aprovado" color="text-success" onClick={() => setFilters({ ...filters, kyc: 'approved' })} />
-                    </FilterGroup>
                 </div>
             )}
 
-            <div className="flex-1 space-y-8 overflow-y-auto p-8 pr-12">
-                {/* Modal Ação */}
-                {actionModal?.open && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-                        <div className="bg-bg-primary w-full max-w-lg rounded-[48px] shadow-2xl overflow-hidden border border-border-subtle animate-in zoom-in-95 duration-200">
-                            <div className="p-10 border-b border-border-subtle bg-bg-secondary/30">
-                                <h2 className="text-2xl font-black text-text-primary mb-2 flex items-center gap-3"><AlertCircle className="text-accent-primary" /> Confirmar Intervenção</h2>
-                                <p className="text-xs text-text-tertiary">Ação: <span className="text-text-primary font-black">{actionModal.type}</span> para {actionModal.user.email}</p>
-                            </div>
-                            <div className="p-10 space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-text-tertiary uppercase tracking-widest">Motivo da Auditoria</label>
-                                    <textarea value={actionReason} onChange={(e) => setActionReason(e.target.value)} className="w-full h-32 bg-bg-secondary border border-border-subtle rounded-2xl p-4 text-xs font-medium outline-none focus:border-accent-primary" placeholder="Descreva o motivo..." />
+            {/* User Dossier Slide-over */}
+            {selectedUser && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
+                    <div
+                        className="h-full w-full max-w-4xl shadow-2xl animate-slide-in-right overflow-hidden flex flex-col"
+                        style={{ background: 'var(--bg-primary)' }}
+                    >
+                        <div className="p-6 border-b border-border-subtle flex items-center justify-between" style={{ background: 'var(--bg-secondary)' }}>
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-[8px] bg-accent-primary text-white flex items-center justify-center font-semibold text-base">
+                                    {resolveUserName(selectedUser).charAt(0).toUpperCase()}
                                 </div>
-                                <div className="flex gap-4">
-                                    <button onClick={() => setActionModal(null)} className="flex-1 py-4 bg-bg-secondary rounded-2xl text-[10px] font-black uppercase">Sair</button>
-                                    <button disabled={!actionReason || isUpdating} onClick={performGlobalAction} className="flex-1 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase shadow-xl hover:scale-105 transition-all disabled:opacity-30">Confirmar</button>
+                                <div>
+                                    <h2 className="text-base font-semibold text-text-primary">{resolveUserName(selectedUser)}</h2>
+                                    <p className="text-[10px] text-text-tertiary font-mono">{selectedUser.email}</p>
                                 </div>
                             </div>
+                            <button onClick={() => setSelectedUser(null)} className="p-2 rounded-[8px] hover:bg-bg-tertiary transition-colors border border-border-subtle"><X size={20} /></button>
                         </div>
-                    </div>
-                )}
 
-                {/* Dossiê Slide-over */}
-                {selectedUser && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
-                        <div className="bg-bg-primary h-full w-full max-w-5xl shadow-2xl animate-slide-in-right overflow-hidden flex flex-col">
-                            <div className="p-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary/30">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-accent-primary text-white flex items-center justify-center text-2xl font-black">{(selectedUser.name || 'U').charAt(0)}</div>
-                                    <div>
-                                        <h2 className="text-xl font-black text-text-primary uppercase tracking-tight">{selectedUser.name || 'Sem nome'}</h2>
-                                        <p className="text-xs text-text-tertiary font-bold uppercase tracking-widest">{selectedUser.email}</p>
+                        <div className="flex px-6 border-b border-border-subtle overflow-x-auto" style={{ background: 'var(--bg-secondary)' }}>
+                            {['profile', 'orders', 'risk', 'actions'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setDossierTab(tab)}
+                                    className={`px-5 py-4 text-[10px] font-semibold uppercase tracking-widest border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}
+                                >
+                                    {tab === 'profile' ? 'Perfil' : tab === 'orders' ? 'Pedidos' : tab === 'risk' ? 'Risco & KYC' : 'Ações Admin'}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-8">
+                            {dossierTab === 'profile' && (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <UserStat label="Pedidos Feitos" value={selectedUser.totalClientOrders} color="text-accent-primary" />
+                                        <UserStat label="Serviços Prestados" value={selectedUser.totalProviderOrders} color="text-success" />
+                                        <UserStat label="Disputas Abertas" value={selectedUser.openDisputes} color={selectedUser.openDisputes > 0 ? "text-error" : "text-text-tertiary"} />
+                                        <UserStat label="Avaliação Média" value={selectedUser.avgRating ? `${selectedUser.avgRating.toFixed(1)} ★` : '—'} color="text-warning" />
+                                    </div>
+                                    <div
+                                        className="p-6 space-y-3"
+                                        style={{ background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.06)' }}
+                                    >
+                                        <InfoRow label="E-mail" value={selectedUser.email} />
+                                        <InfoRow label="Função" value={selectedUser.role} />
+                                        <InfoRow label="KYC Status" value={selectedUser.kyc_status || 'Não iniciado'} />
+                                        <InfoRow label="Conta criada em" value={formatDate(selectedUser.created_at)} />
+                                        <InfoRow label="ID do Usuário" value={selectedUser.id?.slice(0, 16) + '...'} />
                                     </div>
                                 </div>
-                                <button onClick={() => setSelectedUser(null)} className="p-3 bg-bg-secondary hover:rotate-90 transition-all rounded-xl border border-border-subtle"><X size={24} /></button>
-                            </div>
-
-                            <div className="flex px-8 bg-bg-secondary/10 border-b border-border-subtle overflow-x-auto">
-                                {['summary', 'documents', 'orders', 'financial', 'disputes', 'services', 'logs', 'penalties'].map((tab) => (
-                                    <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all shrink-0 ${activeTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}>
-                                        {tab === 'summary' ? 'Dossiê' : tab === 'documents' ? 'Documentação' : tab === 'orders' ? 'Pedidos' : tab === 'financial' ? 'Finanças' : tab === 'disputes' ? 'Disputas' : tab === 'services' ? 'Serviços' : tab === 'logs' ? 'Logs' : 'Penalidades'}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-10">
-                                {activeTab === 'summary' && (
-                                    <div className="space-y-10">
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <DetailStat label="Pedidos Totais" value={userStats.orders} icon={<BriefcaseIcon />} color="text-accent-primary" />
-                                            <DetailStat label="Disputas (30d)" value={userStats.disputes} icon={<Scale />} color="text-error" />
-                                            <DetailStat label="Volume Bruto" value={`R$ ${userStats.revenue.toLocaleString()}`} icon={<DollarSign />} color="text-success" />
+                            )}
+                            {dossierTab === 'risk' && (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                                    <div
+                                        className="p-6 flex items-center justify-between"
+                                        style={{ background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.06)' }}
+                                    >
+                                        <div>
+                                            <p className="text-[10px] font-semibold uppercase text-text-tertiary tracking-widest mb-1">Score de Risco</p>
+                                            <h3 className={`text-4xl font-semibold leading-none ${selectedUser.riskLevel === 'high' ? 'text-error' : selectedUser.riskLevel === 'medium' ? 'text-warning' : 'text-success'}`}>
+                                                {selectedUser.riskScore}
+                                                <span className="text-base text-text-tertiary font-medium ml-1">/100</span>
+                                            </h3>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            <div className="bg-bg-secondary/20 p-8 rounded-[40px] border border-border-subtle space-y-6">
-                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest">Análise de Risco</h4>
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-2xl font-black text-text-primary">{selectedUser.risk_score}%</span>
-                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${selectedUser.risk_level === 'high' ? 'bg-error text-white' : 'bg-success text-white'}`}>{selectedUser.risk_level} Risk</span>
-                                                </div>
-                                                <div className="h-3 w-full bg-bg-secondary rounded-full overflow-hidden">
-                                                    <div className={`h-full ${selectedUser.risk_level === 'high' ? 'bg-error' : 'bg-success'}`} style={{ width: `${selectedUser.risk_score}%` }}></div>
-                                                </div>
-                                            </div>
-                                            <div className="bg-bg-secondary/20 p-8 rounded-[40px] border border-border-subtle space-y-4">
-                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest">Perfil & Acesso</h4>
-                                                <InfoRow label="Papel" value={selectedUser.role} />
-                                                <InfoRow label="KYC" value={selectedUser.kyc_status} />
-                                                <InfoRow label="Status" value={selectedUser.status} />
-                                            </div>
-                                        </div>
+                                        <span className={`px-4 py-2 rounded-[6px] text-[10px] font-semibold uppercase tracking-widest ${selectedUser.riskLevel === 'high' ? 'bg-error/10 text-error' : selectedUser.riskLevel === 'medium' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}`}>
+                                            {selectedUser.riskLevel === 'high' ? 'Alto Risco' : selectedUser.riskLevel === 'medium' ? 'Atenção' : 'Seguro'}
+                                        </span>
                                     </div>
-                                )}
-
-                                {activeTab === 'documents' && (
-                                    <div className="space-y-8 animate-fade-in">
-                                        <div className="flex items-center justify-between bg-bg-secondary/20 p-6 rounded-3xl border border-border-subtle">
-                                            <div>
-                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-1">Status de Verificação</h4>
-                                                <p className="text-xl font-black text-text-primary uppercase">{selectedUser.kyc_status || 'Pendente'}</p>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={() => setActionModal({ open: true, type: 'REJECT_KYC', user: selectedUser })}
-                                                    className="px-6 py-3 bg-error/10 text-error rounded-xl text-[10px] font-black uppercase hover:bg-error hover:text-white transition-all">Reprovar</button>
-                                                <button
-                                                    onClick={() => setActionModal({ open: true, type: 'APPROVE_KYC', user: selectedUser })}
-                                                    className="px-6 py-3 bg-success/10 text-success rounded-xl text-[10px] font-black uppercase hover:bg-success hover:text-white transition-all shadow-glow-green">Aprovar Identidade</button>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {selectedUser.provider_profiles?.[0] ? (
-                                                <>
-                                                    <DocumentCard
-                                                        title="Frente do Documento"
-                                                        path={selectedUser.provider_profiles[0].doc_front_path}
-                                                    />
-                                                    {selectedUser.provider_profiles[0].doc_back_path && (
-                                                        <DocumentCard
-                                                            title="Verso do Documento"
-                                                            path={selectedUser.provider_profiles[0].doc_back_path}
-                                                        />
-                                                    )}
-                                                    <DocumentCard
-                                                        title="Selfie de Verificação"
-                                                        path={selectedUser.provider_profiles[0].selfie_path}
-                                                        isFullWidth
-                                                    />
-                                                </>
-                                            ) : (
-                                                <div className="col-span-2 p-12 text-center opacity-30">
-                                                    <FileText size={48} className="mx-auto mb-4" />
-                                                    <p className="font-black uppercase tracking-widest text-xs">Nenhum perfil de profissional vinculado</p>
-                                                </div>
-                                            )}
-                                        </div>
+                                </div>
+                            )}
+                            {dossierTab === 'actions' && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                                    <h4 className="text-[10px] font-semibold uppercase text-text-tertiary tracking-widest">Painel de Intervenção Operacional</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <ActionCard icon={<Lock size={20} />} label="Bloquear Conta" desc="Suspende acesso imediato." color="text-error" onClick={() => setActionModal({ type: 'BLOCK', user: selectedUser })} />
+                                        <ActionCard icon={<Unlock size={20} />} label="Reativar Conta" desc="Restaura acesso completo." color="text-success" onClick={() => setActionModal({ type: 'ACTIVATE', user: selectedUser })} />
+                                        <ActionCard icon={<CheckCircle2 size={20} />} label="Aprovar KYC" desc="Valida documentos do profissional." color="text-accent-primary" onClick={() => setActionModal({ type: 'KYC_APPROVE', user: selectedUser })} />
+                                        <ActionCard icon={<XCircle size={20} />} label="Recusar KYC" desc="Rejeita o processo de verificação." color="text-warning" onClick={() => setActionModal({ type: 'KYC_REJECT', user: selectedUser })} />
                                     </div>
-                                )}
-
-                                {activeTab !== 'summary' && activeTab !== 'documents' && (
-                                    <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
-                                        <History size={64} />
-                                        <p className="mt-4 font-black uppercase tracking-widest">Dados em Processamento...</p>
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
+                            {dossierTab === 'orders' && (
+                                <div className="h-full flex flex-col items-center justify-center opacity-30 animate-in fade-in">
+                                    <Activity size={48} className="animate-pulse" />
+                                    <p className="mt-4 text-sm font-semibold uppercase tracking-widest">Histórico de Pedidos em breve</p>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                )}
-
-                {/* Header & Toolbar */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <h1 className="text-4xl font-black text-text-primary tracking-tighter">Governança de Usuários</h1>
-                        <p className="text-sm text-text-tertiary font-medium">Análise de risco, intervenção direta e auditoria operacional</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        {!isSidebarOpen && <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-bg-secondary border border-border-subtle rounded-xl"><Filter size={20} /></button>}
-                        <button className="h-12 px-6 bg-accent-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-glow-blue hover:scale-105 transition-all flex items-center gap-2"><Download size={16} /> Exportar Dossiês</button>
                     </div>
                 </div>
+            )}
 
-                <div className="bg-bg-primary border border-border-subtle p-6 rounded-[32px] flex flex-col md:flex-row gap-6 items-center">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" size={18} />
-                        <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-bg-secondary border border-border-subtle rounded-2xl pl-12 pr-4 h-14 text-sm font-medium outline-none focus:border-accent-primary transition-all" placeholder="Buscar por ID, Nome, Email ou Documento..." />
-                    </div>
-                    <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="h-14 px-6 bg-bg-secondary border border-border-subtle rounded-2xl text-[10px] font-black uppercase outline-none">
-                        <option value="all">Filtro: Papel</option>
-                        <option value="client">Cliente</option>
-                        <option value="provider">Profissional</option>
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-[22px] font-semibold text-text-primary">Gestão de Usuários</h1>
+                    <p className="text-[13px] text-text-secondary mt-0.5">KYC, risco, governança e controle de acesso</p>
+                </div>
+                <button
+                    onClick={fetchUsers}
+                    className="p-2.5 rounded-[8px] border border-border-subtle hover:rotate-180 transition-all duration-500"
+                    style={{ background: 'var(--bg-secondary)' }}
+                >
+                    <RefreshCw size={18} />
+                </button>
+            </div>
+
+            {/* KPI Strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <KpiCard label="Total de Usuários" value={users.length} icon={<Users size={14} />} />
+                <KpiCard label="Alto Risco" value={users.filter(u => u.riskLevel === 'high').length} icon={<ShieldAlert size={14} />} color="text-error" />
+                <KpiCard label="KYC Pendente" value={users.filter(u => u.kyc_status === 'submitted').length} icon={<Clock size={14} />} color="text-warning" />
+                <KpiCard label="KYC Aprovado" value={users.filter(u => u.kyc_status === 'approved').length} icon={<ShieldCheck size={14} />} color="text-success" />
+            </div>
+
+            {/* Toolbar */}
+            <div
+                className="flex flex-col md:flex-row gap-3 p-4"
+                style={{
+                    background: 'var(--bg-primary)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                }}
+            >
+                <div className="relative flex-1">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary" size={15} />
+                    <input
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        placeholder="Buscar por nome, email ou ID..."
+                        className="w-full h-10 rounded-[8px] pl-10 pr-4 text-sm outline-none focus:border-accent-primary transition-all"
+                        style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)', color: 'var(--text-primary)' }}
+                    />
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                    {[
+                        { val: 'all', label: 'Todos' },
+                        { val: 'client', label: 'Clientes' },
+                        { val: 'provider', label: 'Profissionais' }
+                    ].map(opt => (
+                        <button
+                            key={opt.val}
+                            onClick={() => setFilterRole(opt.val)}
+                            className="h-10 px-4 rounded-[8px] text-[10px] font-semibold uppercase tracking-widest transition-all duration-[120ms]"
+                            style={filterRole === opt.val
+                                ? { background: 'var(--text-primary)', color: '#FFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }
+                                : { background: 'var(--bg-secondary)', color: 'var(--text-tertiary)', border: '1px solid rgba(0,0,0,0.06)' }
+                            }
+                        >{opt.label}</button>
+                    ))}
+                    <select
+                        value={filterRisk}
+                        onChange={e => setFilterRisk(e.target.value)}
+                        className="h-10 px-4 rounded-[8px] text-[10px] font-semibold uppercase outline-none transition-all"
+                        style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)', color: 'var(--text-tertiary)' }}
+                    >
+                        <option value="all">Todos os Riscos</option>
+                        <option value="high">Alto Risco</option>
+                        <option value="medium">Atenção</option>
+                        <option value="low">Seguros</option>
                     </select>
                 </div>
+            </div>
 
-                {/* Tabela */}
-                <div className="bg-bg-primary border border-border-subtle rounded-[40px] overflow-hidden shadow-sm">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-bg-secondary/40 border-b border-border-subtle">
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Identidade</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Risco</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Métricas (Pedidos/Disputas)</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Status</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-right">Ação</th>
+            {/* User Table */}
+            <div
+                style={{
+                    background: 'var(--bg-primary)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    overflow: 'hidden'
+                }}
+            >
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="border-b border-border-subtle" style={{ background: 'var(--bg-secondary)' }}>
+                            <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Usuário</th>
+                            <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Papel / KYC</th>
+                            <th
+                                className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary cursor-pointer select-none hover:text-text-primary transition-colors"
+                                onClick={() => toggleSort('risk')}
+                            >
+                                <span className="flex items-center gap-1.5">
+                                    Risco {sortField === 'risk' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}
+                                </span>
+                            </th>
+                            <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Pedidos</th>
+                            <th
+                                className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary cursor-pointer select-none hover:text-text-primary transition-colors"
+                                onClick={() => toggleSort('created')}
+                            >
+                                <span className="flex items-center gap-1.5">
+                                    Cadastro {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}
+                                </span>
+                            </th>
+                            <th className="px-6 py-4 text-right text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Dossiê</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-subtle">
+                        {loading ? (
+                            <tr><td colSpan={6} className="py-20 text-center">
+                                <RefreshCw className="animate-spin mx-auto mb-3 text-accent-primary" size={24} />
+                                <p className="text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Sincronizando Usuários...</p>
+                            </td></tr>
+                        ) : filteredUsers.length === 0 ? (
+                            <tr><td colSpan={6} className="py-20 text-center opacity-30">
+                                <Users size={40} className="mx-auto mb-3" />
+                                <p className="text-[10px] font-semibold uppercase tracking-widest">Nenhum usuário encontrado</p>
+                            </td></tr>
+                        ) : filteredUsers.map(u => (
+                            <tr
+                                key={u.id}
+                                className="transition-all cursor-pointer"
+                                onClick={() => setSelectedUser(u)}
+                                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-secondary)')}
+                                onMouseLeave={e => (e.currentTarget.style.background = '')}
+                            >
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-[6px] bg-accent-primary/10 text-accent-primary flex items-center justify-center font-semibold text-xs shrink-0">
+                                            {resolveUserName(u).charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-text-primary leading-tight">{resolveUserName(u)}</p>
+                                            <p className="text-[10px] text-text-tertiary font-mono mt-0.5">{u.email}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-col gap-1.5">
+                                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-semibold uppercase w-fit ${getRoleStyle(u.role)}`}>{u.role}</span>
+                                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-semibold uppercase w-fit ${getKycStyle(u.kyc_status)}`}>{u.kyc_status || 'sem kyc'}</span>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-1.5 w-20 rounded-full bg-bg-tertiary overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full ${u.riskLevel === 'high' ? 'bg-error' : u.riskLevel === 'medium' ? 'bg-warning' : 'bg-success'}`}
+                                                style={{ width: `${u.riskScore}%` }}
+                                            />
+                                        </div>
+                                        <span className={`text-[10px] font-semibold ${u.riskLevel === 'high' ? 'text-error' : u.riskLevel === 'medium' ? 'text-warning' : 'text-success'}`}>{u.riskScore}</span>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className="text-xs font-medium text-text-primary">{u.totalClientOrders + u.totalProviderOrders}</span>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className="text-[10px] text-text-tertiary font-mono">{formatDate(u.created_at)}</span>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                    <button
+                                        className="p-2 rounded-[6px] border border-border-subtle hover:bg-text-primary hover:text-white hover:border-transparent transition-all duration-[120ms]"
+                                        style={{ background: 'var(--bg-secondary)' }}
+                                    >
+                                        <Eye size={14} />
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border-subtle">
-                            {loading ? (
-                                <tr><td colSpan={5} className="py-20 text-center"><Clock className="animate-spin mx-auto mb-2" /></td></tr>
-                            ) : filteredUsers.map(user => (
-                                <tr key={user.id} onClick={() => handleSelectUser(user)} className="hover:bg-bg-secondary/20 transition-all cursor-pointer group">
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-bg-secondary flex items-center justify-center font-black text-accent-primary border border-border-subtle group-hover:scale-110 transition-transform">{(user.name || 'U').charAt(0)}</div>
-                                            <div>
-                                                <p className="text-xs font-black text-text-primary uppercase">{user.name || 'Sem nome'}</p>
-                                                <p className="text-[10px] text-text-tertiary font-mono">{user.email}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <div className={`flex items-center gap-2 px-3 py-1 rounded-full w-fit ${user.risk_level === 'high' ? 'bg-error/10 text-error' : user.risk_level === 'medium' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}`}>
-                                            <Shield size={12} />
-                                            <span className="text-[10px] font-black uppercase">{user.risk_score}%</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex gap-4">
-                                            <div className="text-center"><p className="text-xs font-black text-text-primary">{user.total_orders}</p><p className="text-[8px] font-black text-text-tertiary uppercase">Pedidos</p></div>
-                                            <div className="text-center"><p className="text-xs font-black text-error">{user.disputes_30d}</p><p className="text-[8px] font-black text-text-tertiary uppercase">Disputas</p></div>
-                                            <div className="text-center"><p className="text-xs font-black text-warning">{user.cancellation_rate}%</p><p className="text-[8px] font-black text-text-tertiary uppercase">Canc.</p></div>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <span className={`text-[10px] font-black uppercase tracking-widest ${user.status === 'blocked' ? 'text-error' : 'text-success'}`}>{user.status}</span>
-                                    </td>
-                                    <td className="px-8 py-6 text-right">
-                                        <div className="flex justify-end gap-2" onClick={e => e.stopPropagation()}>
-                                            <button
-                                                onClick={() => setActionModal({ open: true, type: user.status === 'blocked' ? 'ACTIVATE' : 'BLOCK', user })}
-                                                className={`p-2 rounded-lg border border-border-subtle hover:bg-black hover:text-white transition-all`}>
-                                                {user.status === 'blocked' ? <Unlock size={16} /> : <Ban size={16} />}
-                                            </button>
-                                            <button className="p-2 bg-bg-secondary rounded-lg border border-border-subtle hover:bg-accent-primary hover:text-white transition-all"><MoreVertical size={16} /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
 };
 
-// --- Subcomponentes Locais ---
-const FilterGroup = ({ label, children }: any) => (
-    <div className="space-y-4">
-        <h4 className="text-[9px] font-black uppercase text-text-tertiary tracking-widest border-b border-border-subtle pb-1">{label}</h4>
-        <div className="flex flex-col gap-2">{children}</div>
+// --- Sub-components ---
+const KpiCard = ({ label, value, icon, color }: any) => (
+    <div
+        className="p-5"
+        style={{
+            background: 'var(--bg-primary)',
+            borderRadius: '10px',
+            border: '1px solid rgba(0,0,0,0.06)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+        }}
+    >
+        <div className={`p-2 rounded-[6px] bg-bg-secondary border border-border-subtle w-fit mb-4 ${color || 'text-text-secondary'}`}>{icon}</div>
+        <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
+        <h3 className={`text-xl font-semibold leading-none ${color || 'text-text-primary'}`}>{value}</h3>
     </div>
 );
 
-const FilterButton = ({ active, label, color, onClick }: any) => (
-    <button onClick={onClick} className={`text-left px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${active ? 'bg-black text-white shadow-lg' : 'bg-bg-secondary/40 text-text-tertiary hover:bg-bg-secondary'}`}>
-        <span className={color}>{label}</span>
+const UserStat = ({ label, value, color }: any) => (
+    <div
+        className="p-5"
+        style={{
+            background: 'var(--bg-primary)',
+            borderRadius: '10px',
+            border: '1px solid rgba(0,0,0,0.06)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+        }}
+    >
+        <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
+        <h3 className={`text-xl font-semibold leading-none ${color}`}>{value}</h3>
+    </div>
+);
+
+const ActionCard = ({ icon, label, desc, color, onClick }: any) => (
+    <button
+        onClick={onClick}
+        className={`p-5 text-left rounded-[10px] border border-border-subtle hover:shadow-md transition-all duration-[120ms] group ${color}`}
+        style={{ background: 'var(--bg-secondary)' }}
+    >
+        <div className="transition-transform group-hover:scale-110 mb-4 w-fit">{icon}</div>
+        <p className="text-xs font-semibold text-text-primary mb-1">{label}</p>
+        <p className="text-[10px] text-text-tertiary leading-relaxed">{desc}</p>
     </button>
 );
 
-const DetailStat = ({ label, value, icon, color }: any) => (
-    <div className="bg-bg-primary border border-border-subtle p-7 rounded-[40px] shadow-sm group hover:-translate-y-1 transition-all">
-        <div className={`p-4 rounded-2xl bg-bg-secondary border border-border-subtle w-fit mb-6 ${color}`}>{React.cloneElement(icon as React.ReactElement, { size: 24 })}</div>
-        <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
-        <h3 className="text-2xl font-black text-text-primary tracking-tighter">{value}</h3>
-    </div>
-);
-
 const InfoRow = ({ label, value }: any) => (
-    <div className="flex justify-between items-center py-4 border-b border-border-subtle/50 text-[10px] uppercase font-black tracking-widest">
-        <span className="text-text-tertiary">{label}</span>
-        <span className="text-text-primary">{value || 'N/A'}</span>
+    <div className="flex justify-between items-center py-2.5 border-b border-border-subtle last:border-0">
+        <span className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest">{label}</span>
+        <span className="text-xs font-medium text-text-primary font-mono">{value || '—'}</span>
     </div>
 );
 
-const DocumentCard = ({ title, path, isFullWidth }: { title: string, path: string, isFullWidth?: boolean }) => {
-    const [imgUrl, setImgUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!path) return;
-        const { data } = supabase.storage.from('documents').getPublicUrl(path);
-        setImgUrl(data.publicUrl);
-    }, [path]);
-
-    return (
-        <div className={`bg-bg-secondary/20 p-6 rounded-[32px] border border-border-subtle flex flex-col gap-4 ${isFullWidth ? 'md:col-span-2' : ''}`}>
-            <div className="flex items-center justify-between">
-                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest leading-none">{title}</h4>
-                {path && (
-                    <a href={imgUrl || '#'} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
-                        <ExternalLink size={14} className="text-text-tertiary" />
-                    </a>
-                )}
-            </div>
-
-            <div className="relative aspect-video bg-black/40 rounded-2xl overflow-hidden group border border-white/5">
-                {path ? (
-                    imgUrl ? (
-                        <img src={imgUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    ) : (
-                        <div className="absolute inset-0 flex items-center justify-center"><Clock className="animate-spin text-text-tertiary" /></div>
-                    )
-                ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 bg-bg-secondary">
-                        <AlertTriangle size={32} className="mb-2" />
-                        <p className="text-[10px] font-black uppercase tracking-widest">Aguardando Envio</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+const getRoleStyle = (role: string) => {
+    if (role === 'provider') return 'bg-accent-primary/10 text-accent-primary';
+    if (role === 'operator') return 'bg-info/10 text-info';
+    return 'bg-bg-secondary text-text-tertiary border border-border-subtle';
 };
+
+const getKycStyle = (status: string) => {
+    if (status === 'approved') return 'bg-success/10 text-success';
+    if (status === 'rejected') return 'bg-error/10 text-error';
+    if (status === 'submitted') return 'bg-warning/10 text-warning';
+    return 'bg-bg-secondary text-text-tertiary border border-border-subtle';
+};
+
+const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
 
 export default UserManagement;
