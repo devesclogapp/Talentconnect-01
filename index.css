@@ -258,6 +258,24 @@
   animation: bounce-slow 3s ease-in-out infinite;
 }
 
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes tick-up {
+  0% { transform: translateY(2px); opacity: 0.8; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-tick {
+  animation: tick-up 0.2s ease-out;
+}
+
 .interactive {
   @apply cursor-pointer transition-all duration-200 active:scale-[0.98];
 }

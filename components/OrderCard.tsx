@@ -29,6 +29,25 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     colorClass: 'text-success bg-success/10 border-success/20',
                     dotColor: 'bg-success'
                 };
+            case 'paid_escrow_held':
+            case 'awaiting_start_confirmation':
+            case 'accepted':
+                return {
+                    label: 'Agendado',
+                    variant: 'success' as const,
+                    icon: Calendar,
+                    colorClass: 'text-success bg-success/10 border-success/20',
+                    dotColor: 'bg-success'
+                };
+            case 'in_execution':
+            case 'awaiting_finish_confirmation':
+                return {
+                    label: 'Em Execução',
+                    variant: 'warning' as const,
+                    icon: Clock,
+                    colorClass: 'text-warning bg-warning/10 border-warning/20',
+                    dotColor: 'bg-warning animate-pulse'
+                };
             case 'sent':
                 return {
                     label: 'Aguardando',
@@ -45,14 +64,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     icon: XCircle,
                     colorClass: 'text-error bg-error/10 border-error/20',
                     dotColor: 'bg-error'
-                };
-            case 'in_execution':
-                return {
-                    label: 'Em Execução',
-                    variant: 'warning' as const,
-                    icon: Clock,
-                    colorClass: 'text-text-primary bg-bg-tertiary border-border-medium',
-                    dotColor: 'bg-text-tertiary animate-pulse'
                 };
             default:
                 return {
@@ -150,7 +161,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t border-border-subtle dark:border-neutral-800">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.12em] mb-1 opacity-60">Total à pagar</span>
+                    <span className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.12em] mb-1 opacity-60">{type === 'provider' ? 'Ganhos previstos' : 'Total à pagar'}</span>
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-[14px] font-bold text-text-secondary opacity-40">R$</span>
                         <span className="text-2xl font-bold text-text-primary dark:text-white tracking-tight leading-none">

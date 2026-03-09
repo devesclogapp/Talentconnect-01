@@ -44,25 +44,36 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
   useEffect(() => {
     fetchActiveOrder();
 
-    // Inscrição em tempo real para acompanhar mudanças no pedido
     let subscription: any;
 
-    const setupSubscription = async () => {
-      const orders: any[] = await getClientOrders();
-      const active = orders?.find(o => !['completed', 'rejected', 'cancelled'].includes(o.status)) || orders?.[0];
+    const setup = async () => {
+      try {
+        const orders: any[] = await getClientOrders();
+        const active = orders?.find(o => !['completed', 'rejected', 'cancelled'].includes(o.status)) || orders?.[0];
 
-      if (active) {
-        const { subscribeToOrderUpdates } = await import('../services/ordersService');
-        subscription = subscribeToOrderUpdates(active.id, (updatedOrder) => {
-          setActiveOrder(updatedOrder);
-        });
+        if (active) {
+          const { subscribeToOrderUpdates, getOrderById } = await import('../services/ordersService');
+          subscription = subscribeToOrderUpdates(active.id, async () => {
+            try {
+              const updatedOrder = await getOrderById(active.id);
+              setActiveOrder(updatedOrder);
+            } catch (error) {
+              console.error("Erro ao atualizar pedido:", error);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao configurar inscrição de tempo real:", error);
       }
     };
 
-    setupSubscription();
+    setup();
 
     return () => {
-      if (subscription) subscription.unsubscribe();
+      // Small delay check to avoid trying to unsubscribe before assignment in async race
+      setTimeout(() => {
+        if (subscription) subscription.unsubscribe();
+      }, 0);
     };
   }, []);
 

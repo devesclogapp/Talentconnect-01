@@ -10,10 +10,35 @@ export const createAdminUser = async () => {
     const adminEmail = 'admin@talentconnect.com';
     const adminPass = 'admin123';
 
-    console.log('--- Iniciando Criação de Usuário Admin ---');
-
     try {
-        // 1. Tentar criar o usuário no Auth
+        // 1. Verificar se o usuário já existe na tabela public.users
+        const { data: existingUser, error: checkError } = await (supabase as any)
+            .from('users')
+            .select('id, role')
+            .eq('email', adminEmail)
+            .maybeSingle();
+
+        if (existingUser) {
+            console.log('ℹ️ Admin de teste identificado.');
+
+            // Garantir que a role está correta apenas se necessário (evitar 403 se não estiver logado)
+            if (existingUser.role !== 'operator') {
+                try {
+                    await (supabase as any)
+                        .from('users')
+                        .update({ role: 'operator' })
+                        .eq('id', existingUser.id);
+                } catch (e) {
+                    // Silencioso se for erro de permissão (403)
+                }
+            }
+
+            return { success: true, email: adminEmail };
+        }
+
+        console.log('--- Criando Novo Usuário Admin de Teste ---');
+
+        // 2. Tentar criar o usuário no Auth se não existir
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: adminEmail,
             password: adminPass,
@@ -27,40 +52,19 @@ export const createAdminUser = async () => {
         });
 
         if (authError) {
+            // Caso ainda dê erro de "already registered" por race condition ou cache do Auth
             if (authError.message.includes('already registered')) {
-                console.log('ℹ️ O usuário admin já existe no Auth.');
-
-                // Se já existe, vamos garantir que ele tenha a role operator no banco public.users
-                // Precisamos do ID dele. Tentar fazer um signIn para pegar os dados ou buscar no banco.
-                const { data: usersData } = await (supabase as any)
-                    .from('users')
-                    .select('id')
-                    .eq('email', adminEmail)
-                    .single();
-
-                if (usersData) {
-                    await (supabase as any)
-                        .from('users')
-                        .update({ role: 'operator' })
-                        .eq('id', (usersData as any).id);
-                    console.log('✅ Role de operador confirmada na tabela public.users.');
-                }
-            } else {
-                throw authError;
+                console.log('ℹ️ O usuário admin já existe no Auth (Sync).');
+                return { success: true, email: adminEmail };
             }
-        } else {
-            console.log('✅ Usuário Admin criado com sucesso no Auth.');
+            throw authError;
         }
 
-        console.log('\n--- Credenciais de Acesso ---');
-        console.log(`Email: ${adminEmail}`);
-        console.log(`Senha: ${adminPass}`);
-        console.log('-----------------------------');
-
+        console.log('✅ Usuário Admin criado com sucesso.');
         return { success: true, email: adminEmail };
 
     } catch (err: any) {
-        console.error('❌ Erro ao criar admin:', err.message);
+        console.warn('⚠️ createAdmin: Falha ao gerenciar admin de teste:', err.message);
         return { success: false, error: err.message };
     }
 };

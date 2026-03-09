@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CreditCard, Lock, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Lock, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -40,7 +40,7 @@ const Payment: React.FC = () => {
     const formatExpiry = (value: string) => {
         const cleaned = value.replace(/\D/g, '');
         if (cleaned.length >= 2) {
-            return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 2);
+            return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
         }
         return cleaned;
     };
@@ -182,8 +182,6 @@ const Payment: React.FC = () => {
                 {/* Card Fields */}
                 {paymentMethod !== 'pix' && (
                     <Card className="p-8 rounded-[32px] border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-4 animate-fade-in">
-                        {errors.general && <p className="text-xs text-error font-normal text-center bg-error/10 p-2 rounded-lg">{errors.general}</p>}
-
                         <div className="space-y-1">
                             <label className="text-black font-normal !text-[9px] px-1">Número do cartão</label>
                             <Input
@@ -232,7 +230,14 @@ const Payment: React.FC = () => {
                 )}
 
                 {/* Submit */}
-                <div className="pt-6">
+                <div className="pt-6 space-y-4">
+                    {errors.general && (
+                        <div className="animate-fade-in bg-error/10 border border-error/20 p-4 rounded-2xl flex items-center gap-3 text-error">
+                            <AlertCircle size={18} />
+                            <p className="text-xs font-medium">{errors.general}</p>
+                        </div>
+                    )}
+
                     <button
                         onClick={handlePayment}
                         disabled={isProcessing}
@@ -241,7 +246,7 @@ const Payment: React.FC = () => {
                         {isProcessing ? <Loader2 size={20} className="animate-spin" /> : <Lock size={20} />}
                         {isProcessing ? 'Processando...' : `Confirmar R$ ${selectedOrder.total_amount?.toFixed(2)}`}
                     </button>
-                    <p className="text-[9px] text-center text-neutral-400 mt-4">
+                    <p className="text-[9px] text-center text-neutral-400">
                         Ambiente de testes: Nenhum valor real será cobrado.
                     </p>
                 </div>

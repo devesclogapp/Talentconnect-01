@@ -15,6 +15,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { getActiveServices } from '../services/servicesService';
+import { supabase } from '../services/supabaseClient';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { CATEGORY_MAP, CATEGORIES_LIST } from '../constants';
 import ServiceCard from '../components/ServiceCard';
@@ -61,6 +62,26 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
         fetchTopServices();
         fetchMarketStats();
+
+        // Real-time updates for orders count
+        const subscription = supabase
+            .channel('client-dashboard-orders')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'orders',
+                },
+                () => {
+                    fetchMarketStats();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     // Auto-play carousel

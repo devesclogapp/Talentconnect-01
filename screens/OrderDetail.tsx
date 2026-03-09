@@ -4,7 +4,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle2, CreditCard, Mes
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { subscribeToOrderUpdates } from '../services/ordersService';
+import { subscribeToOrderUpdates, getOrderById } from '../services/ordersService';
 import { WhatsAppIcon } from '../components/ui/WhatsAppIcon';
 
 // --- Shared Components (Copied from Tracking.tsx for consistency) ---
@@ -100,7 +100,8 @@ interface OrderDetailProps {
     onPay?: (order: any) => void;
     onConfirmStart?: () => void;
     viewingAs?: 'client' | 'provider'; // Added
-    onViewProfile?: (user: any) => void; // Added
+    onViewProfile?: (user: any) => void;
+    onNegotiate?: (order: any) => void;
 }
 
 const OrderDetail: React.FC<OrderDetailProps> = ({
@@ -112,10 +113,137 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
     onConfirmCompletion,
     onPay,
     viewingAs = 'client', // Default to client view
-    onViewProfile
+    onViewProfile,
+    onNegotiate
 }) => {
     const [order, setOrder] = useState(initialOrder);
     const [dispute, setDispute] = useState<any>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handleAccept = async () => {
+        if (!order?.id) return;
+        setIsProcessing(true);
+        try {
+            const { acceptOrder } = await import('../services/ordersService');
+            await acceptOrder(order.id);
+            alert("Pedido aceito com sucesso!");
+        } catch (e) {
+            alert("Erro ao aceitar: " + e);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleNegotiate = () => {
+        if (onNegotiate && order) {
+            onNegotiate(order);
+        }
+    };
+
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const scheduledDate = order?.scheduled_at ? new Date(order.scheduled_at) : null;
+    const isScheduledValid = !!(scheduledDate && !isNaN(scheduledDate.getTime()));
+    const canStart = !isScheduledValid || (now.getTime() >= scheduledDate!.getTime() - 10 * 60000);
+
+    const getCountdown = () => {
+        if (!scheduledDate || canStart) return null;
+        const target = scheduledDate.getTime() - 10 * 60000;
+        const diff = target - now.getTime();
+
+        if (diff <= 0) return null;
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const parts = [];
+        if (days > 0) parts.push(`${days}d`);
+        if (hours > 0 || days > 0) parts.push(`${hours}h`);
+        parts.push(`${mins}m`);
+        parts.push(`${secs}s`);
+
+        return parts.join(' ');
+    };
+
+    const getStartLimitMessage = () => {
+        if (!scheduledDate) return "";
+        const h = scheduledDate.getHours();
+        const period = h < 12 ? 'manhã' : h < 18 ? 'tarde' : 'noite';
+        const hoursStr = h.toString().padStart(2, '0');
+        const day = scheduledDate.getDate().toString().padStart(2, '0');
+        const month = (scheduledDate.getMonth() + 1).toString().padStart(2, '0');
+        const year = scheduledDate.getFullYear();
+        return `Você poderá iniciar o serviço as ${hoursStr}h da ${period} do dia ${day}/${month}/${year}`;
+    };
+
+    const handleReject = async () => {
+        if (!order?.id) return;
+        if (!window.confirm('Tem certeza que deseja recusar este pedido?')) return;
+
+        setIsProcessing(true);
+        try {
+            const { rejectOrder } = await import('../services/ordersService');
+            await rejectOrder(order.id);
+            alert("Pedido recusado.");
+            onBack();
+        } catch (e) {
+            alert("Erro ao recusar: " + e);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleMarkStart = async () => {
+        if (!order?.id) return;
+        setIsProcessing(true);
+        try {
+            const { markExecutionStart } = await import('../services/ordersService');
+            await markExecutionStart(order.id);
+            alert("Início sinalizado! Aguardando confirmação do cliente.");
+        } catch (e) {
+            alert("Erro ao marcar início: " + e);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleMarkFinish = async () => {
+        if (!order?.id) return;
+        setIsProcessing(true);
+        try {
+            const { markExecutionFinish } = await import('../services/ordersService');
+            await markExecutionFinish(order.id);
+            alert("Conclusão sinalizada! Aguardando confirmação do cliente.");
+        } catch (e) {
+            alert("Erro ao marcar conclusão: " + e);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleCancelOrder = async () => {
+        if (!order?.id) return;
+        if (window.confirm('Tem certeza que deseja cancelar este pedido?')) {
+            setIsProcessing(true);
+            try {
+                const { cancelOrder } = await import('../services/ordersService');
+                await cancelOrder(order.id);
+                alert('Pedido cancelado com sucesso.');
+                onBack();
+            } catch (e) {
+                alert('Erro ao cancelar: ' + e);
+            } finally {
+                setIsProcessing(false);
+            }
+        }
+    };
 
     useEffect(() => {
         setOrder(initialOrder);
@@ -145,16 +273,21 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
             fetchDisputeData();
         }
 
-        const subscription = subscribeToOrderUpdates(initialOrder.id, (updatedOrder) => {
-            setOrder(updatedOrder);
-            // Se o status mudou para disputed durante a visualização
-            if (updatedOrder.status === 'disputed' && !dispute) {
-                import('../services/disputesService').then(m => {
-                    m.getDisputeByOrderId(updatedOrder.id).then(data => {
-                        setDispute(data);
-                        if (data?.id) setupDisputeSubscription(data.id);
-                    });
-                });
+        const subscription = subscribeToOrderUpdates(initialOrder.id, async (updatedRaw) => {
+            try {
+                // Re-fetch full order to get joined data (provider, service, execution, etc)
+                const updatedOrder = await getOrderById(initialOrder.id);
+                setOrder(updatedOrder);
+
+                // Se o status mudou para disputed durante a visualização
+                if (updatedOrder.status === 'disputed' && !dispute) {
+                    const { getDisputeByOrderId } = await import('../services/disputesService');
+                    const data = await getDisputeByOrderId(updatedOrder.id);
+                    setDispute(data);
+                    if (data?.id) setupDisputeSubscription(data.id);
+                }
+            } catch (error) {
+                console.error("Erro ao atualizar detalhes do pedido:", error);
             }
         });
 
@@ -173,7 +306,9 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
             case 'awaiting_finish_confirmation': return { label: 'Confirmar Conclusão', variant: 'warning' as const, icon: CheckCircle };
             case 'in_execution': return { label: 'Em Execução', variant: 'success' as const, icon: Clock };
             case 'sent': return { label: 'Aguardando Resposta', variant: 'secondary' as const, icon: AlertCircle };
-            case 'accepted': return { label: 'Aguardando Pagamento', variant: 'warning' as const, icon: Clock };
+            case 'awaiting_details': return { label: 'Nova Proposta', variant: 'warning' as const, icon: Clock };
+            case 'accepted': case 'awaiting_payment': return { label: 'Aguardando Pagamento', variant: 'warning' as const, icon: Clock };
+            case 'paid_escrow_held': return { label: 'Pagamento Confirmado', variant: 'success' as const, icon: CheckCircle2 };
             case 'disputed': return { label: 'Em Disputa', variant: 'error' as const, icon: ShieldCheck };
             case 'rejected': case 'cancelled': return { label: 'Cancelado', variant: 'error' as const, icon: XCircle };
             default: return { label: 'Em Andamento', variant: 'warning' as const, icon: Clock };
@@ -196,7 +331,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
 
     const getStatusStep = (status: string) => {
         switch (status) {
-            case 'sent': return 1;
+            case 'sent': case 'awaiting_details': return 1;
             case 'accepted': return 2;
             case 'paid_escrow_held': return 3;
             case 'awaiting_start_confirmation': return 4;
@@ -293,7 +428,9 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                             </h2>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.12em] mb-1 opacity-60">Total à pagar</p>
+                            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.12em] mb-1 opacity-60">
+                                {isProviderView ? 'Ganhos previstos' : 'Total à pagar'}
+                            </p>
                             <div className="flex items-baseline justify-end gap-1.5">
                                 <span className="text-[14px] font-bold text-text-secondary opacity-40">R$</span>
                                 <span className="text-2xl font-bold text-black dark:text-white leading-none">
@@ -336,7 +473,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                     <div className={`space-y-0 relative ${order.status === 'disputed' ? 'opacity-40 grayscale-[0.5]' : ''}`}>
                         <ProgressStep
                             title="Pedido Enviado"
-                            desc="Aguardando confirmação do Profissional"
+                            desc={isProviderView ? "Você recebeu uma nova solicitação" : "Aguardando confirmação do Profissional"}
                             icon={<ClipboardList size={18} />}
                             active={currentStep >= 1}
                             completed={currentStep > 1}
@@ -344,7 +481,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                         />
 
                         <IntermediateStep
-                            label="Aguardando profissional aceitar no app"
+                            label={isProviderView ? "Responda o quanto antes para garantir o serviço" : "Aguardando profissional aceitar no app"}
                             active={currentStep === 1}
                             completed={currentStep > 1}
                             variant="warning"
@@ -352,7 +489,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
 
                         <ProgressStep
                             title="Confirmado"
-                            desc="Profissional aceitou seu pedido"
+                            desc={isProviderView ? "Você aceitou este pedido" : "Profissional aceitou seu pedido"}
                             icon={<CheckCircle2 size={18} />}
                             active={currentStep >= 2}
                             completed={currentStep > 2}
@@ -360,7 +497,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                         />
 
                         <IntermediateStep
-                            label="Pagamento necessário para prosseguir"
+                            label={isProviderView ? "Aguardando pagamento do cliente" : "Pagamento necessário para prosseguir"}
                             active={currentStep === 2}
                             completed={currentStep > 2}
                             variant="warning"
@@ -376,7 +513,9 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                         />
 
                         <IntermediateStep
-                            label="Profissional deve iniciar o serviço"
+                            label={isProviderView
+                                ? (currentStep > 3 ? "Serviço iniciado" : (canStart ? "Você já pode iniciar o serviço" : getStartLimitMessage()))
+                                : (currentStep > 3 ? "Profissional sinalizou início" : "Profissional deve iniciar o serviço")}
                             active={currentStep === 3}
                             completed={currentStep > 3}
                             variant="warning"
@@ -384,7 +523,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
 
                         <ProgressStep
                             title="Confirmação de Início"
-                            desc={order.status === 'awaiting_start_confirmation' ? 'Confirme o início para liberar' : 'Início validado'}
+                            desc={order.status === 'awaiting_start_confirmation' ? (isProviderView ? 'Aguardando confirmação do cliente' : 'Confirme o início para liberar') : 'Início validado'}
                             icon={<AlertCircle size={18} />}
                             active={currentStep >= 4}
                             completed={currentStep > 4}
@@ -410,7 +549,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                         />
 
                         <IntermediateStep
-                            label="Profissional deve marcar como concluído"
+                            label={isProviderView ? "Marque como concluído ao terminar" : "Profissional deve marcar como concluído"}
                             active={currentStep === 5}
                             completed={currentStep > 5 || order.status === 'awaiting_finish_confirmation'}
                             variant="warning"
@@ -418,7 +557,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
 
                         <ProgressStep
                             title="Conclusão"
-                            desc={order.status === 'awaiting_finish_confirmation' ? 'Confirme a finalização' : 'Serviço finalizado'}
+                            desc={order.status === 'awaiting_finish_confirmation' ? (isProviderView ? 'Aguardando confirmação do cliente' : 'Confirme a finalização') : 'Serviço finalizado'}
                             icon={<ShieldCheck size={18} />}
                             active={currentStep >= 6 || order.status === 'awaiting_finish_confirmation'}
                             completed={currentStep >= 6}
@@ -470,39 +609,176 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
 
                 {/* Actions */}
                 <div className="pt-2 space-y-3 pb-8">
-                    {order.status === 'accepted' && onPay && (
-                        <Button variant="primary" onClick={() => onPay(order)} className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none">
-                            Pagar Agora e Confirmar
-                        </Button>
-                    )}
-                    {order.status === 'awaiting_start_confirmation' && (
-                        <Button
-                            variant="primary"
-                            onClick={async () => {
-                                const { confirmExecutionStart } = await import('../services/ordersService');
-                                try {
-                                    await confirmExecutionStart(order.id);
-                                    if (onBack) onBack();
-                                    alert("Início confirmado!");
-                                } catch (e) {
-                                    alert("Erro ao confirmar: " + e);
-                                }
-                            }}
-                            className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
-                        >
-                            Confirmar Início
-                        </Button>
-                    )}
-                    {order.status === 'awaiting_finish_confirmation' && onConfirmCompletion && (
-                        <Button
-                            variant="primary"
-                            onClick={onConfirmCompletion}
-                            className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
-                        >
-                            Confirmar Conclusão
-                        </Button>
+                    {/* CLIENT ACTIONS */}
+                    {!isProviderView && (
+                        <>
+                            {order.status === 'awaiting_details' && (
+                                <Button
+                                    variant="primary"
+                                    onClick={async () => {
+                                        if (window.confirm(`Você aceita a nova proposta de R$ ${order.total_amount}?`)) {
+                                            setIsProcessing(true);
+                                            try {
+                                                const { updateOrderDetails } = await import('../services/ordersService');
+                                                // If they accept, we transition to awaiting_payment
+                                                // We can reuse current details or prompt for more
+                                                await updateOrderDetails(order.id, {
+                                                    scheduled_at: order.scheduled_at,
+                                                    location_text: order.location_text
+                                                });
+                                                alert("Proposta aceita! Prossiga para o pagamento.");
+                                            } catch (e) {
+                                                alert("Erro ao confirmar: " + e);
+                                            } finally {
+                                                setIsProcessing(false);
+                                            }
+                                        }
+                                    }}
+                                    disabled={isProcessing}
+                                    className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
+                                >
+                                    {isProcessing ? 'Processando...' : 'Aceitar Nova Proposta'}
+                                </Button>
+                            )}
+                            {['accepted', 'awaiting_payment'].includes(order.status) && onPay && (
+                                <Button variant="primary" onClick={() => onPay(order)} className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none">
+                                    Pagar Agora e Confirmar
+                                </Button>
+                            )}
+                            {order.status === 'awaiting_start_confirmation' && (
+                                <Button
+                                    variant="primary"
+                                    onClick={async () => {
+                                        const { confirmExecutionStart } = await import('../services/ordersService');
+                                        try {
+                                            await confirmExecutionStart(order.id);
+                                            alert("Início confirmado!");
+                                        } catch (e) {
+                                            alert("Erro ao confirmar: " + e);
+                                        }
+                                    }}
+                                    className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
+                                >
+                                    Confirmar Presença / Início
+                                </Button>
+                            )}
+                            {order.status === 'awaiting_finish_confirmation' && (
+                                <Button
+                                    variant="primary"
+                                    onClick={async () => {
+                                        setIsProcessing(true);
+                                        try {
+                                            const { confirmExecutionFinish } = await import('../services/ordersService');
+                                            await confirmExecutionFinish(order.id);
+                                            alert("Conclusão confirmada! O pagamento será liberado para o profissional.");
+                                            if (onRate) onRate();
+                                        } catch (e) {
+                                            alert("Erro ao confirmar conclusão: " + e);
+                                        } finally {
+                                            setIsProcessing(false);
+                                        }
+                                    }}
+                                    disabled={isProcessing}
+                                    className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
+                                >
+                                    {isProcessing ? 'Processando...' : 'Confirmar Conclusão do Serviço'}
+                                </Button>
+                            )}
+                        </>
                     )}
 
+                    {/* PROVIDER ACTIONS */}
+                    {isProviderView && (
+                        <>
+                            {order.status === 'sent' && (
+                                <div className="space-y-3">
+                                    <Button
+                                        variant="primary"
+                                        onClick={handleAccept}
+                                        disabled={isProcessing}
+                                        className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none mb-2"
+                                    >
+                                        {isProcessing ? 'Processando...' : 'Aceitar Pedido'}
+                                    </Button>
+
+                                    <button
+                                        onClick={handleNegotiate}
+                                        className="w-full py-4 border-2 border-neutral-100 dark:border-neutral-800 rounded-[20px] label-semibold uppercase tracking-widest text-black dark:text-white transition-all active:bg-neutral-50"
+                                    >
+                                        Negociar Valor
+                                    </button>
+
+                                    <button
+                                        onClick={handleReject}
+                                        disabled={isProcessing}
+                                        className="w-full py-4 text-feedback-error text-xs font-normal flex items-center justify-center gap-2 rounded-[20px] transition-colors hover:bg-feedback-error/5"
+                                    >
+                                        <XCircle size={16} />
+                                        Recusar Pedido
+                                    </button>
+                                </div>
+                            )}
+
+                            {order.status === 'paid_escrow_held' && (
+                                <div className="space-y-4">
+                                    {!canStart && (
+                                        <div className="flex flex-col items-center justify-center p-2">
+                                            <p className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.2em] mb-2">Liberação em</p>
+
+                                            <div className="flex items-center gap-2">
+                                                <Clock size={14} className="text-neutral-400" />
+                                                <div className="flex gap-1 items-center">
+                                                    {(() => {
+                                                        const target = scheduledDate!.getTime() - 10 * 60000;
+                                                        const diff = target - now.getTime();
+                                                        if (diff <= 0) return null;
+
+                                                        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                                        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                                                        const parts = [];
+                                                        if (d > 0) parts.push(`${d}d`);
+                                                        if (h > 0 || d > 0) parts.push(`${h.toString().padStart(2, '0')}h`);
+                                                        parts.push(`${m.toString().padStart(2, '0')}m`);
+                                                        parts.push(`${s.toString().padStart(2, '0')}s`);
+
+                                                        return (
+                                                            <span className="text-xl font-bold text-text-primary tabular-nums tracking-tight">
+                                                                {parts.join(' ')}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <Button
+                                        variant="primary"
+                                        onClick={handleMarkStart}
+                                        disabled={isProcessing || !canStart}
+                                        className={`w-full !rounded-[20px] !py-5 shadow-xl ${!canStart ? 'opacity-50 grayscale cursor-not-allowed border-none' : 'shadow-primary-green/20 !bg-primary-green !text-black border-none'}`}
+                                    >
+                                        {isProcessing ? 'Processando...' : 'Iniciar Serviço'}
+                                    </Button>
+                                </div>
+                            )}
+
+                            {order.status === 'in_execution' && (
+                                <Button
+                                    variant="primary"
+                                    onClick={handleMarkFinish}
+                                    disabled={isProcessing}
+                                    className="w-full !rounded-[20px] !py-5 shadow-xl shadow-primary-green/20 !bg-primary-green !text-black border-none"
+                                >
+                                    {isProcessing ? 'Processando...' : 'Finalizar Serviço'}
+                                </Button>
+                            )}
+                        </>
+                    )}
+
+                    {/* SHARED ACTIONS */}
                     {order.status === 'disputed' && (
                         <div className="w-full py-6 px-4 bg-neutral-50 dark:bg-neutral-900 rounded-[20px] border border-neutral-100 dark:border-neutral-800 text-center">
                             {dispute?.status === 'in_review' ? (
@@ -531,20 +807,11 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                         </button>
                     )}
 
-                    {['sent', 'accepted', 'awaiting_payment'].includes(order.status) && (
+                    {/* Cancel button - refined logic */}
+                    {!isProviderView && ['sent', 'accepted', 'awaiting_payment'].includes(order.status) && (
                         <button
-                            onClick={async () => {
-                                if (window.confirm('Tem certeza que deseja cancelar este pedido?')) {
-                                    const { cancelOrder } = await import('../services/ordersService');
-                                    try {
-                                        await cancelOrder(order.id);
-                                        if (onBack) onBack();
-                                        alert('Pedido cancelado com sucesso.');
-                                    } catch (e) {
-                                        alert('Erro ao cancelar: ' + e);
-                                    }
-                                }
-                            }}
+                            onClick={handleCancelOrder}
+                            disabled={isProcessing}
                             className="w-full py-4 text-feedback-error text-xs font-normal flex items-center justify-center gap-2 rounded-[20px] transition-colors hover:bg-feedback-error/5"
                         >
                             <XCircle size={16} />

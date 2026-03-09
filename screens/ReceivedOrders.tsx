@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Search, Filter, Clock, CheckCircle, XCircle, AlertCircle, Calendar, MapPin, ChevronRight, DollarSign } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Clock, CheckCircle, XCircle, AlertCircle, Calendar, MapPin, ChevronRight, DollarSign, Zap } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { getProviderOrders } from '../services/ordersService';
@@ -122,7 +122,7 @@ const ReceivedOrders: React.FC<ReceivedOrdersProps> = ({ onBack, onSelectOrder, 
     const pendingCount = orders.filter(o => o.status === 'sent').length;
 
     // Icon component for status (Zap was missing import in previous)
-    const Zap = ({ size, className }: any) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>;
+
 
 
     return (
