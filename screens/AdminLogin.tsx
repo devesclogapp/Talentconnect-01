@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, User, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, User, AlertCircle, LayoutDashboard, Globe, Shield } from 'lucide-react';
 import { signIn } from '../services/authService';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Badge } from '../components/ui/Badge';
 
 interface Props {
     onLoginSuccess: (user: any) => void;
@@ -46,75 +49,99 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col lg:flex-row animate-fade-in overflow-hidden bg-bg-primary">
-            {/* Desktop Hero Section */}
-            <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-black">
-                <img
-                    src="/login_hero_talent_connect.png"
-                    alt="Admin Connect"
-                    className="absolute inset-0 w-full h-full object-cover opacity-60 scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+        <div className="min-h-screen flex flex-col lg:flex-row bg-background font-sans overflow-hidden">
+            {/* ── Visual Section (Hero) ── */}
+            <div className="hidden lg:flex lg:w-[450px] xl:w-[500px] relative overflow-hidden bg-[#0F1115] border-r border-border/10">
+                {/* Abstract Background Patterns */}
+                <div className="absolute inset-0 opacity-20 pointer-events-none">
+                    <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)`, backgroundSize: '32px 32px' }}></div>
+                    <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent blur-[120px]"></div>
+                </div>
 
-                <div className="relative z-10 p-20 flex flex-col justify-between h-full w-full">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-                            <ShieldCheck size={32} className="text-white" />
+                <div className="relative z-10 p-12 flex flex-col justify-between h-full w-full">
+                    <div>
+                        <div className="flex items-center gap-3 mb-10">
+                            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                                <Shield className="text-white" size={20} />
+                            </div>
+                            <span className="text-xl font-bold text-white tracking-tight italic">Talent Connect</span>
                         </div>
-                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Admin Connect</h2>
+
+                        <div className="space-y-6">
+                            <Badge variant="outline" className="border-white/10 text-white/50 bg-white/5 px-3 py-1 text-[10px] tracking-widest uppercase">
+                                ERP Administrativo
+                            </Badge>
+                            <h1 className="text-4xl xl:text-5xl font-semibold text-white leading-[1.15] tracking-tight">
+                                Gestão central para <br />
+                                <span className="text-primary font-bold italic underline decoration-primary/30 decoration-4 underline-offset-8">Operadores.</span>
+                            </h1>
+                            <p className="text-sm text-white/40 max-w-[320px] leading-relaxed font-medium">
+                                Monitore transações em tempo real, gerencie disputas e audite toda a rede operacional a partir de uma única interface inteligente.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="space-y-6 text-left">
-                        <h3 className="text-6xl font-black text-white leading-tight tracking-tighter uppercase italic">
-                            Gestão & <br />
-                            <span className="text-accent-primary">Inteligência Operacional</span>
-                        </h3>
-                        <p className="text-lg text-white/60 font-medium max-w-md leading-relaxed">
-                            Console central para auditoria financeira, mediação de disputas e controle estratégico da rede Talent Connect.
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-10">
-                        <div className="flex -space-x-4">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center overflow-hidden bg-bg-secondary shadow-lg">
-                                    <div className={`w-full h-full bg-gradient-to-br ${i % 2 === 0 ? 'from-accent-primary/40 to-blue-500/40' : 'from-indigo-500/40 to-purple-500/40'} flex items-center justify-center`}>
-                                        <User size={20} className="text-white" />
-                                    </div>
-                                </div>
-                            ))}
+                    {/* Stats/Glass Cards */}
+                    <div className="space-y-4">
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-4 group hover:bg-white/10 transition-all cursor-default">
+                            <div className="w-10 h-10 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center border border-green-500/20">
+                                <Globe size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Status da Rede</p>
+                                <p className="text-xs font-semibold text-white">Interface Operacional Global</p>
+                            </div>
                         </div>
-                        <div className="space-y-1 text-left">
-                            <p className="text-xs font-black text-white uppercase tracking-widest">+5.240 Ativos</p>
-                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Monitoramento em Tempo Real</p>
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-4 group hover:bg-white/10 transition-all cursor-default text-left">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                                <LayoutDashboard size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Painel de Controle</p>
+                                <p className="text-xs font-semibold text-white">Auditoria Financeira Ativa</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Login Form Section */}
-            <div className="flex-1 flex flex-col px-8 lg:px-20 pt-16 lg:pt-0 justify-center relative overflow-hidden">
-                <div className="max-w-md w-full mx-auto relative z-10">
-                    <div className="mb-12 text-left">
-                        <div className="lg:hidden w-16 h-16 rounded-[22px] bg-bg-secondary border border-border-medium flex items-center justify-center mb-8 shadow-glow-accent">
-                            <ShieldCheck size={32} className="text-accent-primary" />
+            {/* ── Form Section ── */}
+            <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-20 relative bg-background">
+                {/* Subtle light pattern for background */}
+                <div className="absolute top-0 right-0 w-full h-full opacity-[0.03] pointer-events-none lg:block hidden">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+                    </svg>
+                </div>
+
+                <div className="max-w-sm w-full mx-auto relative z-10">
+                    <div className="mb-10 text-center lg:text-left">
+                        <div className="lg:hidden flex justify-center mb-6">
+                            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                                <Shield className="text-white" size={24} />
+                            </div>
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-black text-text-primary uppercase tracking-tighter mb-4 italic">Sistema ERP</h1>
-                        <p className="body text-text-tertiary">Autenticação obrigatória para acesso às ferramentas administrativas.</p>
+                        <h2 className="text-2xl font-semibold text-foreground tracking-tight mb-2">Acesso Restrito</h2>
+                        <p className="text-sm text-muted-foreground font-medium">Entre com suas credenciais de nível operador para gerenciar o ecossistema.</p>
                     </div>
 
-                    <form onSubmit={handleLogin} className="space-y-8">
-                        <div className="space-y-5">
-                            <div className="group space-y-2 text-left">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-text-tertiary ml-1">E-mail Administrativo</label>
-                                <div className="relative">
-                                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-accent-primary transition-colors">
-                                        <Mail size={18} />
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div className="space-y-4 text-left">
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground inline-block px-1">E-mail Corporativo</label>
+                                <div className="relative group">
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none">
+                                        <Mail size={16} />
                                     </div>
                                     <input
                                         type="email"
-                                        placeholder="admin@talentconnect.com"
-                                        className="w-full bg-bg-secondary/50 border border-border-subtle rounded-3xl pl-14 pr-6 py-5 text-sm outline-none focus:border-accent-primary focus:bg-white transition-all font-medium"
+                                        placeholder="nome@talentconnect.com"
+                                        className="w-full h-12 bg-white dark:bg-card/50 border border-border/80 rounded-xl pl-10 pr-4 text-[13px] font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-foreground"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
@@ -122,16 +149,16 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                 </div>
                             </div>
 
-                            <div className="group space-y-2 text-left">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-text-tertiary ml-1">Chave de Segurança</label>
-                                <div className="relative">
-                                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-accent-primary transition-colors">
-                                        <Lock size={18} />
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground inline-block px-1">Chave de Acesso</label>
+                                <div className="relative group">
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none">
+                                        <Lock size={16} />
                                     </div>
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         placeholder="••••••••"
-                                        className="w-full bg-bg-secondary/50 border border-border-subtle rounded-3xl pl-14 pr-14 py-5 text-sm outline-none focus:border-accent-primary focus:bg-white transition-all font-medium"
+                                        className="w-full h-12 bg-white dark:bg-card/50 border border-border/80 rounded-xl pl-10 pr-12 text-[13px] font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-foreground"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
@@ -139,47 +166,49 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-5 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                                     >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {error && (
-                            <div className="p-5 bg-error/5 border border-error/10 rounded-2xl flex items-center gap-4 animate-in slide-in-from-top-2 text-left">
-                                <AlertCircle size={20} className="text-error" />
-                                <p className="text-xs font-bold text-error uppercase tracking-tight">{error}</p>
+                            <div className="p-3 bg-destructive/5 border border-destructive/10 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 text-left">
+                                <AlertCircle size={16} className="text-destructive shrink-0" />
+                                <p className="text-[11px] font-semibold text-destructive uppercase tracking-tight leading-tight">{error}</p>
                             </div>
                         )}
 
-                        <div className="pt-4 space-y-6">
-                            <button
+                        <div className="pt-2 space-y-4">
+                            <Button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full h-16 bg-black text-white rounded-3xl flex items-center justify-between px-8 group hover:scale-[1.02] transition-all shadow-2xl disabled:opacity-50"
+                                className="w-full h-12 bg-primary hover:bg-primary/90 text-white rounded-xl flex items-center justify-between px-6 px-8 group shadow-lg shadow-primary/10 border-none"
                             >
-                                <span className="text-xs font-black uppercase tracking-widest">{loading ? 'Validando Acesso...' : 'Entrar no Admin'}</span>
-                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center transition-transform group-hover:translate-x-1">
-                                    <ArrowRight size={20} />
-                                </div>
-                            </button>
+                                <span className="text-xs font-bold uppercase tracking-widest">{loading ? 'Autenticando...' : 'Acessar ERP'}</span>
+                                <ArrowRight size={16} className={`${loading ? 'opacity-0' : 'opacity-100'} transition-transform group-hover:translate-x-1`} />
+                            </Button>
 
-                            <button
+                            <Button
+                                variant="ghost"
                                 type="button"
                                 onClick={() => navigate('/login')}
-                                className="w-full py-4 text-[10px] font-black uppercase tracking-widest text-text-tertiary hover:text-text-primary transition-colors border border-dashed border-border-subtle rounded-2xl"
+                                className="w-full h-10 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/30"
                             >
-                                Voltar ao Acesso Comum
-                            </button>
+                                Voltar ao Acesso do Usuário
+                            </Button>
                         </div>
                     </form>
 
-                    <p className="mt-20 text-[9px] font-bold text-text-tertiary text-center uppercase tracking-widest">
-                        Talent Connect Operacional © 2026 <br />
-                        <span className="opacity-50 text-accent-primary">Acesso Restrito à Operadora</span>
-                    </p>
+                    <div className="mt-16 flex flex-col items-center gap-4">
+                        <div className="h-px w-8 bg-border/50"></div>
+                        <p className="text-[9px] font-bold text-muted-foreground/60 text-center uppercase tracking-[0.2em] leading-relaxed">
+                            Talent Connect Operational Console <br />
+                            <span className="text-[8px] opacity-40">Encryption AES-256 Standard</span>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

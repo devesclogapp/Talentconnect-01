@@ -4,6 +4,7 @@ import { supabase } from './services/supabaseClient';
 import { onAuthStateChange, getCurrentUser, syncUserSession } from './services/authService';
 import AppRoutes from './AppRoutes';
 import { useAppStore } from './store';
+import { Toaster } from './components/ui/sonner';
 import {
   Home,
   Calendar,
@@ -195,6 +196,7 @@ const App: React.FC = () => {
       <MainLayout>
         <AppRoutes />
       </MainLayout>
+      <Toaster />
     </BrowserRouter>
   );
 };

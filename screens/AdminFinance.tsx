@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import {
-    DollarSign,
-    Search,
-    RefreshCw,
-    Download,
-    TrendingUp,
-    TrendingDown,
-    Clock,
-    CheckCircle2,
-    XCircle,
-    AlertTriangle,
-    Shield,
-    Lock,
-    Unlock,
-    Activity,
-    CreditCard,
-    X,
-    Eye,
-    ArrowUp,
-    ArrowDown,
-    Percent
+    DollarSign, Search, RefreshCw, Download, TrendingUp, TrendingDown,
+    Clock, CheckCircle2, XCircle, AlertTriangle, Shield, Lock, Unlock,
+    Activity, CreditCard, X, Eye, ArrowUp, ArrowDown, Percent,
+    BarChart3
 } from 'lucide-react';
+import {
+    AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+    ResponsiveContainer, ReferenceLine, Cell
+} from 'recharts';
 import { supabase } from '../services/supabaseClient';
 import { resolveUserName } from '../utils/userUtils';
+import KpiCard from '../components/erp/KpiCard';
+import StatusBadge from '../components/erp/StatusBadge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../components/ui/sheet';
+import { Badge } from '../components/ui/Badge';
+import { ScrollArea } from '../components/ui/scroll-area';
+import { Separator } from '../components/ui/separator';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../components/ui/alert-dialog';
+import { Skeleton } from '../components/ui/skeleton';
+import { toast } from 'sonner';
 
 const logAdminAction = async (action: string, entityType: string, entityId: string, details: string, reason: string) => {
     try {
@@ -47,6 +44,8 @@ const AdminFinance: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState<string | null>(null);
     const [sortField, setSortField] = useState<'amount' | 'created' | null>(null);
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+    const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+    const [showEscrowSheet, setShowEscrowSheet] = useState(false);
 
     const [kpis, setKpis] = useState({
         gmv: 0,
@@ -164,80 +163,141 @@ const AdminFinance: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
-    return (
-        <div className="space-y-6 animate-fade-in pb-12">
+    const getChartData = () => {
+        const days: Record<string, { date: string, gmv: number, revenue: number }> = {};
+        const now = new Date();
 
-            {/* Payment Dossier */}
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(now.getDate() - i);
+            const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            days[dateStr] = { date: dateStr, gmv: 0, revenue: 0 };
+        }
+
+        payments.forEach(p => {
+            const dStr = new Date(p.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            if (days[dStr]) {
+                days[dStr].gmv += (p.amount_total || 0);
+                days[dStr].revenue += (p.operator_fee || 0);
+            }
+        });
+
+        return Object.values(days);
+    };
+
+    const chartData = getChartData();
+
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-background border border-border p-3 rounded-xl shadow-xl animate-in zoom-in-95 backdrop-blur-md bg-opacity-80">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 border-b border-border pb-1">{label}</p>
+                    <div className="space-y-1.5">
+                        <div className="flex justify-between items-center gap-6">
+                            <span className="text-[10px] font-medium text-foreground">GMV TOTAL</span>
+                            <span className="text-xs font-bold font-mono">R$ {payload[0].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="flex justify-between items-center gap-6">
+                            <span className="text-[10px] font-medium text-emerald-500">RECEITA</span>
+                            <span className="text-xs font-bold font-mono text-emerald-500">R$ {payload[1].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
+    return (
+        <div className="space-y-5 animate-fade-in pb-12">
+
+            {/* ── Payment Dossier ── */}
             {selectedPayment && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
-                    <div
-                        className="h-full w-full max-w-3xl shadow-2xl animate-slide-in-right overflow-hidden flex flex-col"
-                        style={{ background: 'var(--bg-primary)' }}
-                    >
-                        <div className="p-6 border-b border-border-subtle flex items-center justify-between" style={{ background: 'var(--bg-secondary)' }}>
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 rounded-[8px] bg-success text-white"><DollarSign size={20} /></div>
+                    <div className="h-full w-full max-w-2xl bg-background shadow-2xl flex flex-col border-l border-border">
+                        <div className="p-5 border-b border-border bg-card flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400">
+                                    <DollarSign size={18} />
+                                </div>
                                 <div>
-                                    <h2 className="text-base font-semibold text-text-primary">Dossiê Financeiro</h2>
-                                    <p className="text-[10px] text-text-tertiary font-mono">#{selectedPayment.id.slice(0, 8)}</p>
+                                    <h2 className="text-sm font-semibold text-foreground">Dossiê Financeiro</h2>
+                                    <p className="text-[10px] text-muted-foreground font-mono">#{selectedPayment.id.slice(0, 8)}</p>
                                 </div>
                             </div>
-                            <button onClick={() => setSelectedPayment(null)} className="p-2 rounded-[8px] hover:bg-bg-tertiary transition-colors border border-border-subtle"><X size={20} /></button>
+                            <button onClick={() => setSelectedPayment(null)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all">
+                                <X size={18} />
+                            </button>
                         </div>
 
-                        <div className="flex px-6 border-b border-border-subtle" style={{ background: 'var(--bg-secondary)' }}>
+                        <div className="flex px-5 border-b border-border bg-card">
                             {['details', 'ledger', 'intervention'].map(tab => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setDossierTab(tab)}
-                                    className={`px-5 py-4 text-[10px] font-semibold uppercase tracking-widest border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}
-                                >
+                                <button key={tab} onClick={() => setDossierTab(tab)}
+                                    className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-widest border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
                                     {tab === 'details' ? 'Detalhes' : tab === 'ledger' ? 'Ledger' : 'Intervenção'}
                                 </button>
                             ))}
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {dossierTab === 'details' && (
-                                <div className="space-y-6 animate-in fade-in">
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <FinanceStat label="Total Bruto" value={formatCurrency(selectedPayment.amount_total)} color="text-text-primary" />
-                                        <FinanceStat label="Taxa (10%)" value={formatCurrency(selectedPayment.operator_fee)} color="text-warning" />
-                                        <FinanceStat label="Repasse Líquido" value={formatCurrency(selectedPayment.provider_amount)} color="text-success" />
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {[
+                                            { label: 'Total Bruto', value: formatCurrency(selectedPayment.amount_total), color: 'text-foreground' },
+                                            { label: 'Taxa (10%)', value: formatCurrency(selectedPayment.operator_fee), color: 'text-yellow-500' },
+                                            { label: 'Repasse Líquido', value: formatCurrency(selectedPayment.provider_amount), color: 'text-green-600 dark:text-green-400' },
+                                        ].map(s => (
+                                            <div key={s.label} className="bg-card border border-border rounded-xl p-4">
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">{s.label}</p>
+                                                <p className={`text-base font-semibold font-mono ${s.color}`}>{s.value}</p>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div
-                                        className="p-6 space-y-1"
-                                        style={{ background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.06)' }}
-                                    >
-                                        <InfoRow label="Status Escrow" value={selectedPayment.escrow_status} />
-                                        <InfoRow label="Serviço" value={selectedPayment.order?.service?.title} />
-                                        <InfoRow label="Cliente" value={resolveUserName(selectedPayment.order?.client)} />
-                                        <InfoRow label="Profissional" value={resolveUserName(selectedPayment.order?.provider)} />
-                                        <InfoRow label="Data" value={formatDate(selectedPayment.created_at)} />
+                                    <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+                                        {[
+                                            { label: 'Status Escrow', value: <StatusBadge status={selectedPayment.escrow_status} size="md" /> },
+                                            { label: 'Serviço', value: selectedPayment.order?.service?.title },
+                                            { label: 'Cliente', value: resolveUserName(selectedPayment.order?.client) },
+                                            { label: 'Profissional', value: resolveUserName(selectedPayment.order?.provider) },
+                                            { label: 'Data', value: formatDate(selectedPayment.created_at) },
+                                        ].map(row => (
+                                            <div key={row.label} className="flex justify-between items-center border-b border-border last:border-0 pb-3 last:pb-0">
+                                                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{row.label}</span>
+                                                <span className="text-xs font-medium text-foreground">{row.value || '—'}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}
                             {dossierTab === 'ledger' && (
-                                <div className="space-y-4 animate-in fade-in">
-                                    <h4 className="text-[10px] font-semibold uppercase text-text-tertiary tracking-widest">Simulação de Razão Contábil</h4>
-                                    <div
-                                        className="p-6 space-y-3"
-                                        style={{ background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.06)' }}
-                                    >
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-semibold uppercase text-muted-foreground tracking-widest">Simulação de Razão Contábil</p>
+                                    <div className="bg-card border border-border rounded-xl p-4 space-y-2">
                                         <LedgerRow label="D - Caixa Escrow" value={formatCurrency(selectedPayment.amount_total)} type="debit" />
                                         <LedgerRow label="C - Receita por Serviços" value={formatCurrency(selectedPayment.amount_total)} type="credit" />
-                                        <div className="h-px bg-border-subtle my-3" />
+                                        <div className="h-px bg-border my-2" />
                                         <LedgerRow label="D - Repasse ao Profissional" value={formatCurrency(selectedPayment.provider_amount)} type="debit" />
                                         <LedgerRow label="C - Receita Operadora (10%)" value={formatCurrency(selectedPayment.operator_fee)} type="credit" />
                                     </div>
                                 </div>
                             )}
                             {dossierTab === 'intervention' && (
-                                <div className="space-y-4 animate-in fade-in">
-                                    <h4 className="text-[10px] font-semibold uppercase text-text-tertiary tracking-widest">Intervenção Financeira Manual</h4>
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-semibold uppercase text-muted-foreground tracking-widest">Intervenção Financeira Manual</p>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <InterventionCard icon={<Unlock size={20} />} label="Liberar Escrow" desc="Autoriza repasse imediato ao profissional." color="text-success" onClick={() => handleAction(selectedPayment.id, 'released')} disabled={isProcessing === selectedPayment.id} />
-                                        <InterventionCard icon={<XCircle size={20} />} label="Reembolsar Cliente" desc="Estorna o valor total para o cliente." color="text-error" onClick={() => handleAction(selectedPayment.id, 'refunded')} disabled={isProcessing === selectedPayment.id} />
+                                        <button onClick={() => handleAction(selectedPayment.id, 'released')} disabled={isProcessing === selectedPayment.id}
+                                            className="p-4 text-left bg-card border border-border rounded-xl hover:bg-green-500/10 hover:border-green-500/30 text-green-600 dark:text-green-400 transition-all group disabled:opacity-30">
+                                            <Unlock size={18} className="mb-3 group-hover:scale-110 transition-transform" />
+                                            <p className="text-xs font-semibold text-foreground mb-1">Liberar Escrow</p>
+                                            <p className="text-[10px] text-muted-foreground">Autoriza repasse imediato.</p>
+                                        </button>
+                                        <button onClick={() => handleAction(selectedPayment.id, 'refunded')} disabled={isProcessing === selectedPayment.id}
+                                            className="p-4 text-left bg-card border border-border rounded-xl hover:bg-red-500/10 hover:border-red-500/30 text-red-600 dark:text-red-400 transition-all group disabled:opacity-30">
+                                            <XCircle size={18} className="mb-3 group-hover:scale-110 transition-transform" />
+                                            <p className="text-xs font-semibold text-foreground mb-1">Reembolsar Cliente</p>
+                                            <p className="text-[10px] text-muted-foreground">Estorna o valor total.</p>
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -246,159 +306,331 @@ const AdminFinance: React.FC = () => {
                 </div>
             )}
 
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* ── Escrow Detail Sheet ── */}
+            <Sheet open={showEscrowSheet} onOpenChange={setShowEscrowSheet}>
+                <SheetContent className="w-full sm:max-w-md p-0 overflow-hidden flex flex-col border-l border-border bg-background">
+                    <div className="p-6 border-b border-border bg-card/50">
+                        <SheetHeader className="text-left space-y-1">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
+                                    <Lock size={18} />
+                                </div>
+                                <SheetTitle className="text-lg font-semibold flex items-center gap-2">
+                                    Volume em Garantia
+                                </SheetTitle>
+                            </div>
+                            <SheetDescription className="text-xs text-muted-foreground leading-relaxed">
+                                Listagem de transações com saldo retido aguardando confirmação de execução ou prazo de segurança.
+                            </SheetDescription>
+                        </SheetHeader>
+                    </div>
+
+                    <ScrollArea className="flex-1">
+                        <div className="p-6">
+                            {payments.filter(p => p.escrow_status === 'held').length > 0 ? (
+                                <div className="grid gap-6">
+                                    {payments.filter(p => p.escrow_status === 'held').map((payment, idx, arr) => (
+                                        <div key={payment.id} className="group animate-in fade-in slide-in-from-right-4 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
+                                            <div className="flex items-start justify-between mb-3">
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                                                        <Clock size={10} /> Escrow Ativo
+                                                    </p>
+                                                    <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                                                        {payment.order?.service?.title || 'Serviço Personalizado'}
+                                                    </h4>
+                                                </div>
+                                                <p className="text-sm font-bold text-foreground">
+                                                    {formatCurrency(payment.amount_total)}
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                                <div className="p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                                                    <p className="text-[9px] uppercase font-bold text-muted-foreground mb-1 tracking-wider">Profissional</p>
+                                                    <p className="text-[11px] font-medium text-foreground truncate">{payment.order?.provider?.name || '---'}</p>
+                                                </div>
+                                                <div className="p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                                                    <p className="text-[9px] uppercase font-bold text-muted-foreground mb-1 tracking-wider">Taxa Plataforma</p>
+                                                    <p className="text-[11px] font-medium text-foreground">{formatCurrency(payment.operator_fee)}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="outline" className="text-[9px] h-5 px-1.5 py-0 border-border text-muted-foreground bg-background">
+                                                    TX: {payment.id.slice(0, 8)}
+                                                </Badge>
+                                                {new Date(payment.created_at) < (new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)) && (
+                                                    <Badge variant="destructive" className="text-[9px] h-5 px-1.5 py-0 bg-red-500/10 text-red-600 dark:text-red-400 border-none">
+                                                        Aging {'>'} 10d
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {idx < arr.length - 1 && <Separator className="mt-6" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
+                                    <Activity size={32} className="mb-2" />
+                                    <p className="text-xs font-semibold uppercase tracking-widest leading-relaxed">
+                                        Nenhuma transação<br />em garantia
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </SheetContent>
+            </Sheet>
+
+            {/* ── Header ── */}
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-[22px] font-semibold text-text-primary">Central Financeira</h1>
-                    <p className="text-[13px] text-text-secondary mt-0.5">GMV, escrow, repasses e reconciliação contábil</p>
+                    <h1 className="text-xl font-semibold text-foreground">Central Financeira</h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">GMV, escrow, repasses e reconciliação contábil</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={fetchPayments}
-                        className="p-2.5 rounded-[8px] border border-border-subtle hover:rotate-180 transition-all duration-500"
-                        style={{ background: 'var(--bg-secondary)' }}
-                    >
-                        <RefreshCw size={18} />
+                    <button onClick={fetchPayments} className="p-2 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:rotate-180 transition-all duration-500">
+                        <RefreshCw size={16} />
                     </button>
-                    <button
-                        onClick={exportToCSV}
-                        className="h-10 px-5 rounded-[8px] text-[10px] font-semibold uppercase tracking-widest text-white flex items-center gap-2 transition-all hover:opacity-90"
-                        style={{ background: 'var(--text-primary)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
-                    >
-                        <Download size={14} />Exportar
+                    <button onClick={exportToCSV} className="flex items-center gap-2 px-4 h-9 bg-foreground text-background rounded-lg text-[12px] font-semibold hover:opacity-90 transition-all">
+                        <Download size={14} /> Exportar
                     </button>
                 </div>
             </div>
 
-            {/* KPI Grid — with analytical gradient accents on top */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <FinanceKpi label="GMV Total" value={formatCurrency(kpis.gmv)} icon={<TrendingUp size={14} />} accentColor="linear-gradient(90deg, #6366F1, #818CF8)" color="text-accent-primary" />
-                <FinanceKpi label="Receita Operadora" value={formatCurrency(kpis.revenue)} icon={<DollarSign size={14} />} accentColor="linear-gradient(90deg, #22C55E, #4ADE80)" color="text-success" />
-                <FinanceKpi label="Em Escrow" value={formatCurrency(kpis.inEscrow)} icon={<Lock size={14} />} accentColor="linear-gradient(90deg, #F59E0B, #FBBF24)" color="text-warning" />
-                <FinanceKpi label="Repasses Pendentes" value={formatCurrency(kpis.pendingPayouts)} icon={<Activity size={14} />} accentColor="linear-gradient(90deg, #F59E0B, #FBBF24)" color="text-warning" />
-                <FinanceKpi label="Reembolsos" value={formatCurrency(kpis.refunds)} icon={<TrendingDown size={14} />} accentColor="linear-gradient(90deg, #EF4444, #F87171)" color="text-error" />
-                <FinanceKpi label="Total de TXs" value={kpis.txCount} icon={<CreditCard size={14} />} accentColor="linear-gradient(90deg, #9CA3AF, #D1D5DB)" color="text-text-secondary" />
+            {/* ── KPI Grid ── */}
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+                <KpiCard
+                    label="GMV Total"
+                    value={formatCurrency(kpis.gmv)}
+                    icon={<TrendingUp size={16} />}
+                    color="text-primary"
+                    bg="bg-primary/10"
+                />
+                <KpiCard
+                    label="Receita Operadora"
+                    value={formatCurrency(kpis.revenue)}
+                    icon={<DollarSign size={16} />}
+                    color="text-green-600 dark:text-green-400"
+                    bg="bg-green-500/10"
+                    trend="+12.5%"
+                    trendDir="up"
+                />
+                <KpiCard
+                    label="Em Escrow"
+                    value={formatCurrency(kpis.inEscrow)}
+                    icon={<Lock size={16} />}
+                    color="text-yellow-600 dark:text-yellow-400"
+                    bg="bg-yellow-500/10"
+                    onClick={() => setShowEscrowSheet(true)}
+                />
+                <KpiCard
+                    label="Repasses Pendentes"
+                    value={formatCurrency(kpis.pendingPayouts)}
+                    icon={<Activity size={16} />}
+                    color="text-orange-600 dark:text-orange-400"
+                    bg="bg-orange-500/10"
+                />
+                <KpiCard
+                    label="Reembolsos"
+                    value={formatCurrency(kpis.refunds)}
+                    icon={<TrendingDown size={16} />}
+                    color="text-red-600 dark:text-red-400"
+                    bg="bg-red-500/10"
+                />
+                <KpiCard
+                    label="Total de TXs"
+                    value={kpis.txCount}
+                    icon={<CreditCard size={16} />}
+                    color="text-slate-600 dark:text-slate-400"
+                    bg="bg-slate-500/10"
+                />
             </div>
 
-            {/* Toolbar */}
-            <div
-                className="flex flex-col md:flex-row gap-3 p-4"
-                style={{
-                    background: 'var(--bg-primary)',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(0,0,0,0.06)',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                }}
-            >
+            {/* ── Analytical Chart ── */}
+            <div className="bg-card border border-border rounded-xl p-6">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                            {chartType === 'line' ? <TrendingUp size={14} className="text-primary" /> : <BarChart3 size={14} className="text-primary" />}
+                            Performance Financeira
+                        </h3>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">Visão consolidada de GMV vs Receita Operadora (Últimos 12 dias)</p>
+                    </div>
+                    <div className="flex bg-muted p-1 rounded-lg border border-border text-[10px]">
+                        <button
+                            onClick={() => setChartType('line')}
+                            className={`px-3 py-1 font-bold uppercase tracking-wider rounded-md transition-all ${chartType === 'line' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            Linha
+                        </button>
+                        <button
+                            onClick={() => setChartType('bar')}
+                            className={`px-3 py-1 font-bold uppercase tracking-wider rounded-md transition-all ${chartType === 'bar' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            Barras
+                        </button>
+                    </div>
+                </div>
+
+                <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        {chartType === 'line' ? (
+                            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="gmvArea" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.15} />
+                                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.01} />
+                                    </linearGradient>
+                                    <linearGradient id="revArea" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.01} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                <XAxis
+                                    dataKey="date"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                    dy={10}
+                                    suppressHydrationWarning
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                />
+                                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border)', strokeWidth: 1 }} />
+
+                                <Area
+                                    type="monotone"
+                                    dataKey="gmv"
+                                    stroke="var(--primary)"
+                                    strokeWidth={2.5}
+                                    fillOpacity={1}
+                                    fill="url(#gmvArea)"
+                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="#10b981"
+                                    strokeWidth={2.5}
+                                    fillOpacity={1}
+                                    fill="url(#revArea)"
+                                    activeDot={{ r: 4, strokeWidth: 0 }}
+                                />
+                            </AreaChart>
+                        ) : (
+                            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="gmvBar" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.8} />
+                                        <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.2} />
+                                    </linearGradient>
+                                    <linearGradient id="revBar" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
+                                        <stop offset="100%" stopColor="#10b981" stopOpacity={0.2} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                <XAxis
+                                    dataKey="date"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                    dy={10}
+                                    suppressHydrationWarning
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 6 }} />
+                                <Bar dataKey="gmv" fill="url(#gmvBar)" radius={[4, 4, 0, 0]} barSize={20} />
+                                <Bar dataKey="revenue" fill="url(#revBar)" radius={[4, 4, 0, 0]} barSize={10} />
+                            </BarChart>
+                        )}
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            {/* ── Toolbar ── */}
+            <div className="bg-card border border-border rounded-xl p-3 flex flex-col md:flex-row gap-3">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary" size={15} />
-                    <input
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                    <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                         placeholder="Buscar por ID, cliente, profissional ou serviço..."
-                        className="w-full h-10 rounded-[8px] pl-10 pr-4 text-sm outline-none transition-all"
-                        style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)', color: 'var(--text-primary)' }}
+                        className="w-full h-9 rounded-lg pl-9 pr-4 text-sm outline-none bg-background border border-border text-foreground focus:border-primary transition-all"
                     />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                    {[
-                        { val: 'all', label: 'Todos' },
-                        { val: 'held', label: 'Retidos' },
-                        { val: 'released', label: 'Liberados' },
-                        { val: 'refunded', label: 'Estornados' },
-                    ].map(opt => (
-                        <button
-                            key={opt.val}
-                            onClick={() => setFilterStatus(opt.val)}
-                            className="h-10 px-4 rounded-[8px] text-[10px] font-semibold uppercase tracking-widest transition-all duration-[120ms]"
-                            style={filterStatus === opt.val
-                                ? { background: 'var(--text-primary)', color: '#FFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }
-                                : { background: 'var(--bg-secondary)', color: 'var(--text-tertiary)', border: '1px solid rgba(0,0,0,0.06)' }
-                            }
-                        >{opt.label}</button>
+                    {[{ val: 'all', label: 'Todos' }, { val: 'held', label: 'Retidos' }, { val: 'released', label: 'Liberados' }, { val: 'refunded', label: 'Estornados' }].map(opt => (
+                        <button key={opt.val} onClick={() => setFilterStatus(opt.val)}
+                            className={`h-9 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wide transition-all ${filterStatus === opt.val ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground border border-border'}`}>
+                            {opt.label}
+                        </button>
                     ))}
                 </div>
             </div>
 
-            {/* Finance Table */}
-            <div
-                style={{
-                    background: 'var(--bg-primary)',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(0,0,0,0.06)',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                    overflow: 'hidden'
-                }}
-            >
+            {/* ── Finance Table ── */}
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="border-b border-border-subtle" style={{ background: 'var(--bg-secondary)' }}>
-                            <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">TX ID / Serviço</th>
-                            <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Partes</th>
-                            <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Escrow</th>
-                            <th
-                                className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary cursor-pointer hover:text-text-primary"
-                                onClick={() => toggleSort('amount')}
-                            >
-                                <span className="flex items-center gap-1.5">Valor {sortField === 'amount' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
+                        <tr className="border-b border-border bg-muted/50">
+                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">TX ID / Serviço</th>
+                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Partes</th>
+                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Escrow</th>
+                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('amount')}>
+                                <span className="flex items-center gap-1.5">Valor {sortField === 'amount' ? (sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />) : null}</span>
                             </th>
-                            <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Taxa</th>
-                            <th
-                                className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary cursor-pointer hover:text-text-primary"
-                                onClick={() => toggleSort('created')}
-                            >
-                                <span className="flex items-center gap-1.5">Data {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
+                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Taxa</th>
+                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('created')}>
+                                <span className="flex items-center gap-1.5">Data {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />) : null}</span>
                             </th>
-                            <th className="px-6 py-4 text-right text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Dossiê</th>
+                            <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Dossiê</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-subtle">
+                    <tbody>
                         {loading ? (
-                            <tr><td colSpan={7} className="py-20 text-center">
-                                <RefreshCw className="animate-spin mx-auto mb-3 text-accent-primary" size={24} />
-                                <p className="text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Sincronizando Ledger...</p>
+                            <tr><td colSpan={7} className="py-16 text-center">
+                                <RefreshCw className="animate-spin mx-auto mb-3 text-primary" size={22} />
+                                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Sincronizando Ledger...</p>
                             </td></tr>
                         ) : filteredPayments.length === 0 ? (
-                            <tr><td colSpan={7} className="py-20 text-center opacity-30">
-                                <DollarSign size={40} className="mx-auto mb-3" />
-                                <p className="text-[10px] font-semibold uppercase tracking-widest">Nenhuma transação encontrada</p>
+                            <tr><td colSpan={7} className="py-16 text-center opacity-30">
+                                <DollarSign size={36} className="mx-auto mb-3" />
+                                <p className="text-[10px] font-semibold uppercase tracking-widest">Nenhuma transação</p>
                             </td></tr>
                         ) : filteredPayments.map(p => (
-                            <tr
-                                key={p.id}
-                                className="transition-all cursor-pointer"
-                                onClick={() => setSelectedPayment(p)}
-                                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-secondary)')}
-                                onMouseLeave={e => (e.currentTarget.style.background = '')}
-                            >
-                                <td className="px-6 py-4">
-                                    <p className="text-[10px] font-mono text-text-tertiary mb-0.5">#{p.id.slice(0, 8)}</p>
-                                    <p className="text-xs font-semibold text-text-primary">{p.order?.service?.title || 'Serviço'}</p>
+                            <tr key={p.id}
+                                className="border-b border-border last:border-0 hover:bg-muted/30 transition-all cursor-pointer"
+                                onClick={() => setSelectedPayment(p)}>
+                                <td className="px-5 py-4">
+                                    <p className="text-[10px] font-mono text-muted-foreground mb-0.5">#{p.id.slice(0, 8)}</p>
+                                    <p className="text-xs font-semibold text-foreground">{p.order?.service?.title || 'Serviço'}</p>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <p className="text-[10px] text-text-secondary">{resolveUserName(p.order?.client)}</p>
-                                    <p className="text-[10px] text-text-tertiary">→ {resolveUserName(p.order?.provider)}</p>
+                                <td className="px-5 py-4">
+                                    <p className="text-[10px] text-foreground">{resolveUserName(p.order?.client)}</p>
+                                    <p className="text-[10px] text-muted-foreground">→ {resolveUserName(p.order?.provider)}</p>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-semibold uppercase ${getEscrowStyle(p.escrow_status)}`}>
-                                        {p.escrow_status}
-                                    </span>
+                                <td className="px-5 py-4"><StatusBadge status={p.escrow_status} /></td>
+                                <td className="px-5 py-4">
+                                    <span className="text-xs font-semibold text-foreground font-mono tabular-nums">{formatCurrency(p.amount_total)}</span>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <span className="text-xs font-semibold text-text-primary font-mono">{formatCurrency(p.amount_total)}</span>
+                                <td className="px-5 py-4">
+                                    <span className="text-[11px] text-yellow-500 font-mono tabular-nums">{formatCurrency(p.operator_fee)}</span>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <span className="text-[11px] text-warning font-mono">{formatCurrency(p.operator_fee)}</span>
+                                <td className="px-5 py-4">
+                                    <span className="text-[10px] font-mono text-muted-foreground">{formatDate(p.created_at)}</span>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <span className="text-[10px] font-mono text-text-tertiary">{formatDate(p.created_at)}</span>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button
-                                        className="p-2 rounded-[6px] border border-border-subtle hover:bg-text-primary hover:text-white hover:border-transparent transition-all duration-[120ms]"
-                                        style={{ background: 'var(--bg-secondary)' }}
-                                    >
-                                        <Eye size={14} />
+                                <td className="px-5 py-4 text-right">
+                                    <button className="p-1.5 rounded-lg border border-border hover:bg-foreground hover:text-background hover:border-transparent transition-all">
+                                        <Eye size={13} />
                                     </button>
                                 </td>
                             </tr>
@@ -411,70 +643,13 @@ const AdminFinance: React.FC = () => {
 };
 
 // --- Sub-components ---
-const FinanceKpi = ({ label, value, icon, accentColor, color }: any) => (
-    <div
-        className="p-5 relative overflow-hidden cursor-pointer hover:shadow-md transition-all duration-[120ms]"
-        style={{
-            background: 'var(--bg-primary)',
-            borderRadius: '10px',
-            border: '1px solid rgba(0,0,0,0.06)',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-        }}
-    >
-        {/* Analytical gradient line (top bar) */}
-        <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-[10px] opacity-60" style={{ background: accentColor }} />
-        <div className={`p-2 rounded-[6px] bg-bg-secondary border border-border-subtle w-fit mb-4 ${color}`}>{icon}</div>
-        <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
-        <h3 className="text-xl font-semibold text-text-primary leading-none">{value}</h3>
-    </div>
-);
-
-const FinanceStat = ({ label, value, color }: any) => (
-    <div
-        className="p-5"
-        style={{ background: 'var(--bg-secondary)', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.06)' }}
-    >
-        <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
-        <p className={`text-lg font-semibold font-mono ${color}`}>{value}</p>
-    </div>
-);
-
-const InfoRow = ({ label, value }: any) => (
-    <div className="flex justify-between items-center py-2.5 border-b border-border-subtle last:border-0">
-        <span className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest">{label}</span>
-        <span className="text-xs font-medium text-text-primary font-mono">{value || '—'}</span>
-    </div>
-);
-
 const LedgerRow = ({ label, value, type }: any) => (
     <div className="flex justify-between items-center py-2 text-[11px]">
-        <span className={`font-semibold uppercase tracking-widest ${type === 'debit' ? 'text-error' : 'text-success'}`}>{label}</span>
-        <span className="font-mono font-semibold text-text-primary">{value}</span>
+        <span className={`font-semibold uppercase tracking-widest ${type === 'debit' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>{label}</span>
+        <span className="font-mono font-semibold text-foreground">{value}</span>
     </div>
 );
 
-const InterventionCard = ({ icon, label, desc, color, onClick, disabled }: any) => (
-    <button
-        onClick={onClick}
-        disabled={disabled}
-        className={`p-5 text-left rounded-[10px] border border-border-subtle hover:shadow-md transition-all duration-[120ms] group disabled:opacity-30 ${color}`}
-        style={{ background: 'var(--bg-secondary)' }}
-    >
-        <div className="transition-transform group-hover:scale-110 mb-4 w-fit">{icon}</div>
-        <p className="text-xs font-semibold text-text-primary mb-1">{label}</p>
-        <p className="text-[10px] text-text-tertiary leading-relaxed">{desc}</p>
-    </button>
-);
-
-const getEscrowStyle = (status: string) => {
-    const map: Record<string, string> = {
-        held: 'bg-warning/10 text-warning',
-        released: 'bg-success/10 text-success',
-        refunded: 'bg-info/10 text-info',
-        pending: 'bg-bg-secondary text-text-tertiary border border-border-subtle',
-        failed: 'bg-error/10 text-error'
-    };
-    return map[status] || 'bg-bg-secondary text-text-tertiary';
-};
+const getEscrowStyle = (_status: string) => '';
 
 export default AdminFinance;

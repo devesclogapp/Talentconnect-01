@@ -19,6 +19,7 @@ import { supabase } from '../services/supabaseClient';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { CATEGORY_MAP, CATEGORIES_LIST } from '../constants';
 import ServiceCard from '../components/ServiceCard';
+import MetricCard from '../components/dashboard/MetricCard';
 
 interface Props {
     onSelectCategory: (category?: string) => void;
@@ -106,7 +107,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                         <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
                     </div>
                     <div>
-                        <p className="meta !text-[8px] !lowercase text-text-tertiary leading-none font-normal">Acesso autorizado</p>
+                        <p className="meta !text-[11px] !lowercase text-text-tertiary leading-none font-medium">Acesso autorizado</p>
                         <h2 className="heading-md font-bold">Início</h2>
                     </div>
                 </div>
@@ -169,12 +170,12 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                     </div>
                                     <div className="flex flex-col justify-end h-56 pb-2">
                                         <div>
-                                            <p className="meta !text-white/80 font-normal mb-1 pb-1 uppercase tracking-widest !text-[8px]">Exclusivo do mercado</p>
+                                            <p className="meta !text-white/80 font-medium mb-1 pb-1 uppercase tracking-widest !text-[11px]">Exclusivo do mercado</p>
                                             <h3 className="heading-xl text-white font-black leading-tight mb-3">Eleve suas contratações <br />ao nível expert.</h3>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse"></div>
-                                            <p className="text-[8px] font-bold text-white uppercase tracking-wider opacity-80">Acesso Platinum ativo</p>
+                                            <p className="text-[11px] font-bold text-white uppercase tracking-wider opacity-80">Acesso Platinum ativo</p>
                                         </div>
                                     </div>
                                 </div>
@@ -197,12 +198,12 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                     </div>
                                     <div className="flex flex-col justify-end h-56 pb-2">
                                         <div>
-                                            <p className="meta !text-white/80 font-normal mb-1 pb-1 uppercase tracking-widest !text-[8px]">Profissionais verificados</p>
+                                            <p className="meta !text-white/80 font-medium mb-1 pb-1 uppercase tracking-widest !text-[11px]">Profissionais verificados</p>
                                             <h3 className="heading-xl text-white font-black leading-tight mb-3">Conecte-se com <br />especialistas elite.</h3>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
-                                            <p className="text-[8px] font-bold text-white uppercase tracking-wider opacity-80">Rede 100% verificada</p>
+                                            <p className="text-[11px] font-bold text-white uppercase tracking-wider opacity-80">Rede 100% verificada</p>
                                         </div>
                                     </div>
                                 </div>
@@ -225,12 +226,12 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                     </div>
                                     <div className="flex flex-col justify-end h-56 pb-2">
                                         <div>
-                                            <p className="meta !text-white/80 font-normal mb-1 pb-1 uppercase tracking-widest !text-[8px]">Performance garantida</p>
+                                            <p className="meta !text-white/80 font-medium mb-1 pb-1 uppercase tracking-widest !text-[11px]">Performance garantida</p>
                                             <h3 className="heading-xl text-white font-black leading-tight mb-3">Serviços de qualidade <br />sob demanda.</h3>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-info animate-pulse"></div>
-                                            <p className="text-[8px] font-bold text-white uppercase tracking-wider opacity-80">Suporte 24/7 disponível</p>
+                                            <p className="text-[11px] font-bold text-white uppercase tracking-wider opacity-80">Suporte 24/7 disponível</p>
                                         </div>
                                     </div>
                                 </div>
@@ -273,7 +274,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 <div className="w-16 h-16 rounded-[24px] bg-bg-secondary border border-border-subtle flex items-center justify-center text-text-tertiary group-hover:bg-accent-primary group-hover:text-bg-primary group-hover:border-accent-primary group-hover:shadow-glow transition-all duration-300">
                                     <Icon size={24} />
                                 </div>
-                                <span className="text-[10px] font-normal text-text-secondary group-hover:text-text-primary transition-colors">{cat.label}</span>
+                                <span className="text-[11px] font-medium text-text-secondary group-hover:text-text-primary transition-colors">{cat.label}</span>
                             </button>
                         );
                     })}
@@ -286,7 +287,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h4 className="heading-lg mb-1">Operações em Destaque</h4>
-                            <p className="meta !text-[8px] !lowercase text-text-tertiary font-normal">Serviços de alta performance em tempo real</p>
+                            <p className="meta !text-[11px] !lowercase text-text-tertiary font-medium">Serviços de alta performance em tempo real</p>
                         </div>
                     </div>
 
@@ -295,13 +296,13 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                             <div className="h-64 col-span-2 flex items-center justify-center">
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="w-10 h-10 border-4 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin"></div>
-                                    <span className="meta text-text-primary !text-[10px] font-normal">Lendo Mercado...</span>
+                                    <span className="meta text-text-primary !text-[11px] font-medium">Lendo Mercado...</span>
                                 </div>
                             </div>
                         ) : services.length === 0 ? (
                             <div className="p-12 text-center bg-bg-secondary/20 rounded-[32px] border border-dashed border-border-subtle">
                                 <Zap size={40} className="mx-auto text-text-tertiary mb-4 opacity-20" />
-                                <p className="meta text-text-tertiary !text-[10px] font-normal">Mercado limpo. Aguardando novos especialistas.</p>
+                                <p className="meta text-text-tertiary !text-[11px] font-medium">Mercado limpo. Aguardando novos especialistas.</p>
                             </div>
                         ) : (
                             <div className="flex flex-col bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden px-4">
@@ -326,34 +327,20 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
                 {/* Market Intelligence (Analytics Row) */}
                 <section className="grid grid-cols-2 gap-4">
-                    <div className="relative group interactive overflow-hidden rounded-[24px] p-5 bg-black text-white shadow-xl shadow-black/10 transition-all hover:-translate-y-1">
-                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-accent-primary/20 transition-colors" />
-                        <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-4">
-                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-500">Operações</p>
-                                <TrendingUp size={14} className="text-neutral-600 group-hover:text-accent-primary transition-colors" />
-                            </div>
-                            <h5 className="text-3xl font-black mb-1 flex items-baseline gap-0.5">
-                                {activeOrdersCount.toString().padStart(2, '0')}
-                                <span className="text-accent-primary animate-pulse">.</span>
-                            </h5>
-                            <p className="text-[10px] font-medium text-neutral-400 leading-tight">Contratos ativos no mercado</p>
-                        </div>
-                    </div>
-
-                    <div className="relative group interactive overflow-hidden rounded-[24px] p-5 bg-white border border-neutral-100 shadow-xl shadow-black/5 transition-all hover:-translate-y-1">
-                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-neutral-100 rounded-full blur-2xl group-hover:bg-neutral-200 transition-colors" />
-                        <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-4">
-                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400">Posição</p>
-                                <Zap size={14} className="text-neutral-300 group-hover:text-black transition-colors" />
-                            </div>
-                            <h5 className="text-3xl font-black mb-1 text-black tracking-tight">
-                                {activeOrdersCount > 5 ? 'Elite' : (activeOrdersCount > 0 ? 'Pro' : 'Iniciante')}
-                            </h5>
-                            <p className="text-[10px] font-medium text-neutral-500 leading-tight">Status atual da conta</p>
-                        </div>
-                    </div>
+                    <MetricCard
+                        label="Operações"
+                        value={activeOrdersCount.toString().padStart(2, '0')}
+                        icon={TrendingUp}
+                        description="Contratos ativos no mercado"
+                        trend="."
+                        variant="primary"
+                    />
+                    <MetricCard
+                        label="Posição"
+                        value={activeOrdersCount > 5 ? 'Elite' : (activeOrdersCount > 0 ? 'Pro' : 'Iniciante')}
+                        icon={Zap}
+                        description="Status atual da conta"
+                    />
                 </section>
 
 

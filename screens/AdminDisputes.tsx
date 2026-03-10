@@ -1,33 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
-    AlertTriangle,
-    MessageSquare,
-    User,
-    ShieldAlert,
-    ChevronRight,
-    Search,
-    Filter,
-    CheckCircle2,
-    XCircle,
-    Gavel,
-    Clock,
-    DollarSign,
-    ArrowRightCircle,
-    Activity,
-    ShieldCheck,
-    Scale,
-    X,
-    History,
-    FileText,
-    Zap,
-    Briefcase,
-    Percent,
-    Package,
-    Lock
+    AlertTriangle, MessageSquare, ShieldAlert, Search, CheckCircle2,
+    XCircle, Gavel, Clock, DollarSign, Activity, ShieldCheck, Scale,
+    History, FileText, Zap, Lock, RefreshCw, Eye, Package, Percent
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { resolveUserName } from '../utils/userUtils';
 import { useAppStore } from '../store';
+import KpiCard from '../components/erp/KpiCard';
+import StatusBadge from '../components/erp/StatusBadge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../components/ui/sheet';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../components/ui/alert-dialog';
+import { Skeleton } from '../components/ui/skeleton';
+import { toast } from 'sonner';
 
 const AdminDisputes: React.FC = () => {
     const { viewFilters, setViewFilters } = useAppStore();
@@ -40,6 +25,10 @@ const AdminDisputes: React.FC = () => {
     const [selectedDispute, setSelectedDispute] = useState<any>(null);
     const [auditLogs, setAuditLogs] = useState<any[]>([]);
     const [dossierTab, setDossierTab] = useState('summary');
+
+    // AlertDialog state
+    const [pendingAction, setPendingAction] = useState<'analyze' | 'resolve_release' | 'resolve_refund' | null>(null);
+    const [actionReason, setActionReason] = useState('');
 
     useEffect(() => {
         fetchDisputes();
@@ -54,13 +43,8 @@ const AdminDisputes: React.FC = () => {
                 .select(`
                     *,
                     order:orders (
-                        id,
-                        status,
-                        total_amount,
-                        scheduled_at,
-                        location_text,
-                        pricing_mode,
-                        notes,
+                        id, status, total_amount, scheduled_at,
+                        location_text, pricing_mode, notes,
                         client:users!client_id (id, email, name),
                         provider:users!provider_id (id, email, name),
                         service:services (id, title)
@@ -92,57 +76,41 @@ const AdminDisputes: React.FC = () => {
 
     const handleSelectDispute = (dispute: any) => {
         setSelectedDispute(dispute);
+        setDossierTab('summary');
         setAuditLogs([]);
         fetchAuditLogs(dispute.order_id);
     };
 
-    const handleAction = async (action: 'analyze' | 'resolve_release' | 'resolve_refund') => {
-        if (!selectedDispute) return;
+    const performAction = async () => {
+        if (!selectedDispute || !pendingAction) return;
         const disputeId = selectedDispute.id;
-
         try {
             setIsProcessing(disputeId);
-
-            if (action === 'analyze') {
+            if (pendingAction === 'analyze') {
                 await (supabase as any).from('disputes').update({ status: 'in_review' }).eq('id', disputeId);
-                alert('Protocolo de mediação ativado.');
+                toast.success('Protocolo de mediação ativado e disputa em análise.');
             } else {
-                const decision = action === 'resolve_release' ? 'release_to_provider' : 'refund_to_client';
-                const notes = prompt('Justificativa da Decisão (Obrigatório para Auditoria):');
-                if (!notes) return;
-
-                // Transação atômica simulada
+                const decision = pendingAction === 'resolve_release' ? 'release_to_provider' : 'refund_to_client';
                 await (supabase as any).from('disputes').update({
                     status: 'resolved',
                     resolved_at: new Date().toISOString()
                 }).eq('id', disputeId);
-
-                // Log Audit Log
                 await (supabase as any).from('audit_logs').insert({
                     order_id: selectedDispute.order_id,
                     action: 'JUDICIAL_DECISION',
-                    details: `Disputa resolvida: ${decision}. Motivo: ${notes}`,
+                    details: `Disputa resolvida: ${decision}. Motivo: ${actionReason}`,
                     timestamp: new Date().toISOString()
                 });
-
-                alert('Sentença aplicada com sucesso!');
+                toast.success('Sentença aplicada com sucesso e registrada em auditoria.');
             }
-
             fetchDisputes();
             setSelectedDispute(null);
         } catch (err: any) {
-            alert('Falha na operação: ' + err.message);
+            toast.error('Falha na operação: ' + err.message);
         } finally {
             setIsProcessing(null);
-        }
-    };
-
-    const getStatusStyle = (status: string) => {
-        switch (status) {
-            case 'open': return 'bg-error/10 text-error border-error/20';
-            case 'in_review': return 'bg-warning/10 text-warning border-warning/20';
-            case 'resolved': return 'bg-success/10 text-success border-success/20';
-            default: return 'bg-bg-tertiary text-text-tertiary border-border-subtle';
+            setPendingAction(null);
+            setActionReason('');
         }
     };
 
@@ -154,464 +122,394 @@ const AdminDisputes: React.FC = () => {
             (d.reason || '').toLowerCase().includes(search) ||
             resolveUserName(d.order?.client).toLowerCase().includes(search) ||
             resolveUserName(d.order?.provider).toLowerCase().includes(search);
-
         return matchesStatus && matchesSearch;
     });
 
+    const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+    const formatCurrency = (v: number) => `R$ ${(v || 0).toFixed(2)}`;
+
     return (
-        <div className="space-y-6 animate-fade-in relative pb-10">
-            {/* Judge Panel Modaly (Slide-over) */}
-            {selectedDispute && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex justify-end p-0 md:p-6">
-                    <div className="bg-bg-primary h-full md:h-[calc(100vh-3rem)] w-full md:max-w-4xl lg:max-w-5xl xl:max-w-5xl shadow-[0_0_100px_rgba(0,0,0,0.5)] md:rounded-[40px] animate-slide-in-right overflow-hidden flex flex-col border border-border-subtle/20">
-                        <div className="p-5 md:p-6 border-b border-border-subtle bg-bg-secondary/30 flex items-center justify-between">
-                            <div className="flex items-center gap-4 md:gap-6">
-                                <div className="p-3 md:p-4 rounded-2xl bg-error text-white shadow-glow-red shrink-0">
-                                    <Scale size={24} />
+        <div className="space-y-5 pb-12">
+
+            {/* ── AlertDialog — Confirmação de Sentença ── */}
+            <AlertDialog open={!!pendingAction} onOpenChange={(open) => { if (!open) { setPendingAction(null); setActionReason(''); } }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {pendingAction === 'analyze' ? 'Elevar para Análise Crítica' :
+                                pendingAction === 'resolve_release' ? 'Liberar Pagamento ao Profissional' :
+                                    'Estornar Valor ao Cliente'}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {pendingAction === 'analyze'
+                                ? 'A disputa será marcada como "Em Análise" e o protocolo de mediação será ativado.'
+                                : 'Esta decisão é irreversível e será registrada no log de auditoria.'}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    {pendingAction !== 'analyze' && (
+                        <div className="space-y-2 py-2">
+                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                                Justificativa da Sentença (Auditoria)
+                            </label>
+                            <textarea
+                                value={actionReason}
+                                onChange={e => setActionReason(e.target.value)}
+                                className="w-full h-24 rounded-lg p-3 text-xs outline-none bg-background border border-border text-foreground focus:border-primary transition-all resize-none"
+                                placeholder="Descreva o motivo da decisão para auditoria..."
+                            />
+                        </div>
+                    )}
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => { setPendingAction(null); setActionReason(''); }}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            disabled={pendingAction !== 'analyze' && !actionReason || isProcessing === selectedDispute?.id}
+                            onClick={performAction}
+                            className={pendingAction === 'resolve_refund' ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' : ''}
+                        >
+                            {isProcessing ? 'Processando...' : 'Confirmar Sentença'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* ── Sheet — Painel de Mediação ── */}
+            <Sheet open={!!selectedDispute} onOpenChange={(open) => { if (!open) setSelectedDispute(null); }}>
+                <SheetContent side="right" className="w-full max-w-2xl p-0 flex flex-col gap-0 overflow-hidden">
+                    {selectedDispute && (
+                        <>
+                            <SheetHeader className="px-5 py-4 border-b border-border bg-card flex-row items-center gap-3 space-y-0">
+                                <div className="w-9 h-9 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+                                    <Scale size={16} />
                                 </div>
-                                <div className="min-w-0">
-                                    <h2 className="text-lg md:text-xl font-black text-text-primary uppercase tracking-tight truncate">Centro de Mediação</h2>
-                                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                                        <span className="text-[9px] font-black text-text-tertiary uppercase tracking-widest bg-bg-secondary px-2 py-0.5 rounded border border-border-subtle/50">ID {selectedDispute.id.slice(0, 8)}</span>
-                                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${getStatusStyle(selectedDispute.status)}`}>
-                                            {selectedDispute.status === 'open' ? 'Aberto' : selectedDispute.status === 'in_review' ? 'Em Análise' : selectedDispute.status === 'resolved' ? 'Resolvido' : selectedDispute.status}
+                                <div className="flex-1 min-w-0">
+                                    <SheetTitle className="text-sm font-semibold text-foreground leading-tight">
+                                        Centro de Mediação
+                                    </SheetTitle>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <span className="text-[10px] text-muted-foreground font-mono">
+                                            #{selectedDispute.id.slice(0, 8)}
                                         </span>
+                                        <StatusBadge status={selectedDispute.status} />
                                     </div>
                                 </div>
+                            </SheetHeader>
+
+                            {/* Tabs */}
+                            <div className="flex px-5 border-b border-border bg-card overflow-x-auto">
+                                {[
+                                    { id: 'summary', label: 'Resumo', icon: <Scale size={12} /> },
+                                    { id: 'order', label: 'Contrato', icon: <FileText size={12} /> },
+                                    { id: 'financial', label: 'Financeiro', icon: <DollarSign size={12} /> },
+                                    { id: 'logs', label: 'Auditoria', icon: <History size={12} /> },
+                                ].map(tab => (
+                                    <button key={tab.id} onClick={() => setDossierTab(tab.id)}
+                                        className={`flex items-center gap-1.5 px-4 py-3 text-[10px] font-semibold uppercase tracking-widest border-b-2 transition-all shrink-0 ${dossierTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+                                        {tab.icon} {tab.label}
+                                    </button>
+                                ))}
                             </div>
-                            <button
-                                onClick={() => setSelectedDispute(null)}
-                                className="p-2 md:p-3 bg-bg-secondary hover:bg-bg-tertiary border border-border-subtle rounded-xl transition-all shrink-0 hover:rotate-90"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
 
-                        <div className="flex px-4 md:px-10 bg-bg-secondary/10 border-b border-border-subtle overflow-x-auto no-scrollbar">
-                            {[
-                                { id: 'summary', label: 'Resumo', longLabel: 'Resumo do Conflito', icon: <Scale size={14} /> },
-                                { id: 'order', label: 'Contrato', longLabel: 'Contrato Digital', icon: <FileText size={14} /> },
-                                { id: 'financial', label: 'Financeiro', longLabel: 'Escrow & Fluxo', icon: <DollarSign size={14} /> },
-                                { id: 'compliance', label: 'Provas', longLabel: 'Chat & Provas', icon: <MessageSquare size={14} /> },
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setDossierTab(tab.id)}
-                                    className={`px-4 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-black uppercase tracking-widest border-b-2 transition-all shrink-0 flex items-center gap-2 ${dossierTab === tab.id ? 'border-accent-primary text-accent-primary bg-accent-primary/5' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}
-                                >
-                                    {tab.icon} <span className="hidden xs:inline">{tab.longLabel}</span><span className="xs:hidden">{tab.label}</span>
-                                </button>
-                            ))}
-                        </div>
+                            <div className="flex-1 overflow-y-auto p-6 space-y-5">
 
-                        <div className="flex-1 overflow-hidden flex flex-col xl:flex-row">
-                            <div className="flex-1 overflow-y-auto p-4 md:p-6 xl:p-8 space-y-8 custom-scrollbar scroll-smooth">
+                                {/* ── Tab: Resumo ── */}
                                 {dossierTab === 'summary' && (
-                                    <div className="space-y-8 animate-fade-in max-w-4xl mx-auto xl:mx-0">
-                                        {/* Case Details */}
-                                        <div className="space-y-6">
-                                            <div className="bg-bg-secondary/10 border border-border-subtle rounded-[28px] md:rounded-[32px] p-5 md:p-6 space-y-6 shadow-sm">
-                                                <div className="flex flex-col sm:flex-row items-start justify-between gap-6 pb-6 border-b border-border-subtle/30">
+                                    <div className="space-y-5">
+                                        {/* Motivo */}
+                                        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <p className="text-[10px] font-semibold text-destructive uppercase tracking-widest mb-1">Motivo da Disputa</p>
+                                                    <p className="text-base font-semibold text-foreground">{selectedDispute.reason || 'Inconformidade Geral'}</p>
+                                                </div>
+                                                <div className="text-right shrink-0">
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Valor</p>
+                                                    <p className="text-lg font-semibold text-foreground">{formatCurrency(selectedDispute.order?.total_amount)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="pt-4 border-t border-border text-xs text-muted-foreground italic leading-relaxed bg-muted/30 rounded-lg p-3">
+                                                "{selectedDispute.reason || 'Nenhum detalhe adicional fornecido.'}"
+                                            </div>
+                                        </div>
+
+                                        {/* Partes */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {[
+                                                {
+                                                    label: 'Reclamante',
+                                                    user: selectedDispute.opened_by === 'client' ? selectedDispute.order?.client : selectedDispute.order?.provider,
+                                                    role: selectedDispute.opened_by === 'client' ? 'Cliente' : 'Profissional',
+                                                    accent: true
+                                                },
+                                                {
+                                                    label: 'Parte Notificada',
+                                                    user: selectedDispute.opened_by === 'client' ? selectedDispute.order?.provider : selectedDispute.order?.client,
+                                                    role: selectedDispute.opened_by === 'client' ? 'Profissional' : 'Cliente',
+                                                    accent: false
+                                                }
+                                            ].map(p => (
+                                                <div key={p.label} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-semibold text-sm shrink-0 ${p.accent ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
+                                                        {resolveUserName(p.user).charAt(0).toUpperCase()}
+                                                    </div>
                                                     <div className="min-w-0">
-                                                        <h4 className="text-[9px] font-black text-error uppercase tracking-[0.2em] mb-2">Motivo da Disputa</h4>
-                                                        <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-text-primary leading-tight break-words">{selectedDispute.reason || 'Inconformidade Geral'}</h3>
-                                                    </div>
-                                                    <div className="sm:text-right shrink-0 bg-bg-secondary/50 p-4 rounded-2xl border border-border-subtle/50 min-w-[140px]">
-                                                        <p className="text-[9px] font-black text-text-tertiary uppercase mb-1">Valor do Litígio</p>
-                                                        <p className="text-xl md:text-2xl font-black text-text-primary">R$ {(selectedDispute.order?.total_amount || 0).toFixed(2)}</p>
+                                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{p.label}</p>
+                                                        <p className="text-xs font-semibold text-foreground truncate">{resolveUserName(p.user)}</p>
+                                                        <p className="text-[10px] text-muted-foreground">{p.role}</p>
                                                     </div>
                                                 </div>
+                                            ))}
+                                        </div>
 
-                                                <div className="p-6 bg-bg-primary/50 border border-dashed border-border-subtle rounded-3xl italic text-sm text-text-secondary leading-relaxed relative">
-                                                    <span className="absolute -top-3 left-6 px-2 bg-bg-primary text-[8px] font-black text-text-tertiary uppercase">Depoimento do Reclamante</span>
-                                                    "{selectedDispute.reason || 'Nenhum detalhe adicional fornecido.'}"
-                                                </div>
-
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div className="p-5 bg-bg-secondary/30 rounded-3xl border border-border-subtle flex gap-4 items-center">
-                                                        <div className="w-12 h-12 rounded-2xl bg-accent-primary text-white flex items-center justify-center font-black text-lg shadow-glow-blue shrink-0">
-                                                            {resolveUserName(selectedDispute.opened_by === 'client' ? selectedDispute.order?.client : selectedDispute.order?.provider).charAt(0)}
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className="text-[9px] font-black text-text-tertiary uppercase mb-0.5">Reclamante</p>
-                                                            <p className="text-sm font-black text-text-primary uppercase tracking-tight truncate">{selectedDispute.opened_by === 'client' ? resolveUserName(selectedDispute.order?.client) : resolveUserName(selectedDispute.order?.provider)}</p>
-                                                            <p className="text-[9px] text-accent-primary font-black uppercase tracking-widest">{selectedDispute.opened_by === 'client' ? 'Cliente' : 'Profissional'}</p>
-                                                        </div>
+                                        {/* Ações */}
+                                        <div className="space-y-3">
+                                            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Sentença Operacional</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    onClick={() => setPendingAction('resolve_release')}
+                                                    disabled={selectedDispute.status === 'resolved'}
+                                                    className="p-4 text-left bg-green-500/5 border border-green-500/20 rounded-xl hover:bg-green-500/10 hover:border-green-500/50 transition-all group disabled:opacity-40 disabled:pointer-events-none">
+                                                    <div className="w-8 h-8 rounded-lg bg-green-500 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                        <CheckCircle2 size={16} />
                                                     </div>
-                                                    <div className="p-5 bg-bg-secondary/30 rounded-3xl border border-border-subtle flex gap-4 items-center">
-                                                        <div className="w-12 h-12 rounded-2xl bg-bg-tertiary text-text-primary flex items-center justify-center font-black text-lg border border-border-subtle/50 shrink-0">
-                                                            {resolveUserName(selectedDispute.opened_by === 'client' ? selectedDispute.order?.provider : selectedDispute.order?.client).charAt(0)}
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className="text-[9px] font-black text-text-tertiary uppercase mb-0.5">Parte Notificada</p>
-                                                            <p className="text-sm font-black text-text-primary uppercase tracking-tight truncate">{selectedDispute.opened_by === 'client' ? resolveUserName(selectedDispute.order?.provider) : resolveUserName(selectedDispute.order?.client)}</p>
-                                                            <p className="text-[9px] text-text-tertiary font-black uppercase tracking-widest">{selectedDispute.opened_by === 'client' ? 'Profissional' : 'Cliente'}</p>
-                                                        </div>
+                                                    <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">Liberar ao Profissional</p>
+                                                    <p className="text-[10px] text-muted-foreground leading-relaxed">Serviço executado. Valor liberado ao prestador.</p>
+                                                </button>
+                                                <button
+                                                    onClick={() => setPendingAction('resolve_refund')}
+                                                    disabled={selectedDispute.status === 'resolved'}
+                                                    className="p-4 text-left bg-destructive/5 border border-destructive/20 rounded-xl hover:bg-destructive/10 hover:border-destructive/50 transition-all group disabled:opacity-40 disabled:pointer-events-none">
+                                                    <div className="w-8 h-8 rounded-lg bg-destructive text-destructive-foreground flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                        <XCircle size={16} />
                                                     </div>
-                                                </div>
+                                                    <p className="text-xs font-semibold text-destructive mb-1">Estornar ao Cliente</p>
+                                                    <p className="text-[10px] text-muted-foreground leading-relaxed">Estorno integral. Profissional não recebe.</p>
+                                                </button>
                                             </div>
-
-                                            {/* Action Panel */}
-                                            <div className="space-y-6">
-                                                <h4 className="text-[10px] font-black text-text-primary uppercase tracking-[0.2em] flex items-center gap-2">
-                                                    <Scale size={14} className="text-accent-primary" /> Sentença Operacional
-                                                </h4>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                                    <button
-                                                        onClick={() => handleAction('resolve_release')}
-                                                        className="p-6 bg-success/5 border-2 border-dashed border-success/20 hover:border-success hover:bg-success/10 rounded-[28px] text-left transition-all group relative overflow-hidden"
-                                                    >
-                                                        <div className="w-10 h-10 rounded-2xl bg-success text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-success/20">
-                                                            <CheckCircle2 size={20} />
-                                                        </div>
-                                                        <p className="text-sm font-black text-success uppercase mb-1">Liberar p/ Profissional</p>
-                                                        <p className="text-[10px] text-text-tertiary leading-relaxed font-medium">O serviço será considerado executado e o valor será repassado imediatamente ao profissional.</p>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleAction('resolve_refund')}
-                                                        className="p-6 bg-error/5 border-2 border-dashed border-error/20 hover:border-error hover:bg-error/10 rounded-[28px] text-left transition-all group relative overflow-hidden"
-                                                    >
-                                                        <div className="w-10 h-10 rounded-2xl bg-error text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-error/20">
-                                                            <XCircle size={20} />
-                                                        </div>
-                                                        <p className="text-sm font-black text-error uppercase mb-1">Estornar p/ Cliente</p>
-                                                        <p className="text-[10px] text-text-tertiary leading-relaxed font-medium">Estorno integral do valor bloqueado. O profissional não receberá remuneração por este pedido.</p>
-                                                    </button>
-                                                </div>
-
-                                                {selectedDispute.status === 'open' && (
-                                                    <button
-                                                        onClick={() => handleAction('analyze')}
-                                                        className="w-full h-16 bg-black text-white rounded-[28px] text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-accent-primary transition-all flex items-center justify-center gap-4 group ring-opacity-50 hover:ring-8 hover:ring-accent-primary/20"
-                                                    >
-                                                        <Zap size={18} className="text-accent-primary group-hover:animate-pulse" />
-                                                        Elevar para Protocolo de Análise Crítica
-                                                    </button>
-                                                )}
-                                            </div>
+                                            {selectedDispute.status === 'open' && (
+                                                <button
+                                                    onClick={() => setPendingAction('analyze')}
+                                                    className="w-full h-12 bg-foreground text-background rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-3">
+                                                    <Zap size={14} className="text-primary" />
+                                                    Elevar para Protocolo de Análise Crítica
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 )}
 
+                                {/* ── Tab: Contrato ── */}
                                 {dossierTab === 'order' && (
-                                    <div className="space-y-8 animate-fade-in max-w-4xl mx-auto xl:mx-0">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="bg-bg-secondary/10 border border-border-subtle rounded-[32px] p-6 md:p-8 space-y-6 shadow-sm">
-                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest flex items-center gap-2">
-                                                    <FileText size={14} /> Dados do Pedido
-                                                </h4>
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between items-center py-4 border-b border-border-subtle/50">
-                                                        <span className="text-[10px] font-black text-text-tertiary uppercase">Serviço</span>
-                                                        <span className="text-xs font-black text-text-primary uppercase tracking-tight text-right truncate ml-4">{selectedDispute.order?.service?.title || 'N/A'}</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center py-4 border-b border-border-subtle/50">
-                                                        <span className="text-[10px] font-black text-text-tertiary uppercase">Agendamento</span>
-                                                        <span className="text-xs font-black text-text-primary uppercase tracking-tight">
-                                                            {selectedDispute.order?.scheduled_at ? new Date(selectedDispute.order.scheduled_at).toLocaleString('pt-BR') : 'Não definido'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center py-4">
-                                                        <span className="text-[10px] font-black text-text-tertiary uppercase">Modalidade</span>
-                                                        <span className="text-xs font-black text-accent-primary uppercase tracking-widest">{selectedDispute.order?.pricing_mode === 'hourly' ? 'Por Hora' : 'Valor Fixo'}</span>
-                                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+                                            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5"><FileText size={12} /> Dados do Pedido</p>
+                                            {[
+                                                { label: 'Serviço', value: selectedDispute.order?.service?.title || 'N/A' },
+                                                { label: 'Agendamento', value: selectedDispute.order?.scheduled_at ? new Date(selectedDispute.order.scheduled_at).toLocaleString('pt-BR') : 'Não definido' },
+                                                { label: 'Modalidade', value: selectedDispute.order?.pricing_mode === 'hourly' ? 'Por Hora' : 'Valor Fixo' },
+                                                { label: 'Endereço', value: selectedDispute.order?.location_text || 'Não declarado' },
+                                            ].map(row => (
+                                                <div key={row.label} className="flex justify-between items-center border-b border-border last:border-0 pb-3 last:pb-0">
+                                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{row.label}</span>
+                                                    <span className="text-xs font-medium text-foreground text-right ml-4 truncate max-w-[200px]">{row.value}</span>
                                                 </div>
-                                            </div>
-                                            <div className="bg-bg-secondary/10 border border-border-subtle rounded-[32px] p-6 md:p-8 space-y-6 shadow-sm">
-                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest flex items-center gap-2">
-                                                    <Search size={14} /> Endereço Declarado
-                                                </h4>
-                                                <div className="p-5 bg-bg-primary rounded-2xl border border-border-subtle min-h-[120px] flex items-center justify-center text-center">
-                                                    <p className="text-xs text-text-secondary leading-relaxed italic font-medium px-4">
-                                                        {selectedDispute.order?.location_text || 'O cliente não declarou um endereço específico no fluxo de contratação.'}
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
-                                        <div className="bg-accent-secondary/5 border border-accent-secondary/20 p-6 rounded-[32px] flex gap-5 items-center shadow-sm">
-                                            <div className="p-4 bg-accent-secondary text-white rounded-2xl shadow-xl shrink-0 ring-4 ring-accent-secondary/10">
-                                                <ShieldCheck size={28} />
+                                        <div className="bg-card border border-border rounded-xl p-4 flex gap-3 items-center">
+                                            <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                                <ShieldCheck size={16} />
                                             </div>
                                             <div>
-                                                <p className="text-[11px] font-black text-accent-secondary uppercase tracking-widest mb-1">Nota de Governança Digital</p>
-                                                <p className="text-xs text-text-secondary leading-relaxed font-medium">
-                                                    Este pedido foi registrado em Blockchain privado e utiliza o **Contrato de Execução Instantânea**. A liberação do pagamento depende da análise técnica deste tribunal.
+                                                <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-1">Nota de Governança</p>
+                                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                                    Este pedido usa Contrato de Execução Instantânea. A liberação depende da análise deste painel.
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 )}
 
+                                {/* ── Tab: Financeiro ── */}
                                 {dossierTab === 'financial' && (
-                                    <div className="space-y-8 animate-fade-in max-w-4xl mx-auto xl:mx-0">
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                            <div className="bg-bg-primary border border-border-subtle p-6 rounded-[32px] shadow-sm relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-accent-primary/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150"></div>
-                                                <div className="p-2.5 bg-bg-secondary rounded-xl w-fit mb-4 text-text-primary border border-border-subtle/50">
-                                                    <DollarSign size={18} />
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {[
+                                                { label: 'Custódia Total', value: formatCurrency(selectedDispute.order?.total_amount), icon: <DollarSign size={14} />, color: 'text-foreground' },
+                                                { label: 'Taxa APP (10%)', value: formatCurrency((selectedDispute.order?.total_amount || 0) * 0.1), icon: <Percent size={14} />, color: 'text-destructive' },
+                                                { label: 'Repasse Líquido', value: formatCurrency((selectedDispute.order?.total_amount || 0) * 0.9), icon: <Activity size={14} />, color: 'text-green-600 dark:text-green-400' },
+                                            ].map(s => (
+                                                <div key={s.label} className="bg-card border border-border rounded-xl p-4">
+                                                    <div className={`mb-2 ${s.color}`}>{s.icon}</div>
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">{s.label}</p>
+                                                    <p className={`text-sm font-semibold ${s.color}`}>{s.value}</p>
                                                 </div>
-                                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Custódia Total</p>
-                                                <h3 className="text-xl lg:text-2xl font-black text-text-primary tracking-tighter">R$ {(selectedDispute.order?.total_amount || 0).toFixed(2)}</h3>
-                                            </div>
-                                            <div className="bg-bg-primary border border-border-subtle p-6 rounded-[32px] shadow-sm relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-error/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150"></div>
-                                                <div className="p-2.5 bg-bg-secondary rounded-xl w-fit mb-4 text-error border border-border-subtle/50">
-                                                    <Percent size={18} />
-                                                </div>
-                                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Taxa APP (10%)</p>
-                                                <h3 className="text-xl lg:text-2xl font-black text-text-primary tracking-tighter">R$ {((selectedDispute.order?.total_amount || 0) * 0.1).toFixed(2)}</h3>
-                                            </div>
-                                            <div className="bg-bg-primary border border-border-subtle p-6 rounded-[32px] shadow-sm relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-success/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150"></div>
-                                                <div className="p-2.5 bg-bg-secondary rounded-xl w-fit mb-4 text-success border border-border-subtle/50">
-                                                    <Activity size={18} />
-                                                </div>
-                                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Repasse Líquido</p>
-                                                <h3 className="text-xl lg:text-2xl font-black text-text-primary tracking-tighter">R$ {((selectedDispute.order?.total_amount || 0) * 0.9).toFixed(2)}</h3>
-                                            </div>
+                                            ))}
                                         </div>
-
-                                        <div className="bg-bg-secondary/10 border border-border-subtle rounded-[32px] p-6 md:p-8 space-y-5 shadow-sm">
-                                            <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest flex items-center gap-2">
-                                                <Lock size={14} /> Status da Garantia Financeira
-                                            </h4>
-                                            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-bg-primary rounded-[24px] border border-border-subtle">
-                                                <div className="flex items-center gap-6">
-                                                    <div className="w-16 h-16 rounded-[24px] bg-warning/15 text-warning flex items-center justify-center shadow-lg shadow-warning/5">
-                                                        <Lock size={28} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-base font-black text-text-primary uppercase tracking-tight">ESCROW: HELD (RETIDO)</p>
-                                                        <p className="text-[11px] text-text-tertiary font-bold uppercase tracking-widest">Protocolo Antifraude Ativo</p>
-                                                    </div>
+                                        <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center">
+                                                    <Lock size={16} />
                                                 </div>
-                                                <div className="px-6 py-3 bg-warning/10 text-warning rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] animate-pulse border border-warning/20 shadow-glow-yellow">
-                                                    Aguardando Sentença
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {dossierTab === 'compliance' && (
-                                    <div className="space-y-8 animate-fade-in max-w-6xl mx-auto xl:mx-0">
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                            {/* Chat Monitor Simulation */}
-                                            <div className="bg-bg-secondary/20 p-6 md:p-8 rounded-[32px] border border-border-subtle flex flex-col h-[420px] shadow-sm">
-                                                <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-6 flex items-center gap-2">
-                                                    <MessageSquare size={14} /> Logs de Negociação (IA Monitor)
-                                                </h4>
-                                                <div className="flex-1 overflow-y-auto space-y-5 pr-4 custom-scrollbar">
-                                                    <div className="flex flex-col gap-1 max-w-[85%]">
-                                                        <p className="text-[9px] font-black uppercase text-accent-primary ml-4 mb-1">{resolveUserName(selectedDispute.order?.client)}</p>
-                                                        <div className="bg-bg-primary p-5 rounded-3xl rounded-tl-none border border-border-subtle shadow-sm">
-                                                            <p className="text-sm text-text-primary leading-relaxed font-medium">Já estou no local aguardando há 20 minutos, mas você não apareceu nem atendeu o telefone.</p>
-                                                            <p className="text-[8px] text-text-tertiary mt-2">10:15 • LIDO</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex flex-col items-end gap-1 max-w-[85%] ml-auto">
-                                                        <p className="text-[9px] font-black uppercase text-text-tertiary mr-4 mb-1 text-right">{resolveUserName(selectedDispute.order?.provider)}</p>
-                                                        <div className="bg-black p-5 rounded-3xl rounded-tr-none shadow-xl">
-                                                            <p className="text-sm text-white leading-relaxed font-medium">Estive aí no horário combinado mas a recepção disse que não havia agendamento em meu nome.</p>
-                                                            <p className="text-[8px] text-white/40 mt-2 text-right">10:22 • LIDO</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex flex-col gap-1 max-w-[85%]">
-                                                        <p className="text-[9px] font-black uppercase text-accent-primary ml-4 mb-1">{resolveUserName(selectedDispute.order?.client)}</p>
-                                                        <div className="bg-bg-primary p-5 rounded-3xl rounded-tl-none border border-border-subtle shadow-sm">
-                                                            <p className="text-sm text-text-primary leading-relaxed font-medium">Isso é mentira! Eu estava na frente do prédio. Tirei fotos e vou abrir uma disputa agora mesmo.</p>
-                                                            <p className="text-[8px] text-text-tertiary mt-2">10:25 • ENVIADO</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-8 p-6 bg-bg-tertiary/40 rounded-3xl border border-dashed border-border-subtle/50 text-center">
-                                                    <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest flex items-center justify-center gap-2 opacity-60">
-                                                        <Lock size={12} /> Criptografia de Ponta-a-Pontas
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* Evidências & Anexos */}
-                                            <div className="space-y-10">
                                                 <div>
-                                                    <h4 className="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-8">Arquivos & Evidências (Hash Verificado)</h4>
-                                                    <div className="grid grid-cols-2 gap-6">
-                                                        <div className="aspect-[4/3] bg-bg-secondary/40 border-2 border-dashed border-border-subtle rounded-[32px] flex flex-col items-center justify-center text-text-tertiary group hover:border-accent-primary hover:bg-accent-primary/5 transition-all cursor-pointer shadow-sm">
-                                                            <div className="p-4 bg-bg-primary rounded-2xl mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                                                                <FileText size={32} className="text-accent-primary" />
-                                                            </div>
-                                                            <span className="text-[10px] font-black uppercase tracking-widest">Selfie_Local.jpg</span>
-                                                            <span className="text-[8px] opacity-40 mt-1 uppercase">2.4 MB • GPS TAG</span>
-                                                        </div>
-                                                        <div className="aspect-[4/3] bg-bg-secondary/40 border-2 border-dashed border-border-subtle rounded-[32px] flex flex-col items-center justify-center text-text-tertiary group hover:border-error hover:bg-error/5 transition-all cursor-pointer shadow-sm">
-                                                            <div className="p-4 bg-bg-primary rounded-2xl mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                                                                <Package size={32} className="text-error" />
-                                                            </div>
-                                                            <span className="text-[10px] font-black uppercase tracking-widest">Relatorio_PDF.pdf</span>
-                                                            <span className="text-[8px] opacity-40 mt-1 uppercase">152 KB • DOCS</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="bg-warning/5 border border-warning/20 p-6 rounded-[32px] shadow-sm ring-1 ring-warning/5">
-                                                    <div className="flex gap-4 items-center mb-6">
-                                                        <div className="w-10 h-10 rounded-xl bg-warning text-white flex items-center justify-center shadow-lg shadow-warning/20">
-                                                            <ShieldAlert size={20} />
-                                                        </div>
-                                                        <p className="text-[11px] font-black text-warning uppercase tracking-widest">Diretriz de Compliance</p>
-                                                    </div>
-                                                    <p className="text-xs text-text-tertiary leading-relaxed font-medium">
-                                                        O moderador deve cruzar os horários dos logs de chat com as tags de GPS das evidências fotográficas para validar a presença das partes no local acordado.
-                                                    </p>
+                                                    <p className="text-xs font-semibold text-foreground">ESCROW: RETIDO</p>
+                                                    <p className="text-[10px] text-muted-foreground">Protocolo Antifraude Ativo</p>
                                                 </div>
                                             </div>
+                                            <span className="px-3 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-lg text-[10px] font-semibold uppercase tracking-widest border border-yellow-500/20 animate-pulse">
+                                                Aguardando Sentença
+                                            </span>
                                         </div>
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Facts Timeline Sidebar */}
-                            <div className="hidden xl:flex w-[320px] border-l border-border-subtle bg-bg-secondary/10 flex-col shrink-0">
-                                <div className="p-6 border-b border-border-subtle bg-bg-primary/50 shadow-sm relative">
-                                    <div className="absolute top-0 left-0 w-1 h-full bg-accent-primary opacity-20"></div>
-                                    <h3 className="text-xs font-black text-text-primary uppercase tracking-widest flex items-center gap-3">
-                                        <History size={18} className="text-accent-primary" />
-                                        Fatos Imutáveis
-                                    </h3>
-                                    <p className="text-[10px] text-text-tertiary font-bold mt-2 uppercase tracking-wide opacity-60">Audit logs do protocolo técnico</p>
-                                </div>
-                                <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar scroll-smooth">
-                                    {auditLogs.length > 0 ? auditLogs.map((log, i) => (
-                                        <div key={i} className="relative pl-8 border-l-2 border-border-subtle/50 pb-4 group">
-                                            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-lg bg-bg-secondary border-2 border-border-subtle group-hover:border-accent-primary group-hover:scale-125 transition-all shadow-sm"></div>
-                                            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                <Clock size={10} className="text-text-tertiary" />
-                                                {new Date(log.timestamp).toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit' })}
-                                            </p>
-                                            <p className="text-xs font-black text-text-primary uppercase tracking-tight leading-tight mb-2 group-hover:text-accent-primary transition-colors">{log.action?.split('_').join(' ')}</p>
-                                            <div className="p-3 bg-bg-primary/40 rounded-xl border border-border-subtle/30 text-[10px] text-text-tertiary italic leading-relaxed font-medium group-hover:bg-bg-primary transition-colors">
-                                                {log.details}
+                                {/* ── Tab: Auditoria ── */}
+                                {dossierTab === 'logs' && (
+                                    <div className="space-y-3">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                                            <History size={12} /> Fatos Imutáveis — Audit Log
+                                        </p>
+                                        {auditLogs.length > 0 ? auditLogs.map((log, i) => (
+                                            <div key={i} className="relative pl-5 border-l-2 border-border pb-4 group">
+                                                <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-muted border-2 border-border group-hover:border-primary transition-all" />
+                                                <p className="text-[10px] text-muted-foreground font-mono mb-1 flex items-center gap-1.5">
+                                                    <Clock size={10} />
+                                                    {new Date(log.timestamp).toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                                                </p>
+                                                <p className="text-xs font-semibold text-foreground mb-1">{log.action?.split('_').join(' ')}</p>
+                                                <div className="p-2.5 bg-muted/50 rounded-lg text-[10px] text-muted-foreground leading-relaxed">{log.details}</div>
                                             </div>
-                                        </div>
-                                    )) : (
-                                        <div className="py-32 text-center opacity-40">
-                                            <div className="w-16 h-16 rounded-full bg-bg-secondary mx-auto flex items-center justify-center mb-6">
-                                                <Activity size={32} className="text-text-tertiary animate-pulse" />
+                                        )) : (
+                                            <div className="h-32 flex flex-col items-center justify-center text-muted-foreground opacity-40">
+                                                <Activity size={32} className="mb-2 animate-pulse" />
+                                                <p className="text-[10px] font-semibold uppercase tracking-widest">Sincronizando Logs...</p>
                                             </div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Sincronizando Fatos...</p>
-                                        </div>
-                                    )}
-                                </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        </>
+                    )}
+                </SheetContent>
+            </Sheet>
 
-            {/* Page Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* ── Page Header ── */}
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="heading-xl text-text-primary">Gestão de Disputas</h1>
-                    <p className="text-sm text-text-tertiary font-medium">Análise de litígios e mediação de pagamentos em escrow</p>
+                    <h1 className="text-xl font-semibold text-foreground">Gestão de Disputas</h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">Análise de litígios e mediação de pagamentos em escrow</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <div className="px-5 py-2.5 bg-error/10 border border-error/20 rounded-2xl flex items-center gap-2.5 shadow-sm">
-                        <AlertTriangle size={18} className="text-error" />
-                        <span className="text-[10px] font-black text-error uppercase tracking-widest">{disputes.filter(d => d.status === 'open').length} Críticos</span>
+                <button onClick={fetchDisputes}
+                    className="p-2 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:rotate-180 transition-all duration-500">
+                    <RefreshCw size={16} />
+                </button>
+            </div>
+
+            {/* ── Loading — Skeleton ── */}
+            {loading ? (
+                <div className="space-y-5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+                    </div>
+                    <div className="bg-card border border-border rounded-xl overflow-hidden">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-border last:border-0">
+                                <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+                                <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-3 w-32" />
+                                    <Skeleton className="h-2.5 w-48" />
+                                </div>
+                                <Skeleton className="h-5 w-16 rounded-full" />
+                                <Skeleton className="h-3 w-20" />
+                            </div>
+                        ))}
                     </div>
                 </div>
-            </div>
+            ) : (
+                <>
+                    {/* ── KPI Strip ── */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <KpiCard label="Total de Disputas" value={disputes.length} icon={<Gavel size={16} />} />
+                        <KpiCard label="Abertas" value={disputes.filter(d => d.status === 'open').length}
+                            icon={<AlertTriangle size={16} />} color="text-destructive" bg="bg-destructive/10" />
+                        <KpiCard label="Em Análise" value={disputes.filter(d => d.status === 'in_review').length}
+                            icon={<Clock size={16} />} color="text-yellow-600 dark:text-yellow-400" bg="bg-yellow-500/10" />
+                        <KpiCard label="Resolvidas" value={disputes.filter(d => d.status === 'resolved').length}
+                            icon={<ShieldCheck size={16} />} color="text-green-600 dark:text-green-400" bg="bg-green-500/10" />
+                    </div>
 
-            {/* Toolbar */}
-            <div className="bg-bg-primary border border-border-subtle p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
-                <div className="relative w-full md:w-96">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" size={16} />
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Buscar ID, motivo ou usuários..."
-                        className="w-full bg-bg-secondary/50 border border-border-subtle rounded-2xl pl-12 pr-4 py-3 text-xs outline-none focus:border-accent-primary transition-all font-medium"
-                    />
-                </div>
-                <div className="flex items-center gap-3">
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="bg-bg-secondary border border-border-subtle rounded-2xl px-6 py-3 text-xs outline-none font-black uppercase tracking-widest text-text-primary"
-                    >
-                        <option value="all">Status Gerais</option>
-                        <option value="open">Abertos</option>
-                        <option value="in_review">Em Análise</option>
-                        <option value="resolved">Resolvidos</option>
-                    </select>
-                </div>
-            </div>
+                    {/* ── Toolbar ── */}
+                    <div className="bg-card border border-border rounded-xl p-3 flex flex-col md:flex-row gap-3">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                            <input
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                placeholder="Buscar ID, motivo ou usuários..."
+                                className="w-full h-9 rounded-lg pl-9 pr-4 text-sm outline-none bg-background border border-border text-foreground focus:border-primary transition-all"
+                            />
+                        </div>
+                        <select
+                            value={filterStatus}
+                            onChange={e => setFilterStatus(e.target.value)}
+                            className="h-9 px-3 rounded-lg text-[11px] font-semibold outline-none bg-muted border border-border text-muted-foreground cursor-pointer">
+                            <option value="all">Todos os Status</option>
+                            <option value="open">Abertas</option>
+                            <option value="in_review">Em Análise</option>
+                            <option value="resolved">Resolvidas</option>
+                        </select>
+                    </div>
 
-            {/* Disputes List (Table View for ERP Efficiency) */}
-            <div className="bg-bg-primary border border-border-subtle rounded-[40px] overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-bg-secondary/50 border-b border-border-subtle">
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary">ID Casos</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Motivo / Reclamante</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Valor Bloqueado</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary">Status</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-text-tertiary text-right">Análise</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border-subtle">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={5} className="px-8 py-20 text-center text-text-tertiary">
-                                        <Clock className="animate-spin mx-auto mb-4" size={32} />
-                                        <p className="text-[10px] font-black uppercase tracking-widest">Sincronizando Casos...</p>
-                                    </td>
+                    {/* ── Table ── */}
+                    <div className="bg-card border border-border rounded-xl overflow-hidden">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-border bg-muted/50">
+                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Caso / Data</th>
+                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Motivo / Reclamante</th>
+                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Valor Bloqueado</th>
+                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Status</th>
+                                    <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Analisar</th>
                                 </tr>
-                            ) : filteredDisputes.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-8 py-20 text-center text-text-tertiary opacity-40">
-                                        <ShieldCheck size={48} className="mx-auto mb-4" />
-                                        <p className="text-sm font-bold">Nenhum litígio pendente.</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredDisputes.map((dispute) => (
-                                    <tr
-                                        key={dispute.id}
-                                        className="hover:bg-bg-secondary/20 transition-all group cursor-pointer"
-                                        onClick={() => handleSelectDispute(dispute)}
-                                    >
-                                        <td className="px-8 py-6">
-                                            <p className="text-[10px] font-black text-text-primary uppercase tracking-tight">#{dispute.id.slice(0, 8)}</p>
-                                            <p className="text-[10px] text-text-tertiary font-medium">{new Date(dispute.created_at).toLocaleDateString('pt-BR')}</p>
+                            </thead>
+                            <tbody>
+                                {filteredDisputes.length === 0 ? (
+                                    <tr><td colSpan={5} className="py-16 text-center opacity-30">
+                                        <ShieldCheck size={36} className="mx-auto mb-3" />
+                                        <p className="text-[10px] font-semibold uppercase tracking-widest">Nenhum litígio pendente</p>
+                                    </td></tr>
+                                ) : filteredDisputes.map(dispute => (
+                                    <tr key={dispute.id}
+                                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-all cursor-pointer"
+                                        onClick={() => handleSelectDispute(dispute)}>
+                                        <td className="px-5 py-3.5">
+                                            <p className="text-xs font-semibold text-foreground font-mono">#{dispute.id.slice(0, 8)}</p>
+                                            <p className="text-[10px] text-muted-foreground mt-0.5">{formatDate(dispute.created_at)}</p>
                                         </td>
-                                        <td className="px-8 py-6">
-                                            <div>
-                                                <p className="text-xs font-black text-text-primary uppercase tracking-tight mb-1">{dispute.reason || 'Conflito de Execução'}</p>
-                                                <p className="text-[10px] font-bold text-accent-primary uppercase tracking-widest">Por: {dispute.opened_by === 'client' ? resolveUserName(dispute.order?.client) : resolveUserName(dispute.order?.provider)}</p>
-                                            </div>
+                                        <td className="px-5 py-3.5">
+                                            <p className="text-xs font-semibold text-foreground leading-tight">{dispute.reason || 'Conflito de Execução'}</p>
+                                            <p className="text-[10px] text-primary mt-0.5">
+                                                Por: {dispute.opened_by === 'client' ? resolveUserName(dispute.order?.client) : resolveUserName(dispute.order?.provider)}
+                                            </p>
                                         </td>
-                                        <td className="px-8 py-6">
-                                            <p className="text-sm font-black text-text-primary">R$ {dispute.order?.total_amount?.toFixed(2)}</p>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(dispute.status)}`}>
-                                                {dispute.status === 'open' ? 'Aberto' : dispute.status === 'in_review' ? 'Em Análise' : dispute.status === 'resolved' ? 'Resolvido' : dispute.status}
+                                        <td className="px-5 py-3.5">
+                                            <span className="text-xs font-semibold text-foreground tabular-nums">
+                                                {formatCurrency(dispute.order?.total_amount)}
                                             </span>
                                         </td>
-                                        <td className="px-8 py-6 text-right">
-                                            <button className="p-2.5 bg-bg-secondary hover:bg-error hover:text-white rounded-xl transition-all shadow-sm">
-                                                <ChevronRight size={16} />
+                                        <td className="px-5 py-3.5">
+                                            <StatusBadge status={dispute.status} />
+                                        </td>
+                                        <td className="px-5 py-3.5 text-right">
+                                            <button className="p-1.5 rounded-lg border border-border hover:bg-foreground hover:text-background hover:border-transparent transition-all">
+                                                <Eye size={13} />
                                             </button>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
         </div>
     );
 };
