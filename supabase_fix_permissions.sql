@@ -1,27 +1,20 @@
--- Execute este script no SQL Editor do Supabase para corrigir a visualização de nomes
+-- MASTER FIX: EXECUTE ESTE SCRIPT NO SQL EDITOR DO SUPABASE
+-- Este script garante que o Admin (usuários logados) possa ver TUDO no marketplace.
 
--- 1. Habilitar que usuários autenticados vejam os dados básicos de outros usuários (necessário para o chat/dashboard)
-create policy "Public profiles are visible to everyone"
-on public.users
-for select
-to authenticated
-using ( true );
+-- 1. Limpeza Radical de políticas existentes
+DROP POLICY IF EXISTS "Public profiles are visible to everyone" ON public.users;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
+DROP POLICY IF EXISTS "Authenticated users can view all orders" ON public.orders;
+DROP POLICY IF EXISTS "Authenticated users can view all services" ON public.services;
+DROP POLICY IF EXISTS "Authenticated users can view all disputes" ON public.disputes;
 
--- 2. Garantir que usuários possam atualizar seus próprios dados
-create policy "Users can update own profile"
-on public.users
-for update
-to authenticated
-using ( auth.uid() = id );
+-- 2. Permissão de Leitura TOTAL (Sem restrições para quem está logado)
+CREATE POLICY "Public profiles are visible to everyone" ON public.users FOR SELECT TO authenticated USING ( true );
+CREATE POLICY "Authenticated users can view all orders" ON public.orders FOR SELECT TO authenticated USING ( true );
+CREATE POLICY "Authenticated users can view all services" ON public.services FOR SELECT TO authenticated USING ( true );
+CREATE POLICY "Authenticated users can view all disputes" ON public.disputes FOR SELECT TO authenticated USING ( true );
 
--- 3. Permitir inserção de perfil (caso não exista script automático)
-create policy "Users can insert own profile"
-on public.users
-for insert
-to authenticated
-with check ( auth.uid() = id );
-
--- 4. (Opcional) Se as policies acima falharem porque já existem, tente remover as antigas antes:
--- drop policy if exists "Public profiles are visible to everyone" on public.users;
--- drop policy if exists "Users can update own profile" on public.users;
--- drop policy if exists "Users can insert own profile" on public.users;
+-- 3. Permissão de Escrita Básica (Perfil Próprio)
+CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE TO authenticated USING ( auth.uid() = id );
+CREATE POLICY "Users can insert own profile" ON public.users FOR INSERT TO authenticated WITH CHECK ( auth.uid() = id );

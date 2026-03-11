@@ -187,7 +187,14 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                 disabled={loading}
                                 className="w-full h-12 bg-primary hover:bg-primary/90 text-white rounded-xl flex items-center justify-between px-6 px-8 group shadow-lg shadow-primary/10 border-none"
                             >
-                                <span className="text-xs font-bold uppercase tracking-widest">{loading ? 'Autenticando...' : 'Acessar ERP'}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest">
+                                    {loading ? (
+                                        <span className="relative inline-block">
+                                            Autenticando
+                                            <span className="absolute left-full ml-1 top-0">...</span>
+                                        </span>
+                                    ) : 'Acessar ERP'}
+                                </span>
                                 <ArrowRight size={16} className={`${loading ? 'opacity-0' : 'opacity-100'} transition-transform group-hover:translate-x-1`} />
                             </Button>
 

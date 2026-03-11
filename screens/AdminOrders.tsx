@@ -288,7 +288,12 @@ const AdminOrders: React.FC = () => {
                         {loading ? (
                             <tr><td colSpan={7} className="py-16 text-center">
                                 <RefreshCw className="animate-spin mx-auto mb-3 text-primary" size={22} />
-                                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Sincronizando...</p>
+                                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                                    <span className="relative inline-block">
+                                        Sincronizando
+                                        <span className="absolute left-full ml-1 top-0">...</span>
+                                    </span>
+                                </p>
                             </td></tr>
                         ) : filteredOrders.length === 0 ? (
                             <tr><td colSpan={7} className="py-16 text-center opacity-30">

@@ -177,14 +177,12 @@ const Register: React.FC<RegisterProps> = ({ onBack, onRegisterSuccess }) => {
             <button onClick={() => setStep('role')} className="btn-icon mb-12 relative z-10">
                 <ArrowLeft size={20} className="text-text-secondary" />
             </button>
-
-            <div className="mb-10 relative z-10">
+            <div className="mb-10 relative z-10 flex flex-col items-center text-center">
                 <h1 className="heading-3xl mb-2">Criar Conta</h1>
                 <p className="body max-w-[260px]">
                     Registrar como <span className="text-accent-primary font-bold">{selectedRole === 'CLIENT' ? 'Cliente' : 'Profissional'}</span>
                 </p>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
                 {errors.general && (
                     <div className="p-4 bg-error/10 border border-error/20 rounded-xl flex items-center gap-3 animate-fade-in">

@@ -64,14 +64,13 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onRegister, onForgotPassword }
             <div className="absolute bottom-[-10%] right-[-20%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]"></div>
 
             <div className="max-w-md mx-auto w-full flex-1 flex flex-col">
-                <div className="mb-14 relative z-10">
+                <div className="mb-14 relative z-10 flex flex-col items-center text-center">
                     <div className="w-16 h-16 rounded-[22px] bg-bg-secondary border border-border-medium flex items-center justify-center mb-8 shadow-glow-accent">
                         <ShieldCheck size={32} className="text-accent-primary" />
                     </div>
                     <h1 className="text-4xl font-black text-text-primary uppercase tracking-tighter mb-3">Bem-vindo</h1>
                     <p className="body text-text-tertiary">Acesse sua conta para gerenciar seus pedidos e serviços.</p>
                 </div>
-
                 <form onSubmit={handleLogin} className="space-y-6 relative z-10">
                     {/* Profile Selector */}
                     <div className="bg-bg-secondary p-1 rounded-2xl border border-border-subtle flex relative">

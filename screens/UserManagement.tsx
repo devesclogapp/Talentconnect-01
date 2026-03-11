@@ -161,7 +161,12 @@ const UserManagement: React.FC = () => {
                             onClick={performAction}
                             className={actionModal?.type === 'BLOCK' || actionModal?.type === 'KYC_REJECT' ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' : ''}
                         >
-                            {isProcessing ? 'Processando...' : 'Confirmar & Logar'}
+                            {isProcessing ? (
+                                <span className="relative inline-block">
+                                    Processando
+                                    <span className="absolute left-full ml-1 top-0">...</span>
+                                </span>
+                            ) : 'Confirmar & Logar'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

@@ -6,6 +6,8 @@ export const resolveUserName = (userData: any): string => {
 
     if (!data) return 'Cliente (Pendente)';
 
+    if (data.displayName) return data.displayName;
+
     const cleanName = (data.name || '').trim();
     const lowerName = cleanName.toLowerCase();
     const isGeneric = ['usuário', 'usuario', 'cliente', 'profissional', 'prestador', 'user'].includes(lowerName);
@@ -19,15 +21,13 @@ export const resolveUserName = (userData: any): string => {
         return data.email.split('@')[0];
     }
 
-    // Se chegou aqui, temos um nome genérico e SEM email.
-    // Isso indica fortemente que o select não retornou o email (RLS) ou o registro está incompleto.
-    if (isGeneric) {
-        // Tenta mostrar ID curto como fallback desesperado para diferenciar usuários
-        if (data.id) return `Cliente #${data.id.substr(0, 4)}`;
-        return 'Cliente (Dados Ocultos)';
+    // Se chegou aqui, não temos nome nem email. 
+    // Vamos mostrar o ID para diagnosticar se o registro existe mas está oculto por RLS.
+    if (data.id) {
+        return `ID: ${data.id.substr(0, 4)}...`;
     }
 
-    return cleanName || 'Cliente';
+    return cleanName || 'Usuário Oculto';
 };
 
 export const resolveUserAvatar = (userData: any): string => {

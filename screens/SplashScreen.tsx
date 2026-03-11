@@ -25,9 +25,10 @@ const SplashScreen: React.FC = () => {
             <div className={`transform transition-all duration-1000 ease-out flex flex-col items-center ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
                 {/* Visual Logo Placeholder */}
                 <div className="relative mb-6">
-                    <div className="absolute -inset-4 bg-brand-primary/10 rounded-full blur-2xl animate-pulse"></div>
+                    {/* Brilho de fundo usando a cor real da marca */}
+                    <div className="absolute -inset-4 bg-brand-primary/20 rounded-full blur-2xl animate-pulse"></div>
                     <div className="w-24 h-24 bg-brand-primary rounded-[28px] flex items-center justify-center shadow-2xl relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent"></div>
                         <Sparkles className="text-white w-12 h-12" />
                     </div>
                 </div>
@@ -36,9 +37,13 @@ const SplashScreen: React.FC = () => {
                     <h1 className="heading-xl tracking-tight mb-2">
                         Talent <span className="text-brand-primary dark:text-white">Connect</span>
                     </h1>
-                    <p className="meta-bold text-app-muted tracking-[0.2em] animate-pulse">
-                        Carregando...
-                    </p>
+                    {/* Centralização ignorando as reticências */}
+                    <div className="flex justify-center">
+                        <p className="meta-bold text-app-muted tracking-[0.2em] animate-pulse relative inline-block">
+                            Carregando
+                            <span className="absolute left-full ml-1 top-0">...</span>
+                        </p>
+                    </div>
                 </div>
             </div>
 

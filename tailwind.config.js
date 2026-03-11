@@ -54,6 +54,8 @@ export default {
                 'bg-primary': 'var(--bg-primary)',
                 'bg-secondary': 'var(--bg-secondary)',
                 'bg-tertiary': 'var(--bg-tertiary)',
+                'brand-primary': '#FF6B00',
+                'brand-secondary': '#FFFFFF',
                 'accent-primary': 'var(--accent-primary)',
                 'accent-secondary': 'var(--accent-secondary)',
                 'text-primary': 'var(--text-primary)',
