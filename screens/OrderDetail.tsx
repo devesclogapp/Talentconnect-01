@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle2, CreditCard, Mes
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { formatNumber } from '../utils/format';
 import { subscribeToOrderUpdates, getOrderById } from '../services/ordersService';
 import { WhatsAppIcon } from '../components/ui/WhatsAppIcon';
 
@@ -434,7 +435,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                             <div className="flex items-baseline justify-end gap-1.5">
                                 <span className="text-[14px] font-bold text-text-secondary opacity-40">R$</span>
                                 <span className="text-2xl font-bold text-black dark:text-white leading-none">
-                                    {order.total_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                    {formatNumber(order.total_amount)}
                                 </span>
                             </div>
                         </div>

@@ -6,6 +6,7 @@ import { Input } from '../components/ui/Input';
 import { supabase } from '../services/supabaseClient';
 import { useAppStore } from '../store';
 import { processPayment } from '../services/ordersService';
+import { formatNumber } from '../utils/format';
 
 const Payment: React.FC = () => {
     const navigate = useNavigate();
@@ -149,7 +150,7 @@ const Payment: React.FC = () => {
                 {/* Total */}
                 <div className="text-center py-4">
                     <p className="text-black font-normal text-sm mb-1">Total a reter</p>
-                    <h2 className="text-5xl font-bold text-black dark:text-white">R$ {selectedOrder.total_amount?.toFixed(2)}</h2>
+                    <h2 className="text-5xl font-bold text-black dark:text-white">R$ {formatNumber(selectedOrder.total_amount)}</h2>
                 </div>
 
                 {/* Methods */}
@@ -244,7 +245,7 @@ const Payment: React.FC = () => {
                         className="w-full py-6 bg-primary-black text-white rounded-[24px] shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all font-normal"
                     >
                         {isProcessing ? <Loader2 size={20} className="animate-spin" /> : <Lock size={20} />}
-                        {isProcessing ? 'Processando...' : `Confirmar R$ ${selectedOrder.total_amount?.toFixed(2)}`}
+                        {isProcessing ? 'Processando...' : `Confirmar R$ ${formatNumber(selectedOrder.total_amount)}`}
                     </button>
                     <p className="text-[9px] text-center text-neutral-400">
                         Ambiente de testes: Nenhum valor real será cobrado.

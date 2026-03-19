@@ -27,9 +27,9 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
   const [formData, setFormData] = useState({
     title: '',
     category: 'Limpeza',
-    basePrice: '50',
+    basePrice: 200,
     description: '',
-    durationHours: '1',
+    durationHours: 1,
     pricingMode: 'fixed' as 'fixed' | 'hourly'
   });
 
@@ -52,9 +52,9 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
         setFormData({
           title: service.title || '',
           category: service.category || 'Limpeza',
-          basePrice: String(service.base_price || 50),
+          basePrice: service.base_price || 200,
           description: service.description || '',
-          durationHours: String(service.duration_hours || 0),
+          durationHours: service.duration_hours || 0,
           pricingMode: service.pricing_mode || 'fixed'
         });
       } catch (error) {
@@ -80,10 +80,10 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
       const servicePayload = {
         title: formData.title,
         category: formData.category,
-        base_price: parseFloat(formData.basePrice),
+        base_price: Number(formData.basePrice),
         description: formData.description,
         pricing_mode: formData.pricingMode,
-        duration_hours: parseFloat(formData.durationHours) || 0,
+        duration_hours: Number(formData.durationHours) || 0,
         image_url: getCategoryImage(formData.category),
         active: true
       };
@@ -314,6 +314,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
                     type="number"
                     value={formData.basePrice}
                     onChange={(e) => updateField('basePrice', e.target.value)}
+                    onFocus={(e) => e.target.select()}
                     className="bg-transparent border-none text-6xl font-black p-0 focus:ring-0 text-text-primary w-40 text-center tracking-tighter"
                     placeholder="00"
                   />

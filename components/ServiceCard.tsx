@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, Star, MapPin } from 'lucide-react';
 import { getCategoryImage } from '../constants';
+import { formatNumber } from '../utils/format';
 
 interface ServiceCardProps {
     service: any;
@@ -48,7 +49,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick, resolveUser
                 <div className="flex flex-col mb-2">
                     <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-normal text-black">
-                            R$ {service.base_price?.toLocaleString('pt-BR')}
+                            R$ {formatNumber(service.base_price)}
                         </span>
                         {service.pricing_mode === 'hourly' && (
                             <span className="text-[10px] text-neutral-600 font-normal">/hora</span>
@@ -56,7 +57,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick, resolveUser
                     </div>
                     {/* Fake installments to mirror the style */}
                     <p className="text-[12px] text-neutral-500 font-normal">
-                        Até 12x de R$ {(service.base_price / 12).toFixed(2).replace('.', ',')}
+                        Até 12x de R$ {formatNumber(service.base_price / 12)}
                     </p>
                 </div>
 

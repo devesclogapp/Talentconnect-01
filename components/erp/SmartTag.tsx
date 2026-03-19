@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, Briefcase, Package, Coins, Calendar, AlertTriangle, ExternalLink, Info, Sparkles } from 'lucide-react';
 import TrustScore from './TrustScore';
+import { formatNumber } from '../../utils/format';
 
 interface SmartTagProps {
     type: 'CLIENTE' | 'PROFISSIONAL' | 'SERVICO' | 'PEDIDO' | 'NEGOCIACAO' | 'VALOR' | 'DATA' | 'RISCO';
@@ -126,7 +127,7 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
                                         <p className="text-[8px] uppercase font-bold text-muted-foreground">Preço Médio</p>
-                                        <p className="text-[10px] font-bold">R$ {data?.avgPrice?.toFixed(2) || '0.00'}</p>
+                                        <p className="text-[10px] font-bold">R$ {formatNumber(data?.avgPrice)}</p>
                                     </div>
                                     <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
                                         <p className="text-[8px] uppercase font-bold text-muted-foreground">Taxa Disputa</p>
@@ -139,15 +140,15 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                                 <div className="bg-muted/30 p-3 rounded-xl border border-border/50 space-y-2">
                                     <div className="flex justify-between items-center text-[10px] font-medium text-muted-foreground">
                                         <span>Valor Bruto (Escrow)</span>
-                                        <span className="font-bold text-foreground">R$ {(data?.totalAmount || 0).toFixed(2)}</span>
+                                        <span className="font-bold text-foreground">R$ {formatNumber(data?.totalAmount || 0)}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-[10px] font-medium text-red-500/80">
-                                        <span>Taxa Plattform (15%)</span>
-                                        <span className="font-bold">- R$ {((data?.totalAmount || 0) * 0.15).toFixed(2)}</span>
+                                        <span>Taxa Plattform (10%)</span>
+                                        <span className="font-bold">- R$ {formatNumber((data?.totalAmount || 0) * 0.1)}</span>
                                     </div>
                                     <div className="pt-2 border-t border-border flex justify-between items-center">
                                         <span className="text-[9px] font-black uppercase tracking-widest text-foreground">Repasse Profissional</span>
-                                        <span className="text-sm font-black text-green-500">R$ {((data?.totalAmount || 0) * 0.85).toFixed(2)}</span>
+                                        <span className="text-sm font-black text-green-500">R$ {formatNumber((data?.totalAmount || 0) * 0.9)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -165,7 +166,7 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                                 </div>
                                 <div className="pt-2 border-t border-border flex justify-between items-center">
                                     <span className="text-[9px] font-bold text-muted-foreground uppercase">Valor Total</span>
-                                    <span className="text-xs font-black text-foreground">R$ {data?.total_amount?.toFixed(2) || '0.00'}</span>
+                                    <span className="text-xs font-black text-foreground">R$ {formatNumber(data?.total_amount)}</span>
                                 </div>
                             </div>
                         ) : (

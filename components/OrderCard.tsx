@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, CheckCircle, XCircle, AlertCircle, MapPin, Calendar, ChevronRight } from 'lucide-react';
 import { Badge } from './ui/Badge';
+import { formatNumber } from '../utils/format';
 
 interface OrderCardProps {
     order: any;
@@ -165,7 +166,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-[14px] font-bold text-text-secondary opacity-40">R$</span>
                         <span className="text-2xl font-bold text-text-primary dark:text-white tracking-tight leading-none">
-                            {order.total_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            {formatNumber(order.total_amount)}
                         </span>
                     </div>
                 </div>

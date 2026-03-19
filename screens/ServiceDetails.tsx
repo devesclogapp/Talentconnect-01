@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Star, MessageSquare } from 'lucide-react';
 import { CATEGORY_MAP, getCategoryImage } from '../constants';
+import { formatNumber } from '../utils/format';
 
 interface Props {
   service: any;
@@ -51,7 +52,7 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
           <div className="text-right drop-shadow-sm">
             <div className="flex items-baseline gap-1">
               <span className="text-[16px] font-black text-accent-primary">R$</span>
-              <span className="text-4xl font-black text-black leading-none">{service.base_price?.toLocaleString('pt-BR')}</span>
+              <span className="text-4xl font-black text-black leading-none">{formatNumber(service.base_price)}</span>
             </div>
             <p className="text-[9px] text-black/40 uppercase tracking-widest font-black mt-1">
               {service.pricing_mode === 'hourly' ? 'por hora base' : 'valor fechado'}

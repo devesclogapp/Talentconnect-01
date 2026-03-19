@@ -7,6 +7,7 @@ import { Calendar } from '../components/ui/Calendar';
 import { TimePicker } from '../components/ui/TimePicker';
 import { Select } from '../components/ui/Select';
 import { BRAZILIAN_STATES, CITIES_BY_STATE } from '../constants';
+import { formatNumber } from '../utils/format';
 
 interface CreateOrderProps {
     service: any;
@@ -127,7 +128,7 @@ const CreateOrder: React.FC<CreateOrderProps> = ({ service, provider, onBack, on
                     </div>
                     <div className="text-right">
                         <p className="text-black font-normal !text-[9px]">Valor base</p>
-                        <p className="heading-md text-black-green-dark">R$ {basePrice}</p>
+                        <p className="heading-md text-black-green-dark">R$ {formatNumber(basePrice)}</p>
                     </div>
                 </div>
             </header>
@@ -264,7 +265,7 @@ const CreateOrder: React.FC<CreateOrderProps> = ({ service, provider, onBack, on
                     <div className="flex flex-col gap-0.5">
                         <div className="flex items-baseline gap-1.5 mb-2">
                             <span className="text-xl font-bold text-accent-secondary">R$</span>
-                            <p className="text-5xl font-black text-white tracking-tighter">{totalEstimated.toFixed(2)}</p>
+                            <p className="text-5xl font-black text-white tracking-tighter">{formatNumber(totalEstimated)}</p>
                         </div>
                         <p className="text-[10px] text-white/40 font-normal">
                             {pricingMode === 'hourly' ? `${formData.estimatedHours}h x R$ ${basePrice}/h` : 'Preço fixo acordado'}

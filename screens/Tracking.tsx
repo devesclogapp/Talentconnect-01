@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { getClientOrders, confirmExecutionFinish, confirmExecutionStart } from '../services/ordersService';
+import { formatNumber } from '../utils/format';
 
 interface Props {
   onBack: () => void;
@@ -248,7 +249,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                   <div className="flex items-baseline gap-1">
                     <span className="text-xs font-bold text-white opacity-40">R$</span>
                     <span className="text-2xl font-bold text-white tracking-tighter">
-                      {activeOrder.total_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      {formatNumber(activeOrder.total_amount)}
                     </span>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import { CheckCircle, Calendar, Clock, MapPin, User, FileText, CreditCard, Loade
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { createOrder } from '../services/ordersService';
+import { formatNumber } from '../utils/format';
 
 interface OrderConfirmationProps {
     orderData: any;
@@ -169,7 +170,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                         </div>
                         <div className="flex items-baseline gap-1.5 mb-2">
                             <span className="text-xl font-bold text-accent-secondary">R$</span>
-                            <p className="text-5xl font-black text-white tracking-tighter">{orderData?.totalEstimated?.toFixed(2)}</p>
+                            <p className="text-5xl font-black text-white tracking-tighter">{formatNumber(orderData?.totalEstimated)}</p>
                         </div>
                         <p className="meta text-white/40">O pagamento só será liberado após a sua confirmação de conclusão do serviço.</p>
                     </Card>

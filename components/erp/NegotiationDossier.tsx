@@ -9,6 +9,7 @@ import TrustScore from './TrustScore';
 import DecisionIntelligence from './DecisionIntelligence';
 import StatusBadge from './StatusBadge';
 import { resolveUserName } from '../../utils/userUtils';
+import { formatNumber } from '../../utils/format';
 
 interface NegotiationDossierProps {
     data: any; // The full negotiation (order + dispute + payments + executions)
@@ -95,7 +96,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Valor do Contrato</p>
-                                    <p className="text-lg font-black text-foreground">R$ {order.total_amount?.toFixed(2)}</p>
+                                    <p className="text-lg font-black text-foreground">R$ {formatNumber(order.total_amount)}</p>
                                 </div>
                             </div>
                         </section>
@@ -226,7 +227,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                         <div className="grid grid-cols-2 gap-3">
                             <div className="bg-card border border-border rounded-2xl p-5">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Custódia (Escrow)</p>
-                                <p className="text-2xl font-black text-foreground tabular-nums">R$ {order.total_amount?.toFixed(2)}</p>
+                                <p className="text-2xl font-black text-foreground tabular-nums">R$ {formatNumber(order.total_amount)}</p>
                                 <div className="mt-4 flex items-center gap-2 px-2 py-1 bg-yellow-500/10 text-yellow-600 rounded-lg w-fit">
                                     <ShieldCheck size={12} />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Retido</span>
@@ -234,7 +235,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                             </div>
                             <div className="bg-card border border-border rounded-2xl p-5">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Repasse Previsto</p>
-                                <p className="text-2xl font-black text-green-600 dark:text-green-400 tabular-nums">R$ {(order.total_amount * 0.9).toFixed(2)}</p>
+                                <p className="text-2xl font-black text-green-600 dark:text-green-400 tabular-nums">R$ {formatNumber(order.total_amount * 0.9)}</p>
                                 <div className="mt-4 flex items-center gap-2 px-2 py-1 bg-green-500/10 text-green-600 rounded-lg w-fit">
                                     <Activity size={12} />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Liquidável</span>
@@ -247,7 +248,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                             </div>
                             <div>
                                 <p className="text-[11px] font-bold text-foreground">Taxa da Plataforma (10%)</p>
-                                <p className="text-[10px] text-muted-foreground">Valor a ser retido: R$ {(order.total_amount * 0.1).toFixed(2)}</p>
+                                <p className="text-[10px] text-muted-foreground">Valor a ser retido: R$ {formatNumber(order.total_amount * 0.1)}</p>
                             </div>
                         </div>
                     </div>
