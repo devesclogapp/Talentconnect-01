@@ -28,6 +28,49 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
     const [startTime, setStartTime] = useState<Date | null>(null);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const scheduledDate = order?.scheduled_at ? new Date(order.scheduled_at) : null;
+    const isScheduledValid = !!(scheduledDate && !isNaN(scheduledDate.getTime()));
+    const canStart = !isScheduledValid || (now.getTime() >= scheduledDate!.getTime() - 10 * 60000);
+
+    const getCountdown = () => {
+        if (!scheduledDate || canStart) return null;
+        const target = scheduledDate.getTime() - 10 * 60000;
+        const diff = target - now.getTime();
+
+        if (diff <= 0) return null;
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const parts = [];
+        if (d > 0) parts.push(`${d}d`);
+        if (h > 0 || d > 0) parts.push(`${h.toString().padStart(2, '0')}h`);
+        parts.push(`${m.toString().padStart(2, '0')}m`);
+        parts.push(`${s.toString().padStart(2, '0')}s`);
+
+        return parts.join(' ');
+    };
+
+    const getStartLimitMessage = () => {
+        if (!scheduledDate) return "";
+        const h = scheduledDate.getHours();
+        const m = scheduledDate.getMinutes();
+        const period = h < 12 ? 'manhã' : h < 18 ? 'tarde' : 'noite';
+        const hoursStr = h.toString().padStart(2, '0');
+        const minsStr = m.toString().padStart(2, '0');
+        const day = scheduledDate.getDate().toString().padStart(2, '0');
+        const month = (scheduledDate.getMonth() + 1).toString().padStart(2, '0');
+        return `O início será liberado em ${day}/${month} às ${hoursStr}:${minsStr} (${period}). Regra de segurança: liberação permitida apenas 10 min antes do agendamento.`;
+    };
 
     // Helper to extract execution data safely
     const getExecutionData = (ord: Order | null) => {
@@ -101,6 +144,10 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
 
     const handleStartService = async () => {
         if (!order) return;
+        if (!canStart) {
+            alert(getStartLimitMessage());
+            return;
+        }
         setIsProcessing(true);
         try {
             await markExecutionStart(order.id);
@@ -266,7 +313,9 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                                     <IntermediateStep
                                         label={currentStep >= 4
                                             ? "Execução iniciada"
-                                            : `Você deve iniciar a execução no dia ${new Date(order?.scheduled_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} e hora ${new Date(order?.scheduled_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+                                            : canStart
+                                                ? "O início já está liberado! Aguardando você."
+                                                : getStartLimitMessage()
                                         }
                                         active={currentStep === 3}
                                         completed={currentStep >= 4}
@@ -369,15 +418,52 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                     </div>
                 </Card>
 
-                {/* Instructions */}
-                {(status === 'ready_to_start' || status === 'in_progress') && (
+                {/* Instructions / Countdown */}
+                {status === 'ready_to_start' && (
+                    <div className="space-y-4">
+                        {!canStart && (
+                            <Card className="p-8 bg-black dark:bg-white text-white dark:text-black rounded-[32px] border-none shadow-2xl overflow-hidden relative group">
+                                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                                    <Clock size={80} />
+                                </div>
+                                <p className="meta-bold opacity-60 tracking-[0.2em] mb-4 text-[9px]">LIBERAÇÃO EM</p>
+                                <div className="flex items-baseline gap-1 mb-4 animate-in fade-in slide-in-from-bottom duration-500">
+                                    <span className="text-4xl font-black font-mono tracking-tighter">{getCountdown()}</span>
+                                </div>
+                                <p className="text-[10px] font-bold opacity-80 leading-relaxed uppercase tracking-widest">
+                                    {getStartLimitMessage()}
+                                </p>
+
+                                <div className="mt-6 flex items-center gap-2">
+                                    <div className="h-1 flex-1 bg-white/20 dark:bg-black/20 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-primary-green transition-all duration-1000"
+                                            style={{
+                                                width: `${Math.min(100, (1 - ((scheduledDate!.getTime() - 10 * 60000 - now.getTime()) / (24 * 60 * 60 * 1000))) * 100)}%`
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </Card>
+                        )}
+
+                        <div className="p-6 bg-primary-green/10 rounded-[24px] border border-primary-green/20 flex gap-4">
+                            <AlertCircle size={24} className="text-black-green-dark shrink-0" />
+                            <p className="body-small text-black-green-dark">
+                                {canStart
+                                    ? 'Ao clicar em iniciar, o cliente será notificado que você começou o trabalho.'
+                                    : 'Aguarde o cronômetro para iniciar o serviço. Regra de segurança Talent Connect.'
+                                }
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {status === 'in_progress' && (
                     <div className="p-6 bg-primary-green/10 rounded-[24px] border border-primary-green/20 flex gap-4">
                         <AlertCircle size={24} className="text-black-green-dark shrink-0" />
                         <p className="body-small text-black-green-dark">
-                            {status === 'ready_to_start'
-                                ? 'Ao clicar em iniciar, o cliente será notificado que você começou o trabalho.'
-                                : 'Lembre-se de finalizar o serviço assim que terminar para liberar o pagamento.'
-                            }
+                            Lembre-se de finalizar o serviço assim que terminar para liberar o pagamento.
                         </p>
                     </div>
                 )}
@@ -397,11 +483,14 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                     {status === 'ready_to_start' && (
                         <button
                             onClick={handleStartService}
-                            disabled={isProcessing}
-                            className="w-full py-6 bg-primary-green text-black rounded-[24px] label-semibold tracking-widest shadow-xl shadow-primary-green/20 flex items-center justify-center gap-3 transition-all  active:scale-[0.98]"
+                            disabled={isProcessing || !canStart}
+                            className={`w-full py-6 rounded-[24px] label-semibold tracking-widest shadow-xl flex items-center justify-center gap-3 transition-all ${canStart
+                                    ? 'bg-primary-green text-black shadow-primary-green/20 active:scale-[0.98]'
+                                    : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 grayscale opacity-60 cursor-not-allowed shadow-none'
+                                }`}
                         >
                             <Play size={20} fill="currentColor" />
-                            {isProcessing ? 'Iniciando...' : 'Iniciar Trabalho Agora'}
+                            {isProcessing ? 'Iniciando...' : canStart ? 'Iniciar Trabalho Agora' : 'Botão Bloqueado'}
                         </button>
                     )}
 

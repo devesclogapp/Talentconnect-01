@@ -51,11 +51,42 @@ const ProviderDashboard: React.FC<Props> = ({
     });
     const [recentRequests, setRecentRequests] = useState<any[]>([]);
     const [showFinancialDetails, setShowFinancialDetails] = useState(false);
+    const [profile, setProfile] = useState<any>(null);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
                 setLoading(true);
+
+                // Fetch Profile for KYC status
+                const { data: profileData } = await supabase
+                    .from('provider_profiles')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
+                setProfile(profileData);
+
+                // Self-Healing Logic: If metadata says submitted but DB is empty, sync them
+                if (user?.user_metadata?.documents_status === 'submitted' && (!(profileData as any) || !(profileData as any).doc_front_path)) {
+                    console.log("Self-healing: Syncing KYC data from metadata to database...");
+                    const metadata = user.user_metadata;
+                    const syncData: any = {
+                        user_id: user.id,
+                        doc_front_path: metadata.doc_front_path,
+                        doc_back_path: metadata.doc_back_path,
+                        selfie_path: metadata.selfie_path,
+                        documents_status: 'submitted'
+                    };
+
+                    const { data: updatedProfile, error: syncError } = await (supabase
+                        .from('provider_profiles') as any)
+                        .upsert(syncData)
+                        .select()
+                        .single();
+
+                    if (!syncError) setProfile(updatedProfile);
+                }
+
                 const orders: any[] = await getProviderOrders();
 
                 const getPaymentDetails = (order: any) => {
@@ -184,7 +215,7 @@ const ProviderDashboard: React.FC<Props> = ({
 
             <div className="px-6 mb-6">
                 {(() => {
-                    const status = user?.user_metadata?.documents_status || 'pending';
+                    const status = profile?.documents_status || user?.user_metadata?.documents_status || 'pending';
                     const isVerified = status === 'approved';
                     const isSubmitted = status === 'submitted';
 

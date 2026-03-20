@@ -178,6 +178,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="/admin/disputes" element={<AdminLayout activeView="ADMIN_DISPUTES" onNavigate={(path) => navigate(path)}><AdminDisputes /></AdminLayout>} />
                 <Route path="/admin/services" element={<AdminLayout activeView="ADMIN_SERVICES" onNavigate={(path) => navigate(path)}><AdminServices /></AdminLayout>} />
 
+
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>

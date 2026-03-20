@@ -53,7 +53,8 @@ const Profile: React.FC<Props> = ({ user, onNavigate }) => {
     const [stats, setStats] = useState({
         rating: '0.0',
         orders: '0',
-        trust: '100%'
+        trust: '100%',
+        kyc_status: null as string | null
     });
 
     React.useEffect(() => {
@@ -66,17 +67,42 @@ const Profile: React.FC<Props> = ({ user, onNavigate }) => {
             try {
                 let rating = '5.0';
                 let ordersCount = 0;
+                let kycStatusFromDb = null;
 
                 if (role === 'PROVIDER') {
-                    // Fetch Provider Profile for Rating
+                    // Fetch Provider Profile for Rating & KYC
                     const { data: profile } = await supabase
                         .from('provider_profiles')
-                        .select('rating_average')
+                        .select('rating_average, documents_status, doc_front_path')
                         .eq('user_id', user.id)
                         .single();
 
                     if (profile) {
                         rating = ((profile as any).rating_average || 0).toFixed(1);
+                        kycStatusFromDb = (profile as any).documents_status;
+
+                        // Self-Healing Logic: If metadata says submitted but DB is empty, sync them
+                        if (user?.user_metadata?.documents_status === 'submitted' && (!kycStatusFromDb || !(profile as any).doc_front_path)) {
+                            console.log("Self-healing: Syncing KYC data from metadata to database (Profile)...");
+                            const metadata = user.user_metadata;
+                            const syncData: any = {
+                                user_id: user.id,
+                                doc_front_path: metadata.doc_front_path,
+                                doc_back_path: metadata.doc_back_path,
+                                selfie_path: metadata.selfie_path,
+                                documents_status: 'submitted'
+                            };
+
+                            const { data: updatedProfile, error: syncError } = await (supabase
+                                .from('provider_profiles') as any)
+                                .upsert(syncData)
+                                .select()
+                                .single();
+
+                            if (!syncError && updatedProfile) {
+                                kycStatusFromDb = (updatedProfile as any).documents_status;
+                            }
+                        }
                     } else {
                         rating = '0.0';
                     }
@@ -103,7 +129,8 @@ const Profile: React.FC<Props> = ({ user, onNavigate }) => {
                 setStats({
                     rating,
                     orders: ordersCount.toString(),
-                    trust: '100%'
+                    trust: '100%',
+                    kyc_status: kycStatusFromDb
                 });
 
             } catch (error) {
@@ -204,7 +231,7 @@ const Profile: React.FC<Props> = ({ user, onNavigate }) => {
                 {/* Verification Status Banner */}
                 <div className="mb-8">
                     {(() => {
-                        const status = user?.user_metadata?.documents_status || 'pending';
+                        const status = stats.kyc_status || user?.user_metadata?.documents_status || 'pending';
                         const isVerified = status === 'approved';
                         const isSubmitted = status === 'submitted';
 

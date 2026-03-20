@@ -87,10 +87,12 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
             if (updateError) throw updateError;
 
             // 3. Update public.provider_profiles table (for Admin ERP)
+            // We omit documents_status here because if 'submitted' is not in the Enum, 
+            // it blocks the whole update (including paths). 
+            // The ERP now detects 'submitted' if paths exist.
             const { error: profileError } = await supabase
                 .from('provider_profiles')
                 .update({
-                    documents_status: 'submitted',
                     ...paths
                 })
                 .eq('user_id', user.id);

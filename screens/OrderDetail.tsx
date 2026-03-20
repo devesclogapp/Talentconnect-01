@@ -159,16 +159,16 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
 
         if (diff <= 0) return null;
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
 
         const parts = [];
-        if (days > 0) parts.push(`${days}d`);
-        if (hours > 0 || days > 0) parts.push(`${hours}h`);
-        parts.push(`${mins}m`);
-        parts.push(`${secs}s`);
+        if (d > 0) parts.push(`${d}d`);
+        if (h > 0 || d > 0) parts.push(`${h.toString().padStart(2, '0')}h`);
+        parts.push(`${m.toString().padStart(2, '0')}m`);
+        parts.push(`${s.toString().padStart(2, '0')}s`);
 
         return parts.join(' ');
     };
@@ -176,12 +176,13 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
     const getStartLimitMessage = () => {
         if (!scheduledDate) return "";
         const h = scheduledDate.getHours();
+        const m = scheduledDate.getMinutes();
         const period = h < 12 ? 'manhã' : h < 18 ? 'tarde' : 'noite';
         const hoursStr = h.toString().padStart(2, '0');
+        const minsStr = m.toString().padStart(2, '0');
         const day = scheduledDate.getDate().toString().padStart(2, '0');
         const month = (scheduledDate.getMonth() + 1).toString().padStart(2, '0');
-        const year = scheduledDate.getFullYear();
-        return `Você poderá iniciar o serviço as ${hoursStr}h da ${period} do dia ${day}/${month}/${year}`;
+        return `O início será liberado em ${day}/${month} às ${hoursStr}:${minsStr} (${period}). Regra de segurança: liberação permitida apenas 10 min antes do agendamento.`;
     };
 
     const handleReject = async () => {

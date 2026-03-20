@@ -60,7 +60,7 @@ const UserManagement: React.FC = () => {
             const allDisputesRes = await supabase.from('disputes').select('id, order_id, status');
             let allRatingsRes: { data: any[] | null } = { data: null };
             try { allRatingsRes = await supabase.from('ratings').select('provider_id, score') as any; } catch (_) { }
-            const profilesRes = await supabase.from('provider_profiles').select('user_id, documents_status, bio');
+            const profilesRes = await supabase.from('provider_profiles').select('user_id, documents_status, bio, doc_front_path, doc_back_path, selfie_path');
             const allOrders = (allOrdersRes.data || []) as any[];
             const allDisputes = (allDisputesRes.data || []) as any[];
             const allRatings = (allRatingsRes.data || []) as any[];
@@ -75,12 +75,19 @@ const UserManagement: React.FC = () => {
                 const userRatings = allRatings.filter(r => r.provider_id === u.id);
                 const avgRating = userRatings.length > 0 ? userRatings.reduce((s: number, r: any) => s + (r.score || 0), 0) / userRatings.length : null;
                 const profile = allProfiles.find(p => p.user_id === u.id);
-                const riskData = { ...u, openDisputes, cancelledOrders };
+                let kycStatus = profile?.documents_status || u.kyc_status || 'pending';
+
+                // Robustness: If files exist but status is still pending, it means it's submitted for analysis
+                if (kycStatus === 'pending' && profile?.doc_front_path) {
+                    kycStatus = 'submitted';
+                }
+
+                const riskData = { ...u, openDisputes, cancelledOrders, kyc_status: kycStatus };
                 const riskScore = calculateUserRisk(riskData);
                 return {
                     ...u, openDisputes, cancelledOrders, completedOrders,
                     totalClientOrders: clientOrders.length, totalProviderOrders: providerOrders.length,
-                    avgRating, profile, riskScore,
+                    avgRating, profile, riskScore, kyc_status: kycStatus,
                     riskLevel: riskScore > 60 ? 'high' : riskScore > 30 ? 'medium' : 'low'
                 };
             });
@@ -97,9 +104,20 @@ const UserManagement: React.FC = () => {
             const updates: any = {};
             if (type === 'BLOCK') updates.active = false;
             if (type === 'ACTIVATE') updates.active = true;
-            if (type === 'KYC_APPROVE') updates.kyc_status = 'approved';
-            if (type === 'KYC_REJECT') updates.kyc_status = 'rejected';
-            await (supabase as any).from('users').update(updates).eq('id', user.id);
+            if (type === 'KYC_APPROVE') {
+                updates.kyc_status = 'approved';
+                await supabase.from('provider_profiles').update({ documents_status: 'approved' }).eq('user_id', user.id);
+            }
+            if (type === 'KYC_REJECT') {
+                updates.kyc_status = 'rejected';
+                await supabase.from('provider_profiles').update({ documents_status: 'rejected' }).eq('user_id', user.id);
+            }
+            try {
+                // Try update users table as well (governance)
+                await (supabase as any).from('users').update(updates).eq('id', user.id);
+            } catch (userErr) {
+                console.warn("Could not update users table, but profile was updated:", userErr);
+            }
             await logAdminAction(`GOVERNANCE_${type}`, 'USER', user.id, `Ação de governança: ${type}`, actionReason);
             setUsers(prev => prev.map(u => u.id === user.id ? { ...u, ...updates } : u));
             if (selectedUser?.id === user.id) setSelectedUser({ ...selectedUser, ...updates });
@@ -230,7 +248,7 @@ const UserManagement: React.FC = () => {
                                 )}
 
                                 {dossierTab === 'risk' && (
-                                    <div className="space-y-4">
+                                    <div className="space-y-6">
                                         <div className="bg-card border border-border rounded-xl p-5 flex items-center justify-between">
                                             <div>
                                                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Score de Risco</p>
@@ -240,9 +258,58 @@ const UserManagement: React.FC = () => {
                                             </div>
                                             <StatusBadge status={selectedUser.riskLevel === 'high' ? 'open' : selectedUser.riskLevel === 'medium' ? 'in_review' : 'resolved'} size="md" />
                                         </div>
-                                        <div className="bg-card border border-border rounded-xl p-4 space-y-2">
-                                            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">KYC</p>
-                                            <StatusBadge status={selectedUser.kyc_status || 'pending'} size="md" />
+
+                                        {/* KYC Documents Section */}
+                                        <div className="bg-card border border-border rounded-xl p-4 space-y-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Documentação KYC</p>
+                                                <StatusBadge status={selectedUser.kyc_status || 'pending'} size="sm" />
+                                            </div>
+
+                                            {selectedUser.profile?.doc_front_path ? (
+                                                <div className="grid grid-cols-1 gap-4">
+                                                    <div>
+                                                        <p className="text-[9px] font-bold text-muted-foreground uppercase mb-2">Frente do Documento</p>
+                                                        <div className="aspect-video rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center relative group">
+                                                            <img
+                                                                src={supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_front_path).data.publicUrl}
+                                                                className="w-full h-full object-contain cursor-zoom-in transition-transform group-hover:scale-105"
+                                                                onClick={() => window.open(supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_front_path).data.publicUrl, '_blank')}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {selectedUser.profile.doc_back_path && (
+                                                        <div>
+                                                            <p className="text-[9px] font-bold text-muted-foreground uppercase mb-2">Verso do Documento</p>
+                                                            <div className="aspect-video rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center relative group">
+                                                                <img
+                                                                    src={supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_back_path).data.publicUrl}
+                                                                    className="w-full h-full object-contain cursor-zoom-in transition-transform group-hover:scale-105"
+                                                                    onClick={() => window.open(supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_back_path).data.publicUrl, '_blank')}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {selectedUser.profile.selfie_path && (
+                                                        <div>
+                                                            <p className="text-[9px] font-bold text-muted-foreground uppercase mb-2">Selfie de Verificação</p>
+                                                            <div className="aspect-square rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center relative group">
+                                                                <img
+                                                                    src={supabase.storage.from('documents').getPublicUrl(selectedUser.profile.selfie_path).data.publicUrl}
+                                                                    className="w-full h-full object-cover cursor-zoom-in transition-transform group-hover:scale-105"
+                                                                    onClick={() => window.open(supabase.storage.from('documents').getPublicUrl(selectedUser.profile.selfie_path).data.publicUrl, '_blank')}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="py-10 text-center bg-muted/30 rounded-lg border border-dashed border-border">
+                                                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Nenhum documento enviado</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
