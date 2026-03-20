@@ -342,38 +342,41 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
 };
 
 const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, variant = 'success' }: any) => {
-  let bgClass = active ? 'bg-accent-primary' : 'bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800';
-  let iconColorClass = active ? 'text-white' : 'text-black';
-  let titleColorClass = active ? 'text-black dark:text-white' : 'text-neutral-500 dark:text-neutral-500';
+  let bgStyle = { backgroundColor: '#F9FAFB', borderColor: '#F3F4F6' };
+  let iconColor = '#9CA3AF';
+  let titleColor = '#6B7280';
 
-  if (active || completed) {
-    if (variant === 'warning') {
-      bgClass = 'bg-warning text-black';
-      iconColorClass = 'text-black';
-      titleColorClass = 'text-orange-700 dark:text-warning';
-    }
-    else if (variant === 'info') {
-      bgClass = 'bg-info text-white';
-      iconColorClass = 'text-white';
-      titleColorClass = 'text-info';
-    }
-    else if (variant === 'success') {
-      bgClass = 'bg-success text-white';
-      iconColorClass = 'text-white';
-      titleColorClass = 'text-success';
-    }
+  if (completed) {
+    bgStyle = { backgroundColor: '#10B981', borderColor: '#10B981' };
+    iconColor = '#FFFFFF';
+    titleColor = '#10B981';
+  } else if (active) {
+    const color = variant === 'info' ? '#3B82F6' : '#FF6B00';
+    bgStyle = { backgroundColor: color, borderColor: color };
+    iconColor = '#FFFFFF';
+    titleColor = '#111111';
   }
 
   return (
     <div className={`flex gap-8 ${last ? '' : 'min-h-[90px]'}`}>
       <div className="flex flex-col items-center">
-        <div className={`w-12 h-12 rounded-[20px] flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${bgClass} ${iconColorClass} ${pulse ? 'animate-pulse scale-105 shadow-glow' : ''}`}>
-          {icon}
+        <div
+          style={bgStyle}
+          className={`w-12 h-12 rounded-[20px] border flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${pulse ? 'animate-pulse scale-105 shadow-glow' : ''}`}
+        >
+          <div style={{ color: iconColor }}>
+            {completed ? <CheckCircle2 size={18} /> : icon}
+          </div>
         </div>
-        <div className={`w-0.5 h-full ${active && completed ? (variant === 'info' ? 'bg-info' : variant === 'warning' ? 'bg-warning' : 'bg-success') : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>
+        {!last && (
+          <div
+            style={{ backgroundColor: completed ? (variant === 'info' ? '#3B82F6' : variant === 'warning' ? '#F59E0B' : '#10B981') : '#F3F4F6' }}
+            className={`w-0.5 h-full`}
+          ></div>
+        )}
       </div>
       <div className="pt-2 flex-1">
-        <p className={`font-bold transition-colors ${titleColorClass}`}>{title}</p>
+        <p className={`font-bold transition-colors`} style={{ color: titleColor }}>{title}</p>
         {desc && <p className={`text-[10px] font-normal mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
       </div>
     </div>
@@ -381,41 +384,31 @@ const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, varia
 };
 
 const IntermediateStep = ({ label, active, completed, variant = 'warning' }: any) => {
-  let dotColor = active ? 'bg-accent-secondary' : 'bg-neutral-200 dark:bg-neutral-800';
-
-  // Define text color logic
-  let textColorClass = 'text-neutral-400 dark:text-neutral-600'; // Default inactive text (readable gray)
+  let dotColor = '#E5E7EB';
+  let textColor = '#9CA3AF';
+  let lineColor = '#F3F4F6';
 
   if (completed) {
-    if (variant === 'warning') dotColor = 'bg-[#FF9800]';
-    else if (variant === 'info') dotColor = 'bg-info';
-    else dotColor = 'bg-success';
-
-    textColorClass = 'text-neutral-500 dark:text-neutral-400'; // Completed text (slightly darker gray)
+    lineColor = variant === 'info' ? '#3B82F6' : variant === 'warning' ? '#F59E0B' : '#10B981';
+    dotColor = lineColor;
+    textColor = '#6B7280';
   } else if (active) {
-    if (variant === 'warning') {
-      dotColor = 'bg-[#FF9800]';
-      textColorClass = 'text-orange-600 dark:text-orange-400 font-medium'; // Readable orange
-    } else if (variant === 'info') {
-      dotColor = 'bg-info';
-      textColorClass = 'text-info font-medium';
-    }
+    dotColor = variant === 'info' ? '#3B82F6' : '#F59E0B';
+    textColor = dotColor;
   }
 
   return (
     <div className="flex gap-8 min-h-[40px] -mt-2 -mb-2 relative z-0">
       <div className="flex flex-col items-center w-12">
-        {/* Line traverses through */}
-        <div className={`w-0.5 h-full absolute top-0 bottom-0 ${completed ? (variant === 'info' ? 'bg-info' : variant === 'warning' ? 'bg-[#FF9800]' : 'bg-success') : 'bg-neutral-100 dark:bg-neutral-800'}`}></div>
-
-        {/* Small Dot */}
-        <div className={`w-3 h-3 rounded-full z-10 my-auto flex items-center justify-center transition-all ${dotColor} ${active ? 'animate-pulse ring-4 ring-opacity-20 ' + (variant === 'warning' ? 'ring-[#FF9800]' : 'ring-info') : 'border-2 border-app-bg'}`}>
+        <div style={{ backgroundColor: lineColor }} className="w-0.5 h-full absolute top-0 bottom-0"></div>
+        <div
+          style={{ backgroundColor: dotColor }}
+          className={`w-3 h-3 rounded-full z-10 my-auto flex items-center justify-center transition-all ${active ? 'animate-pulse ring-4 ring-opacity-20 ' + (variant === 'warning' ? 'ring-amber-500' : 'ring-blue-500') : 'border-2 border-white'}`}
+        >
         </div>
       </div>
       <div className="py-3 flex-1">
-        <p
-          className={`text-[11px] font-normal transition-colors ${textColorClass}`}
-        >
+        <p style={{ color: textColor }} className={`text-[11px] font-normal transition-colors`}>
           {label}
         </p>
       </div>

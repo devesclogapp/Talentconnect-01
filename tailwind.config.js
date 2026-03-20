@@ -63,8 +63,8 @@ export default {
                 'text-tertiary': 'var(--text-tertiary)',
 
                 // Legacy / Semantic Mapping - FIXED
-                'primary-green': 'var(--success)', // Now actually Green
-                'primary-black': 'var(--accent-primary)', // Now actually Black/Accent
+                'primary-green': 'var(--success)',
+                'primary-black': 'var(--accent-primary)',
                 'app-bg': 'var(--bg-primary)',
                 'app-text': 'var(--text-primary)',
 

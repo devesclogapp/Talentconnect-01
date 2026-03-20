@@ -22,8 +22,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
 
     return (
         <div className={`relative group overflow-hidden p-6 rounded-[32px] border transition-all duration-300 hover:shadow-glow-sm ${isPrimary
-                ? 'bg-text-primary border-text-primary text-white'
-                : 'bg-bg-primary border-border-subtle text-text-primary hover:bg-bg-secondary'
+            ? 'bg-text-primary border-text-primary text-white'
+            : 'bg-bg-primary border-border-subtle text-text-primary hover:bg-bg-secondary'
             }`}>
             {/* Background elements */}
             <div className={`absolute -right-4 -top-4 w-20 h-20 rounded-full blur-2xl transition-colors ${isPrimary ? 'bg-white/10 group-hover:bg-accent-primary/20' : 'bg-bg-secondary group-hover:bg-accent-primary/5'
