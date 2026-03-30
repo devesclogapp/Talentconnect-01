@@ -28,10 +28,14 @@ import {
     ArrowRightCircle,
     BarChart3,
     Activity,
-    Eye
+    Eye,
+    Info,
+    Zap,
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { resolveUserName } from '../utils/userUtils';
+
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from "../components/ui/tooltip";
 
 // --- Helpers de Governança ---
 const logAdminAction = async (action: string, entityType: string, entityId: string, details: string, reason: string) => {
@@ -320,9 +324,9 @@ const AdminServices: React.FC = () => {
                                 {activeTab === 'summary' && (
                                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <DetailStat label="Pedidos Totais" value={selectedService.orders} icon={<ArrowRightCircle />} color="text-accent-primary" />
-                                            <DetailStat label="Receita Total" value={`R$ ${selectedService.revenueTotal.toLocaleString()}`} icon={<DollarSign />} color="text-success" />
-                                            <DetailStat label="Risco Atual" value={`${selectedService.risk_score}%`} icon={<ShieldAlert />} color={selectedService.risk_level === 'high' ? 'text-error' : 'text-success'} />
+                                            <DetailStat label="Pedidos Totais" value={selectedService.orders} icon={<ArrowRightCircle />} color="text-accent-primary" tooltip="Volume de solicitações criadas para este serviço específico." />
+                                            <DetailStat label="Receita Total" value={`R$ ${selectedService.revenueTotal.toLocaleString()}`} icon={<DollarSign />} color="text-success" tooltip="Valores já liquidados e repassados por este serviço." />
+                                            <DetailStat label="Risco Atual" value={`${selectedService.risk_score}%`} icon={<ShieldAlert />} color={selectedService.risk_level === 'high' ? 'text-error' : 'text-success'} tooltip="Nível de periculosidade baseado em avaliações baixas e cancelamentos." />
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -533,25 +537,46 @@ const FilterButton = ({ active, label, color, onClick }: any) => (
     </button>
 );
 
-const DetailStat = ({ label, value, icon, color }: any) => (
-    <div
-        className="p-5 hover:shadow-md transition-all h-full flex flex-col justify-between"
-        style={{
-            background: 'var(--bg-primary)',
-            borderRadius: '10px',
-            border: '1px solid rgba(0,0,0,0.06)',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-        }}
-    >
-        <div className={`p-3 rounded-[6px] w-fit mb-5 ${color}`} style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)' }}>
-            {React.cloneElement(icon as React.ReactElement, { size: 20, strokeWidth: 1.5 })}
+const DetailStat = ({ label, value, icon, color, tooltip }: any) => {
+    return (
+        <div
+            className="p-5 hover:shadow-md transition-all h-full flex flex-col justify-between relative group"
+            style={{
+                background: 'var(--bg-primary)',
+                borderRadius: '10px',
+                border: '1px solid rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+            }}
+        >
+            {tooltip && (
+                <div className="absolute top-4 right-4">
+                    <TooltipProvider>
+                        <Tooltip delayDuration={200}>
+                            <TooltipTrigger asChild>
+                                <button className="p-1 rounded-full hover:bg-slate-500/5 transition-colors text-slate-400/20 hover:text-slate-400/60 outline-none">
+                                    <Info size={12} strokeWidth={2} />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipPortal>
+                                <TooltipContent side="top" className="max-w-[180px] text-center bg-slate-900 border-slate-800 text-white py-2 z-[9999]">
+                                    {tooltip}
+                                </TooltipContent>
+                            </TooltipPortal>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+            )}
+
+            <div className={`p-3 rounded-[6px] w-fit mb-5 ${color}`} style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                {React.cloneElement(icon as React.ReactElement, { size: 20, strokeWidth: 1.5 })}
+            </div>
+            <div>
+                <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
+                <h3 className="text-xl font-semibold text-text-primary leading-none tracking-tight">{value}</h3>
+            </div>
         </div>
-        <div>
-            <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
-            <h3 className="text-xl font-semibold text-text-primary leading-none tracking-tight">{value}</h3>
-        </div>
-    </div>
-);
+    );
+};
 
 const ControlButton = ({ icon, label, color, onClick }: any) => (
     <button

@@ -32,16 +32,16 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, aging, color, b
                 {React.cloneElement(icon, { size: 16 })}
             </div>
             <div className="flex flex-col items-end gap-1">
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide ${trend.includes('Ação') || trend.includes('Urgente')
+                <span className={`text-sm font-normal px-2 py-0.5 rounded-md capitalize ${trend.includes('Ação') || trend.includes('Urgente')
                     ? 'bg-error/10 text-error'
                     : 'bg-bg-secondary text-text-tertiary'
                     }`}>
                     {trend}
                 </span>
-                <span className="text-[11px] font-semibold text-text-tertiary opacity-70">{aging}</span>
+                <span className="text-sm font-semibold text-text-tertiary opacity-70">{aging}</span>
             </div>
         </div>
-        <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-tight mb-0.5">{label}</p>
+        <p className="text-sm font-normal text-text-secondary capitalize mb-0.5">{label}</p>
         <h3 className="text-xl font-semibold text-text-primary leading-tight tracking-tight">{value}</h3>
         <div className="mt-3 h-px w-full opacity-20" style={{ background: 'currentColor' }} />
     </div>

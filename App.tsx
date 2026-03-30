@@ -131,11 +131,22 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const root = window.document.documentElement;
+
+    // Desabilitar transições temporariamente para troca instantânea
+    root.classList.add('no-transitions');
+
     if (isDarkMode) {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
+
+    // Pequeno timeout para reabilitar após o reflow
+    const timer = setTimeout(() => {
+      root.classList.remove('no-transitions');
+    }, 50);
+
+    return () => clearTimeout(timer);
   }, [isDarkMode]);
 
   // Supabase Auth Listener & Initial Check

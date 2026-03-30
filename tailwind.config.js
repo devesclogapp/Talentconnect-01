@@ -16,98 +16,72 @@ export default {
         },
         extend: {
             colors: {
-                border: "hsl(var(--border))",
-                input: "hsl(var(--input))",
-                ring: "hsl(var(--ring))",
-                background: "hsl(var(--background))",
-                foreground: "hsl(var(--foreground))",
+                // Folioblox Design System Tokens
+                'folio-bg': 'var(--bg)',
+                'folio-surface': 'var(--surface)',
+                'folio-surface2': 'var(--surface2)',
+                'folio-card': 'var(--card)',
+                'folio-accent': 'var(--accent)',
+                'folio-accent-dim': 'var(--accent-dim)',
+                'folio-text': 'var(--text)',
+                'folio-text-dim': 'var(--text2)',
+
+                // Keep Shadcn/Existing compatibility but map to Folioblox
+                border: "var(--border)",
+                input: "var(--border)",
+                ring: "var(--accent)",
+                background: "var(--bg)",
+                foreground: "var(--text)",
                 primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
+                    DEFAULT: "var(--accent)",
+                    foreground: "#FFFFFF",
                 },
                 secondary: {
-                    DEFAULT: "hsl(var(--secondary))",
-                    foreground: "hsl(var(--secondary-foreground))",
+                    DEFAULT: "var(--surface2)",
+                    foreground: "var(--text)",
                 },
                 destructive: {
-                    DEFAULT: "hsl(var(--destructive))",
-                    foreground: "hsl(var(--destructive-foreground))",
+                    DEFAULT: "var(--red)",
+                    foreground: "#FFFFFF",
                 },
                 muted: {
-                    DEFAULT: "hsl(var(--muted))",
-                    foreground: "hsl(var(--muted-foreground))",
+                    DEFAULT: "var(--surface2)",
+                    foreground: "var(--text2)",
                 },
                 accent: {
-                    DEFAULT: "hsl(var(--accent))",
-                    foreground: "hsl(var(--accent-foreground))",
+                    DEFAULT: "var(--accent-dim)",
+                    foreground: "var(--accent)",
                 },
                 popover: {
-                    DEFAULT: "hsl(var(--popover))",
-                    foreground: "hsl(var(--popover-foreground))",
+                    DEFAULT: "var(--surface)",
+                    foreground: "var(--text)",
                 },
                 card: {
-                    DEFAULT: "hsl(var(--card))",
-                    foreground: "hsl(var(--card-foreground))",
+                    DEFAULT: "var(--card)",
+                    foreground: "var(--text)",
                 },
 
-                // Talent Connect Specific (mapped to Shadcn)
-                'bg-primary': 'var(--bg-primary)',
-                'bg-secondary': 'var(--bg-secondary)',
-                'bg-tertiary': 'var(--bg-tertiary)',
-                'brand-primary': '#FF6B00',
-                'brand-secondary': '#FFFFFF',
-                'accent-primary': 'var(--accent-primary)',
-                'accent-secondary': 'var(--accent-secondary)',
-                'text-primary': 'var(--text-primary)',
-                'text-secondary': 'var(--text-secondary)',
-                'text-tertiary': 'var(--text-tertiary)',
-
-                // Legacy / Semantic Mapping - FIXED
-                'primary-green': 'var(--success)',
-                'primary-black': 'var(--accent-primary)',
-                'app-bg': 'var(--bg-primary)',
-                'app-text': 'var(--text-primary)',
-
-                // Missing Colors Definition
-                'black-green': '#002200',
-                'black-green-dark': '#001100',
-
-                'feedback-success': 'var(--success)',
-                'feedback-warning': 'var(--warning)',
-                'feedback-error': 'var(--error)',
-                'feedback-info': 'var(--info)',
-
-                'border-subtle': 'var(--border-subtle)',
-                'border-medium': 'var(--border-medium)',
-
-                success: {
-                    DEFAULT: 'var(--success)',
-                },
-                error: {
-                    DEFAULT: 'var(--error)',
-                },
-                warning: {
-                    DEFAULT: 'var(--warning)',
-                },
-                info: {
-                    DEFAULT: 'var(--info)',
-                },
+                // Semantic
+                success: 'var(--green)',
+                error: 'var(--red)',
+                warning: 'var(--yellow)',
+                info: 'var(--blue)',
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
+                sans: ['"DM Sans"', 'Inter', 'system-ui', 'sans-serif'],
+                display: ['"DM Sans"', 'sans-serif'],
             },
             borderRadius: {
                 'lg': 'var(--radius)',
-                'md': 'calc(var(--radius) - 2px)',
-                'sm': 'calc(var(--radius) - 4px)',
-                'xl': 'var(--radius-xl)',
-                '2xl': 'var(--radius-2xl)',
-                'full': 'var(--radius-full)',
+                'md': 'var(--radius-sm)',
+                'sm': 'var(--radius-xs)',
+                'full': '9999px',
             },
             boxShadow: {
-                'glow': 'var(--glow-accent)',
+                'folio': '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
                 'md': 'var(--shadow-md)',
                 'lg': 'var(--shadow-lg)',
+                'glow': 'var(--glow-accent)',
             },
             spacing: {
                 'safe-top': 'env(safe-area-inset-top)',

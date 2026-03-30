@@ -126,8 +126,11 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
           <ArrowLeft size={20} className="text-black dark:text-white" />
         </button>
         <div className="flex-1 text-center">
-          <h2 className="heading-md text-[12px] text-black dark:text-white">Status do pedido</h2>
-          <p className="text-black font-normal !text-[9px]">ID: #{activeOrder.id.slice(0, 8)}</p>
+          <h2 className="heading-md text-[12px] text-black dark:text-white leading-none">Status do pedido</h2>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <p className="text-black font-normal !text-[9px]">ID: #{activeOrder.id.slice(0, 8)}</p>
+            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
         </div>
         <button onClick={onSupport} className="w-10 h-10 flex items-center justify-center interactive">
           <LifeBuoy size={20} className="text-black dark:text-white" />

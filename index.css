@@ -1,99 +1,89 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: 240 10% 98%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 25 100% 50%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 25 100% 50%;
-  --radius: 0.75rem;
+  /* Talent Connect Design Signature - Muted Premium */
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface2: #F1F5F9;
+  --card: #FFFFFF;
+  --border: rgba(15, 23, 42, 0.06);
+  --border-md: rgba(15, 23, 42, 0.12);
 
-  /* Legacy Compatibility */
-  --bg-primary: hsl(var(--background));
-  --bg-secondary: hsl(var(--secondary));
-  --bg-tertiary: hsl(var(--muted));
-  --accent-primary: hsl(var(--primary));
-  --accent-secondary: hsl(25 100% 45%);
-  --text-primary: hsl(var(--foreground));
-  --text-secondary: hsl(var(--muted-foreground));
-  --text-tertiary: hsl(240 3.8% 65%);
-  --success: 161 84% 39%;
-  --error: 0 84% 60%;
-  --warning: 38 92% 50%;
-  --info: 221 83% 58%;
+  --accent: #6366F1;
+  --accent2: #4F46E5;
+  --accent-dim: rgba(99, 102, 241, 0.08);
 
-  --border-subtle: hsl(var(--border));
-  --border-medium: hsl(var(--input));
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
-  --radius-full: 9999px;
+  --text: #0F172A;
+  --text2: rgba(15, 23, 42, 0.56);
+  --text3: rgba(15, 23, 42, 0.36);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08);
-  --glow-accent: 0 0 20px hsla(var(--primary) / 0.4);
+  --green: #478D74;
+  --green-dim: rgba(71, 141, 116, 0.08);
+  --yellow: #9B8468;
+  --yellow-dim: rgba(155, 132, 104, 0.08);
+  --red: #9F5D5D;
+  --red-dim: rgba(159, 93, 93, 0.08);
+  --blue: #607EB9;
+  --blue-dim: rgba(96, 126, 185, 0.08);
 
-  --primary-green: hsl(var(--success));
-  --primary-green-dark: var(--accent-secondary);
-  --primary-black: var(--text-primary);
-  --app-bg: var(--bg-primary);
-  --app-text: var(--text-primary);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
+
+  /* Legacy Compatibility Mapping */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --primary: var(--accent);
+  --muted: var(--surface2);
+  --accent-primary: var(--accent);
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface);
+  --text-primary: var(--text);
+  --text-secondary: var(--text2);
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 25 100% 50%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 25 100% 50%;
+  /* Talent Connect Dark Mode (Slate Deep) */
+  --bg: #0F172A;
+  --surface: #1E293B;
+  --surface2: #020617;
+  --card: #1E293B;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-md: rgba(255, 255, 255, 0.14);
+
+  --accent: #818CF8;
+  --accent2: #A5B4FC;
+  --accent-dim: rgba(129, 140, 248, 0.12);
+
+  --text: #F8FAFC;
+  --text2: rgba(248, 250, 252, 0.56);
+  --text3: rgba(248, 250, 252, 0.28);
+
+  --green: #10B981;
+  --green-dim: rgba(16, 185, 129, 0.12);
+  --yellow: #F59E0B;
+  --yellow-dim: rgba(245, 158, 11, 0.12);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, 0.12);
+  --blue: #3B82F6;
+  --blue-dim: rgba(59, 130, 246, 0.12);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: none !important;
   }
 }
 
@@ -150,15 +140,15 @@
 
   /* Premium Buttons */
   .btn-primary {
-    @apply h-[56px] px-8 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95;
+    @apply h-[56px] px-8 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-150 ease-out active:scale-95;
     background: var(--accent-primary);
     color: #FFFFFF;
-    box-shadow: 0 4px 14px 0 rgba(255, 107, 0, 0.39);
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.24);
   }
 
   .btn-primary:hover {
     background: var(--accent-secondary);
-    box-shadow: 0 6px 20px rgba(255, 107, 0, 0.23);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.16);
   }
 
   .btn-icon {
@@ -173,7 +163,7 @@
     border-radius: var(--radius-lg);
     padding: 24px;
     border: 1px solid var(--border-subtle);
-    @apply transition-all duration-200;
+    @apply transition-all duration-150 ease-out;
   }
 
   .card-stat {
@@ -201,7 +191,7 @@
   }
 
   .card-transaction {
-    @apply flex items-center gap-4 p-4 rounded-xl transition-all active:scale-[0.98];
+    @apply flex items-center gap-4 p-4 rounded-xl transition-all duration-150 ease-out active:scale-[0.98];
     background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
   }
@@ -209,14 +199,14 @@
   /* Inputs */
   .input {
     @apply rounded-xl p-4 text-sm w-full outline-none transition-all;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-medium);
-    color: var(--text-primary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
   }
 
   .input:focus {
-    @apply border-accent-primary;
-    box-shadow: 0 0 0 3px rgba(198, 255, 0, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
   }
 
   /* Global UI */
@@ -241,6 +231,82 @@
     color: var(--text-primary);
     background: var(--bg-tertiary);
   }
+
+  .interactive {
+    @apply cursor-pointer transition-all duration-150 ease-out active:scale-[0.98];
+  }
+
+  /* Talent Connect Hero Component - More Muted */
+  .hero {
+    background: linear-gradient(135deg, #475569 0%, #1E293B 100%);
+    border-radius: 16px;
+    padding: 24px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    gap: 24px;
+    min-height: 180px;
+    color: #FFFFFF;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 42%;
+    bottom: -50px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.10);
+  }
+
+  .hero-pills {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: auto;
+  }
+
+  .hp {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-right: 24px;
+  }
+
+  .hp-num {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .hp-val {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .hd {
+    width: 1px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    margin-right: 24px;
+  }
 }
 
 /* Utils */
@@ -255,8 +321,12 @@
   scrollbar-width: none;
 }
 
+.no-transitions * {
+  transition: none !important;
+}
+
 .gradient-text {
-  background: linear-gradient(to right, #FFFFFF, var(--accent-primary));
+  background: linear-gradient(to right, #FFFFFF, var(--accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -276,8 +346,4 @@
 
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
-}
-
-.interactive {
-  @apply cursor-pointer transition-all duration-200 active:scale-[0.98];
 }

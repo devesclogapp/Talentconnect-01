@@ -68,34 +68,33 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
     const activeLabel = MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeView)?.label || 'Painel';
 
     return (
-        <div className={`min-h-screen flex font-sans ${isDarkMode ? 'dark' : ''} bg-background`}>
-
+        <div className={`min-h-screen flex font-sans ${isDarkMode ? 'dark' : ''} bg-folio-bg text-folio-text`}>
             {/* ── Sidebar ── */}
             <aside
-                className="flex flex-col shrink-0 border-r border-border bg-card transition-all duration-300 ease-out"
-                style={{ width: isSidebarOpen ? '240px' : '64px' }}
+                className="flex flex-col shrink-0 border-r border-folio-border bg-folio-surface2 transition-all duration-300 ease-out"
+                style={{ width: isSidebarOpen ? '250px' : '72px' }}
             >
                 {/* Logo */}
-                <div className="h-14 flex items-center px-4 border-b border-border overflow-hidden shrink-0">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-primary">
-                        <span className="font-semibold text-[10px] text-primary-foreground">TC</span>
+                <div className="h-16 flex items-center px-5 border-b border-folio-border/50 overflow-hidden shrink-0">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-folio-accent shadow-glow">
+                        <span className="font-bold text-[11px] text-white">TC</span>
                     </div>
                     {isSidebarOpen && (
                         <div className="ml-3 overflow-hidden">
-                            <p className="font-semibold text-[13px] text-foreground whitespace-nowrap tracking-tight leading-none">Talent Connect</p>
-                            <p className="text-[9px] font-semibold text-primary uppercase tracking-widest mt-0.5">ERP Admin</p>
+                            <p className="font-bold text-[14px] text-folio-text whitespace-nowrap tracking-tight leading-none">Talent Connect</p>
+                            <p className="text-[10px] font-bold text-folio-accent uppercase tracking-widest mt-1">ERP ADMIN</p>
                         </div>
                     )}
                 </div>
 
                 {/* Nav */}
-                <nav className="flex-1 py-3 overflow-hidden overflow-y-auto">
+                <nav className="flex-1 py-6 overflow-hidden overflow-y-auto px-3">
                     {MENU_GROUPS.map((group) => (
-                        <div key={group.label} className="mb-4">
+                        <div key={group.label} className="mb-6">
                             {isSidebarOpen && (
-                                <p className="px-4 mb-1 text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">{group.label}</p>
+                                <p className="px-3 mb-2 text-[10px] font-bold text-folio-text-dim/40 uppercase tracking-[1.5px]">{group.label}</p>
                             )}
-                            <div className="px-2 space-y-0.5">
+                            <div className="space-y-1">
                                 {group.items.map((item) => {
                                     const isActive = activeView === item.id;
                                     return (
@@ -106,21 +105,21 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
                                                 onNavigate(route);
                                             }}
                                             title={!isSidebarOpen ? item.label : undefined}
-                                            className={`w-full flex items-center h-9 px-2.5 rounded-lg transition-all duration-150 ease-out group relative ${isActive
-                                                    ? 'bg-primary/10 text-primary'
-                                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                            className={`w-full flex items-center h-10 px-3 rounded-xl transition-all duration-200 group relative ${isActive
+                                                ? 'bg-folio-surface text-folio-text shadow-sm'
+                                                : 'text-folio-text-dim hover:text-folio-text hover:bg-folio-surface/50'
                                                 }`}
                                         >
-                                            {isActive && (
-                                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
-                                            )}
-                                            <span className={`shrink-0 transition-transform duration-150 ${isActive ? '' : 'group-hover:scale-105'}`}>
+                                            <span className={`shrink-0 transition-all duration-200 ${isActive ? 'text-folio-accent scale-110' : 'group-hover:scale-105'}`}>
                                                 {item.icon}
                                             </span>
                                             {isSidebarOpen && (
-                                                <span className="ml-3 text-[13px] font-medium whitespace-nowrap">
+                                                <span className={`ml-3 text-[13px] whitespace-nowrap transition-all ${isActive ? 'font-bold' : 'font-medium opacity-80'}`}>
                                                     {item.label}
                                                 </span>
+                                            )}
+                                            {isActive && !isSidebarOpen && (
+                                                <div className="absolute left-0 w-1 h-4 bg-folio-accent rounded-r-full" />
                                             )}
                                         </button>
                                     );
@@ -131,15 +130,15 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
                 </nav>
 
                 {/* Sidebar Footer */}
-                <div className="p-2 border-t border-border space-y-0.5 shrink-0">
+                <div className="p-4 border-t border-folio-border space-y-1 shrink-0">
                     <button
                         onClick={handleLogout}
                         title={!isSidebarOpen ? 'Sair' : undefined}
-                        className="w-full flex items-center h-9 px-2.5 rounded-lg transition-all duration-150 ease-out group text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        className="w-full flex items-center h-10 px-3 rounded-xl transition-all duration-200 group text-folio-text-dim hover:bg-red-500/10 hover:text-red-500"
                     >
-                        <LogOut size={16} className="shrink-0 transition-transform duration-150 group-hover:scale-105" />
+                        <LogOut size={18} className="shrink-0 transition-transform duration-200 group-hover:rotate-12" />
                         {isSidebarOpen && (
-                            <span className="ml-3 text-[13px] font-medium whitespace-nowrap">Sair do Admin</span>
+                            <span className="ml-3 text-[13px] font-bold whitespace-nowrap">Sair do Sistema</span>
                         )}
                     </button>
                 </div>
@@ -149,68 +148,63 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
                 {/* Topbar */}
-                <header className="h-14 flex items-center justify-between px-4 border-b border-border bg-card/80 backdrop-blur-sm shrink-0">
+                <header className="h-16 flex items-center justify-between px-6 border-b border-folio-border/40 bg-folio-bg/80 backdrop-blur-xl shrink-0 z-50">
 
-                    <div className="flex items-center gap-3">
-                        {/* Toggle sidebar */}
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={() => setSidebarOpen(!isSidebarOpen)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 ease-out hover:bg-muted text-muted-foreground hover:text-foreground"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-folio-surface border border-folio-border shadow-sm hover:border-folio-accent/30 transition-all active:scale-90"
                         >
                             {isSidebarOpen ? <ChevronsLeft size={16} /> : <Menu size={16} />}
                         </button>
 
-                        {/* Breadcrumb */}
-                        <div className="hidden md:flex items-center gap-1.5 text-sm">
-                            <span className="text-muted-foreground">Admin</span>
-                            <span className="text-muted-foreground/50">/</span>
-                            <span className="font-semibold text-foreground">{activeLabel}</span>
+                        <div className="hidden md:flex items-center gap-2 text-xs font-bold tracking-tight uppercase">
+                            <span className="text-folio-text-dim/40">ADMIN</span>
+                            <span className="text-folio-text-dim/20">/</span>
+                            <span className="text-folio-text">{activeLabel}</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         {/* Live indicator */}
-                        <div className="hidden md:flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-full">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-[10px] font-semibold uppercase tracking-wide">Online</span>
+                        <div className="hidden lg:flex items-center gap-2 bg-[#1DB97A]/10 text-[#1DB97A] px-3 py-1.5 rounded-full border border-[#1DB97A]/20">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#1DB97A] animate-pulse" />
+                            <span className="text-[9px] font-bold uppercase tracking-widest">SISTEMA ATIVO</span>
                         </div>
 
-                        {/* Dark mode */}
-                        <button
-                            onClick={toggleDarkMode}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 ease-out hover:bg-muted text-muted-foreground hover:text-foreground"
-                            title="Alternar tema"
-                        >
-                            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
-                        </button>
+                        {/* Actions */}
+                        <div className="flex items-center gap-1.5 bg-folio-surface2/50 p-1 rounded-xl border border-folio-border">
+                            <button
+                                onClick={toggleDarkMode}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-folio-surface text-folio-text-dim hover:text-folio-text transition-all"
+                            >
+                                {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
+                            </button>
+                            <button
+                                className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-folio-surface text-folio-text-dim hover:text-folio-text transition-all"
+                            >
+                                <Bell size={15} />
+                                <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#E24B4A] shadow-glow" />
+                            </button>
+                        </div>
 
-                        {/* Notifications */}
-                        <button
-                            className="relative w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 ease-out hover:bg-muted text-muted-foreground hover:text-foreground"
-                            title="Notificações"
-                        >
-                            <Bell size={16} />
-                            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red-500" />
-                        </button>
-
-                        {/* Divider */}
-                        <div className="w-px h-5 mx-1 bg-border" />
+                        <div className="w-px h-6 mx-1 bg-folio-border/60" />
 
                         {/* User */}
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-3 pl-1">
                             <div className="text-right hidden sm:block">
-                                <p className="text-[12px] font-semibold text-foreground leading-tight">{userName}</p>
-                                <p className="text-[10px] font-medium text-green-500">Operador Master</p>
+                                <p className="text-[12px] font-bold text-folio-text leading-tight">{userName}</p>
+                                <p className="text-[10px] font-bold text-[#1DB97A] uppercase tracking-wider">OPERADOR MASTER</p>
                             </div>
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[12px] font-semibold bg-primary shrink-0">
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-[13px] font-bold bg-folio-accent shadow-glow shrink-0 border-2 border-white/10">
                                 {userInitial}
                             </div>
                         </div>
                     </div>
                 </header>
 
-                {/* Content */}
-                <main className="flex-1 overflow-y-auto p-6 flex flex-col bg-background">
+                {/* Content Area */}
+                <main className="flex-1 overflow-y-auto p-8 flex flex-col gap-6 bg-folio-bg">
                     {children}
                 </main>
             </div>

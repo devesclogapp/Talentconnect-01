@@ -141,7 +141,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                     <input
                                         type="email"
                                         placeholder="nome@talentconnect.com"
-                                        className="w-full h-12 bg-white dark:bg-card/50 border border-border/80 rounded-xl pl-10 pr-4 text-[13px] font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-foreground"
+                                        className="w-full h-12 bg-folio-surface border border-folio-border rounded-xl pl-10 pr-4 text-[13px] font-bold outline-none focus:border-folio-accent focus:ring-4 focus:ring-folio-accent/5 transition-all text-folio-text placeholder:text-folio-text-dim/30"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
@@ -150,15 +150,15 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground inline-block px-1">Chave de Acesso</label>
+                                <label className="text-[11px] font-bold uppercase tracking-widest text-folio-text-dim inline-block px-1">Chave de Acesso</label>
                                 <div className="relative group">
-                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none">
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-folio-text-dim group-focus-within:text-folio-accent transition-colors pointer-events-none">
                                         <Lock size={16} />
                                     </div>
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         placeholder="••••••••"
-                                        className="w-full h-12 bg-white dark:bg-card/50 border border-border/80 rounded-xl pl-10 pr-12 text-[13px] font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-foreground"
+                                        className="w-full h-12 bg-folio-surface border border-folio-border rounded-xl pl-10 pr-12 text-[13px] font-bold outline-none focus:border-folio-accent focus:ring-4 focus:ring-folio-accent/5 transition-all text-folio-text placeholder:text-folio-text-dim/30"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required

@@ -3,7 +3,7 @@ import {
     DollarSign, Search, RefreshCw, Download, TrendingUp, TrendingDown,
     Clock, CheckCircle2, XCircle, AlertTriangle, Shield, Lock, Unlock,
     Activity, CreditCard, X, Eye, ArrowUp, ArrowDown, Percent,
-    BarChart3
+    BarChart3, ArrowRight
 } from 'lucide-react';
 import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -390,6 +390,10 @@ const AdminFinance: React.FC = () => {
                     <p className="text-sm text-muted-foreground mt-0.5">GMV, escrow, repasses e reconciliação contábil</p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full mr-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                        <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Live Ledger</span>
+                    </div>
                     <button onClick={fetchPayments} className="p-2 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:rotate-180 transition-all duration-500">
                         <RefreshCw size={16} />
                     </button>
@@ -402,156 +406,162 @@ const AdminFinance: React.FC = () => {
             {/* ── KPI Grid ── */}
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
                 <KpiCard
-                    label="GMV Total"
+                    label="VOLUME TRANSACIONADO"
                     value={formatCurrency(kpis.gmv)}
-                    icon={<TrendingUp size={16} />}
-                    color="text-primary"
-                    bg="bg-primary/10"
+                    icon={<TrendingUp size={18} />}
+                    trend="Plataforma"
+                    tooltip="Soma total de todos os pagamentos realizados pelos clientes (GMV)."
                 />
                 <KpiCard
-                    label="Receita Operadora"
+                    label="TAXAS COLETADAS"
                     value={formatCurrency(kpis.revenue)}
-                    icon={<DollarSign size={16} />}
-                    color="text-green-600 dark:text-green-400"
-                    bg="bg-green-500/10"
+                    icon={<DollarSign size={18} />}
+                    color="text-[#1DB97A]"
+                    bg="bg-[#1DB97A]/10"
                     trend="+12.5%"
-                    trendDir="up"
+                    tooltip="Arrecadação líquida da plataforma baseada na taxa de serviço (10%) cobrada dos pedidos."
                 />
                 <KpiCard
-                    label="Em Escrow"
+                    label="GARANTIA PROTEGIDA"
                     value={formatCurrency(kpis.inEscrow)}
-                    icon={<Lock size={16} />}
-                    color="text-yellow-600 dark:text-yellow-400"
-                    bg="bg-yellow-500/10"
+                    icon={<Lock size={18} />}
+                    color="text-[#F5C842]"
+                    bg="bg-[#F5C842]/10"
+                    trend="Em Escrow"
                     onClick={() => setShowEscrowSheet(true)}
+                    tooltip="Saldo total retido em escrow aguardando a finalização dos serviços para ser repassado ou estornado."
                 />
                 <KpiCard
-                    label="Repasses Pendentes"
+                    label="REPASSES PENDENTES"
                     value={formatCurrency(kpis.pendingPayouts)}
-                    icon={<Activity size={16} />}
-                    color="text-orange-600 dark:text-orange-400"
-                    bg="bg-orange-500/10"
+                    icon={<Activity size={18} />}
+                    color="text-folio-accent"
+                    bg="bg-folio-accent/10"
+                    trend="A pagar"
+                    tooltip="Valores de serviços já concluídos que estão programados para serem liquidados na conta dos profissionais."
                 />
                 <KpiCard
-                    label="Reembolsos"
+                    label="ESTORNOS (REFUNDS)"
                     value={formatCurrency(kpis.refunds)}
-                    icon={<TrendingDown size={16} />}
-                    color="text-red-600 dark:text-red-400"
-                    bg="bg-red-500/10"
+                    icon={<TrendingDown size={18} />}
+                    color="text-[#E24B4A]"
+                    bg="bg-[#E24B4A]/10"
+                    trend="Totais"
+                    tooltip="Total de valores devolvidos aos clientes após cancelamentos ou resoluções de disputa favoráveis ao consumidor."
                 />
                 <KpiCard
-                    label="Total de TXs"
+                    label="VOLUME DE TXS"
                     value={kpis.txCount}
-                    icon={<CreditCard size={16} />}
-                    color="text-slate-600 dark:text-slate-400"
-                    bg="bg-slate-500/10"
+                    icon={<CreditCard size={18} />}
+                    tooltip="Quantidade total de transações financeiras processadas pelo sistema."
+                    color="text-folio-text-dim"
+                    bg="bg-folio-bg"
+                    trend="Transações"
                 />
             </div>
 
             {/* ── Analytical Chart ── */}
-            <div className="bg-card border border-border rounded-xl p-6">
-                <div className="flex items-center justify-between mb-8">
+            <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 shadow-folio">
+                <div className="flex items-center justify-between mb-10">
                     <div>
-                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                            {chartType === 'line' ? <TrendingUp size={14} className="text-primary" /> : <BarChart3 size={14} className="text-primary" />}
-                            Performance Financeira
+                        <h3 className="text-sm font-black text-folio-text uppercase tracking-[2px] flex items-center gap-2">
+                            <BarChart3 size={16} className="text-folio-accent" />
+                            Performance Operacional
                         </h3>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">Visão consolidada de GMV vs Receita Operadora (Últimos 12 dias)</p>
+                        <p className="text-[11px] font-bold text-folio-text-dim/40 uppercase tracking-[3px] mt-2">Visão consolidada de Fluxo vs Receita (12 Dias)</p>
                     </div>
-                    <div className="flex bg-muted p-1 rounded-lg border border-border text-[10px]">
+                    <div className="flex bg-folio-bg p-1 rounded-2xl border border-folio-border">
                         <button
                             onClick={() => setChartType('line')}
-                            className={`px-3 py-1 font-bold uppercase tracking-wider rounded-md transition-all ${chartType === 'line' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${chartType === 'line' ? 'bg-folio-accent text-white shadow-glow' : 'text-folio-text-dim hover:text-folio-text'}`}
                         >
-                            Linha
+                            Linear
                         </button>
                         <button
                             onClick={() => setChartType('bar')}
-                            className={`px-3 py-1 font-bold uppercase tracking-wider rounded-md transition-all ${chartType === 'bar' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${chartType === 'bar' ? 'bg-folio-accent text-white shadow-glow' : 'text-folio-text-dim hover:text-folio-text'}`}
                         >
-                            Barras
+                            Sazonal
                         </button>
                     </div>
                 </div>
 
-                <div className="h-[300px] w-full">
+                <div className="h-[320px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         {chartType === 'line' ? (
                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="gmvArea" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.15} />
-                                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.01} />
+                                        <stop offset="5%" stopColor="#6366F1" stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="revArea" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.01} />
+                                        <stop offset="5%" stopColor="#1DB97A" stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor="#1DB97A" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
                                 <XAxis
                                     dataKey="date"
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                    tick={{ fontSize: 9, fill: '#6B7280', fontWeight: 900 }}
                                     dy={10}
-                                    suppressHydrationWarning
                                 />
                                 <YAxis
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                    tick={{ fontSize: 9, fill: '#6B7280', fontWeight: 900 }}
                                 />
-                                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border)', strokeWidth: 1 }} />
+                                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6366F1', strokeWidth: 1, strokeDasharray: '4 4' }} />
 
                                 <Area
                                     type="monotone"
                                     dataKey="gmv"
-                                    stroke="var(--primary)"
-                                    strokeWidth={2.5}
+                                    stroke="#6366F1"
+                                    strokeWidth={4}
                                     fillOpacity={1}
                                     fill="url(#gmvArea)"
-                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                    activeDot={{ r: 6, strokeWidth: 0, fill: '#6366F1' }}
                                 />
                                 <Area
                                     type="monotone"
                                     dataKey="revenue"
-                                    stroke="#10b981"
-                                    strokeWidth={2.5}
+                                    stroke="#1DB97A"
+                                    strokeWidth={4}
                                     fillOpacity={1}
                                     fill="url(#revArea)"
-                                    activeDot={{ r: 4, strokeWidth: 0 }}
+                                    activeDot={{ r: 4, strokeWidth: 0, fill: '#1DB97A' }}
                                 />
                             </AreaChart>
                         ) : (
                             <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="gmvBar" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.8} />
-                                        <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.2} />
+                                        <stop offset="0%" stopColor="#6366F1" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#6366F1" stopOpacity={0.4} />
                                     </linearGradient>
                                     <linearGradient id="revBar" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
-                                        <stop offset="100%" stopColor="#10b981" stopOpacity={0.2} />
+                                        <stop offset="0%" stopColor="#1DB97A" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#1DB97A" stopOpacity={0.4} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
                                 <XAxis
                                     dataKey="date"
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                    tick={{ fontSize: 9, fill: '#6B7280', fontWeight: 900 }}
                                     dy={10}
-                                    suppressHydrationWarning
                                 />
                                 <YAxis
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }}
+                                    tick={{ fontSize: 9, fill: '#6B7280', fontWeight: 900 }}
                                 />
-                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 6 }} />
-                                <Bar dataKey="gmv" fill="url(#gmvBar)" radius={[4, 4, 0, 0]} barSize={20} />
-                                <Bar dataKey="revenue" fill="url(#revBar)" radius={[4, 4, 0, 0]} barSize={10} />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)', radius: 8 }} />
+                                <Bar dataKey="gmv" fill="url(#gmvBar)" radius={[6, 6, 0, 0]} barSize={24} />
+                                <Bar dataKey="revenue" fill="url(#revBar)" radius={[4, 4, 0, 0]} barSize={12} />
                             </BarChart>
                         )}
                     </ResponsiveContainer>
@@ -559,90 +569,218 @@ const AdminFinance: React.FC = () => {
             </div>
 
             {/* ── Toolbar ── */}
-            <div className="bg-card border border-border rounded-xl p-3 flex flex-col md:flex-row gap-3">
+            <div className="bg-folio-surface border border-folio-border rounded-[24px] p-4 flex flex-col md:flex-row gap-4 shadow-folio">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-folio-text-dim" size={16} />
                     <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                        placeholder="Buscar por ID, cliente, profissional ou serviço..."
-                        className="w-full h-9 rounded-lg pl-9 pr-4 text-sm outline-none bg-background border border-border text-foreground focus:border-primary transition-all"
+                        placeholder="ID, Cliente, Profissional ou Serviço..."
+                        className="w-full h-11 rounded-xl pl-11 pr-4 text-sm outline-none bg-folio-bg border border-folio-border text-folio-text focus:border-folio-accent transition-all placeholder:text-folio-text-dim/30"
                     />
                 </div>
                 <div className="flex gap-2 flex-wrap">
                     {[{ val: 'all', label: 'Todos' }, { val: 'held', label: 'Retidos' }, { val: 'released', label: 'Liberados' }, { val: 'refunded', label: 'Estornados' }].map(opt => (
                         <button key={opt.val} onClick={() => setFilterStatus(opt.val)}
-                            className={`h-9 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wide transition-all ${filterStatus === opt.val ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground border border-border'}`}>
+                            className={`h-11 px-5 rounded-xl text-[10px] font-black uppercase tracking-[1.5px] transition-all border ${filterStatus === opt.val ? 'bg-folio-accent border-folio-accent text-white shadow-glow' : 'bg-folio-bg border-folio-border text-folio-text-dim hover:text-folio-text hover:border-folio-text-dim/30'}`}>
                             {opt.label}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* ── Finance Table ── */}
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="border-b border-border bg-muted/50">
-                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">TX ID / Serviço</th>
-                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Partes</th>
-                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Escrow</th>
-                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('amount')}>
-                                <span className="flex items-center gap-1.5">Valor {sortField === 'amount' ? (sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />) : null}</span>
-                            </th>
-                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Taxa</th>
-                            <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('created')}>
-                                <span className="flex items-center gap-1.5">Data {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />) : null}</span>
-                            </th>
-                            <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Dossiê</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr><td colSpan={7} className="py-16 text-center">
-                                <RefreshCw className="animate-spin mx-auto mb-3 text-primary" size={22} />
-                                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                                    <span className="relative inline-block">
-                                        Sincronizando Ledger
-                                        <span className="absolute left-full ml-1 top-0">...</span>
-                                    </span>
-                                </p>
-                            </td></tr>
-                        ) : filteredPayments.length === 0 ? (
-                            <tr><td colSpan={7} className="py-16 text-center opacity-30">
-                                <DollarSign size={36} className="mx-auto mb-3" />
-                                <p className="text-[10px] font-semibold uppercase tracking-widest">Nenhuma transação</p>
-                            </td></tr>
-                        ) : filteredPayments.map(p => (
-                            <tr key={p.id}
-                                className="border-b border-border last:border-0 hover:bg-muted/30 transition-all cursor-pointer"
-                                onClick={() => setSelectedPayment(p)}>
-                                <td className="px-5 py-4">
-                                    <p className="text-[10px] font-mono text-muted-foreground mb-0.5">#{p.id.slice(0, 8)}</p>
-                                    <p className="text-xs font-semibold text-foreground">{p.order?.service?.title || 'Serviço'}</p>
-                                </td>
-                                <td className="px-5 py-4">
-                                    <p className="text-[10px] text-foreground">{resolveUserName(p.order?.client)}</p>
-                                    <p className="text-[10px] text-muted-foreground">→ {resolveUserName(p.order?.provider)}</p>
-                                </td>
-                                <td className="px-5 py-4"><StatusBadge status={p.escrow_status} /></td>
-                                <td className="px-5 py-4">
-                                    <span className="text-xs font-semibold text-foreground font-mono tabular-nums">{formatCurrency(p.amount_total)}</span>
-                                </td>
-                                <td className="px-5 py-4">
-                                    <span className="text-[11px] text-yellow-500 font-mono tabular-nums">{formatCurrency(p.operator_fee)}</span>
-                                </td>
-                                <td className="px-5 py-4">
-                                    <span className="text-[10px] font-mono text-muted-foreground">{formatDate(p.created_at)}</span>
-                                </td>
-                                <td className="px-5 py-4 text-right">
-                                    <button className="p-1.5 rounded-lg border border-border hover:bg-foreground hover:text-background hover:border-transparent transition-all">
-                                        <Eye size={13} />
-                                    </button>
-                                </td>
-                            </tr>
+            {/* ── Finance List (Floating Rows) ── */}
+            <div className="space-y-4">
+                <div className="hidden md:grid grid-cols-12 px-8 py-4 bg-folio-surface2/30 rounded-2xl border border-folio-border/50">
+                    <div className="col-span-3 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">TX / Serviço</div>
+                    <div className="col-span-3 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">Intervenientes (C → P)</div>
+                    <div className="col-span-2 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">Status Escrow</div>
+                    <div className="col-span-2 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px] cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('amount')}>
+                        <span className="flex items-center gap-2">VALOR {sortField === 'amount' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
+                    </div>
+                    <div className="col-span-2 text-right text-[10px] font-black text-folio-text-dim uppercase tracking-[2px] cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('created')}>
+                        <span className="flex items-center justify-end gap-2">DATA {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
+                    </div>
+                </div>
+
+                {loading ? (
+                    <div className="space-y-4">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className="grid grid-cols-12 items-center px-8 py-6 bg-folio-surface border border-folio-border rounded-[32px] opacity-60">
+                                <div className="col-span-3 space-y-2">
+                                    <Skeleton className="h-3 w-20" />
+                                    <Skeleton className="h-4 w-40" />
+                                </div>
+                                <div className="col-span-3">
+                                    <Skeleton className="h-4 w-32" />
+                                </div>
+                                <div className="col-span-2">
+                                    <Skeleton className="h-6 w-16 rounded-lg" />
+                                </div>
+                                <div className="col-span-2">
+                                    <Skeleton className="h-4 w-24" />
+                                </div>
+                                <div className="col-span-2 flex justify-end">
+                                    <Skeleton className="h-4 w-20" />
+                                </div>
+                            </div>
                         ))}
-                    </tbody>
-                </table>
+                    </div>
+                ) : filteredPayments.length === 0 ? (
+                    <div className="py-24 text-center bg-folio-surface border border-dashed border-folio-border rounded-[32px] opacity-40">
+                        <DollarSign size={56} className="mx-auto mb-4 text-folio-accent" />
+                        <p className="text-[12px] font-black uppercase tracking-[3px]">Sem transações registradas</p>
+                    </div>
+                ) : filteredPayments.map(p => (
+                    <div key={p.id}
+                        className="grid grid-cols-12 items-center px-8 py-5 bg-folio-surface border border-folio-border rounded-[32px] hover:border-folio-accent/40 shadow-sm hover:shadow-glow-dim transition-all duration-300 group cursor-pointer"
+                        onClick={() => setSelectedPayment(p)}>
+
+                        <div className="col-span-3">
+                            <p className="text-[10px] font-black text-folio-text-dim/40 font-mono mb-1 uppercase tracking-tighter">#{p.id.slice(0, 8)}</p>
+                            <p className="text-sm font-black text-folio-text uppercase tracking-tight truncate">{p.order?.service?.title || 'Serviço'}</p>
+                        </div>
+
+                        <div className="col-span-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] font-black text-folio-text">{resolveUserName(p.order?.client)}</span>
+                                <ArrowRight size={10} className="text-folio-text-dim/30" />
+                                <span className="text-[11px] font-bold text-folio-text-dim/60 truncate">{resolveUserName(p.order?.provider)}</span>
+                            </div>
+                        </div>
+
+                        <div className="col-span-2">
+                            <div className={`inline-flex px-3 py-1 rounded-lg border text-[9px] font-black tracking-widest uppercase ${p.escrow_status === 'released' ? 'bg-[#1DB97A]/10 border-[#1DB97A]/20 text-[#1DB97A]' :
+                                p.escrow_status === 'held' ? 'bg-[#F5C842]/10 border-[#F5C842]/20 text-[#F5C842]' :
+                                    'bg-folio-bg border-folio-border text-folio-text-dim'
+                                }`}>
+                                {p.escrow_status}
+                            </div>
+                        </div>
+
+                        <div className="col-span-2">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-black text-folio-text tabular-nums tracking-tighter">
+                                    {formatCurrency(p.amount_total)}
+                                </span>
+                                <span className="text-[9px] font-black text-[#F5C842] uppercase tracking-[1px]">Fee: {formatCurrency(p.operator_fee)}</span>
+                            </div>
+                        </div>
+
+                        <div className="col-span-2 text-right">
+                            <p className="text-[11px] font-bold text-folio-text-dim font-mono uppercase tracking-[1px]">{formatDate(p.created_at)}</p>
+                            <div className="mt-2 text-folio-text-dim group-hover:text-folio-accent transition-colors flex justify-end">
+                                <Eye size={16} />
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
+
+            {/* ── Payment Dossier (Overlay) ── */}
+            {selectedPayment && (
+                <div className="fixed inset-0 bg-folio-bg/80 backdrop-blur-md z-[100] flex justify-end animate-in fade-in duration-300">
+                    <div className="h-full w-full max-w-2xl bg-folio-bg shadow-2xl flex flex-col border-l border-folio-border animate-in slide-in-from-right duration-500">
+                        <div className="px-10 py-8 border-b border-folio-border bg-folio-surface flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-2xl bg-folio-bg border border-folio-border text-[#1DB97A] flex items-center justify-center shadow-inner">
+                                    <DollarSign size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-black text-folio-text uppercase tracking-tight">Dossiê de Transação</h2>
+                                    <p className="text-[11px] text-folio-text-dim/60 font-mono font-bold tracking-[2px] mt-1">PROTOCOL: {selectedPayment.id}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setSelectedPayment(null)} className="w-12 h-12 rounded-2xl bg-folio-bg border border-folio-border flex items-center justify-center text-folio-text-dim hover:text-folio-text transition-all">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex px-10 border-b border-folio-border bg-folio-surface gap-2">
+                            {['details', 'ledger', 'intervention'].map(tab => (
+                                <button key={tab} onClick={() => setDossierTab(tab)}
+                                    className={`px-4 py-5 text-[10px] font-black uppercase tracking-[2px] border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
+                                    {tab === 'details' ? 'Auditoria' : tab === 'ledger' ? 'Razão Contábil' : 'Intervenção'}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-10 space-y-8">
+                            {dossierTab === 'details' && (
+                                <div className="space-y-8">
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {[
+                                            { label: 'Bruto', value: formatCurrency(selectedPayment.amount_total), color: 'text-folio-text' },
+                                            { label: 'Revenue 10%', value: formatCurrency(selectedPayment.operator_fee), color: 'text-[#F5C842]' },
+                                            { label: 'Repasse', value: formatCurrency(selectedPayment.provider_amount), color: 'text-[#1DB97A]' },
+                                        ].map(s => (
+                                            <div key={s.label} className="bg-folio-surface border border-folio-border rounded-[24px] p-6 shadow-sm">
+                                                <p className="text-[9px] text-folio-text-dim/50 font-black uppercase tracking-[2px] mb-2">{s.label}</p>
+                                                <p className={`text-lg font-black font-mono tracking-tighter ${s.color}`}>{s.value}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 space-y-6 shadow-folio">
+                                        <p className="text-[10px] font-black text-folio-text-dim/40 uppercase tracking-[3px] mb-2">Metadata da Negociação</p>
+                                        {[
+                                            { label: 'Estado de Escrow', value: <div className={`inline-flex px-3 py-1 rounded-lg text-[9px] font-black tracking-widest border border-folio-border bg-folio-bg uppercase`}>{selectedPayment.escrow_status}</div> },
+                                            { label: 'Item de Serviço', value: selectedPayment.order?.service?.title },
+                                            { label: 'Emissor (Cliente)', value: resolveUserName(selectedPayment.order?.client) },
+                                            { label: 'Beneficiário (Prof.)', value: resolveUserName(selectedPayment.order?.provider) },
+                                            { label: 'Timestamp Interno', value: selectedPayment.created_at },
+                                        ].map(row => (
+                                            <div key={row.label} className="flex flex-col gap-1.5 border-b border-folio-border last:border-0 pb-5 last:pb-0">
+                                                <span className="text-[9px] font-black text-folio-text-dim/50 uppercase tracking-[2px]">{row.label}</span>
+                                                <span className="text-xs font-bold text-folio-text uppercase tracking-tight">{row.value || '—'}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {dossierTab === 'ledger' && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <Activity className="text-folio-accent" size={20} />
+                                        <h4 className="text-sm font-black text-folio-text uppercase tracking-[2px]">Simulação Ledger Partida Dobrada</h4>
+                                    </div>
+                                    <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 space-y-4 shadow-folio">
+                                        <LedgerRow label="D - CAIXA ESCROW (HOLDING)" value={formatCurrency(selectedPayment.amount_total)} type="debit" />
+                                        <LedgerRow label="C - RECEITA BRUTA DIFERIDA" value={formatCurrency(selectedPayment.amount_total)} type="credit" />
+                                        <div className="h-px bg-folio-border my-4" />
+                                        <LedgerRow label="D - PASSIVO REPASSE PROFISSIONAL" value={formatCurrency(selectedPayment.provider_amount)} type="debit" />
+                                        <LedgerRow label="C - RECEITA LÍQUIDA OPERADORA" value={formatCurrency(selectedPayment.operator_fee)} type="credit" />
+                                    </div>
+                                    <p className="text-[10px] text-folio-text-dim/50 italic leading-relaxed text-center px-10">
+                                        * Valores processados via Gateway integrado. O razone acima representa a segregação contábil interna para governança bancária.
+                                    </p>
+                                </div>
+                            )}
+
+                            {dossierTab === 'intervention' && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <Shield className="text-[#E24B4A]" size={20} />
+                                        <h4 className="text-sm font-black text-folio-text uppercase tracking-[2px]">Intervenção Financeira Admin</h4>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <button onClick={() => handleAction(selectedPayment.id, 'released')} disabled={isProcessing === selectedPayment.id}
+                                            className="p-8 text-left bg-folio-surface border border-folio-border rounded-[32px] hover:bg-[#1DB97A]/10 hover:border-[#1DB97A]/30 text-[#1DB97A] transition-all group disabled:opacity-30 shadow-sm hover:shadow-glow-dim">
+                                            <Unlock size={24} className="mb-4 transition-transform group-hover:scale-110 group-hover:rotate-6" />
+                                            <p className="text-sm font-black text-folio-text mb-2 uppercase tracking-tight">Liberar Escrow</p>
+                                            <p className="text-[11px] font-medium text-folio-text-dim leading-relaxed opacity-70">Autoriza o repasse imediato ao profissional.</p>
+                                        </button>
+                                        <button onClick={() => handleAction(selectedPayment.id, 'refunded')} disabled={isProcessing === selectedPayment.id}
+                                            className="p-8 text-left bg-folio-surface border border-folio-border rounded-[32px] hover:bg-[#E24B4A]/10 hover:border-[#E24B4A]/30 text-[#E24B4A] transition-all group disabled:opacity-30 shadow-sm hover:shadow-glow-dim">
+                                            <XCircle size={24} className="mb-4 transition-transform group-hover:scale-110 group-hover:rotate-6" />
+                                            <p className="text-sm font-black text-folio-text mb-2 uppercase tracking-tight">Efetuar Refund</p>
+                                            <p className="text-[11px] font-medium text-folio-text-dim leading-relaxed opacity-70">Cancela a transação e estorna o valor total ao cliente.</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

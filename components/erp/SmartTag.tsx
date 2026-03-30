@@ -43,13 +43,13 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
 
     const getColorClass = () => {
         switch (type) {
-            case 'CLIENTE': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-            case 'PROFISSIONAL': return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
-            case 'SERVICO': return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
-            case 'PEDIDO': return 'bg-green-500/10 text-green-600 border-green-500/20';
+            case 'CLIENTE': return 'bg-info/10 text-info border-info/20';
+            case 'PROFISSIONAL': return 'bg-folio-accent/10 text-folio-accent border-folio-accent/20';
+            case 'SERVICO': return 'bg-accent/10 text-accent border-accent/20';
+            case 'PEDIDO': return 'bg-success/10 text-success border-success/20';
             case 'NEGOCIACAO': return 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20';
             case 'VALOR': return 'bg-slate-500/10 text-slate-600 border-slate-500/20';
-            case 'RISCO': return 'bg-red-500/10 text-red-600 border-red-500/20';
+            case 'RISCO': return 'bg-error/10 text-error border-error/20';
             default: return 'bg-muted text-muted-foreground border-border';
         }
     };
@@ -75,25 +75,25 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
             {isOpen && (
                 <div
                     ref={popoverRef}
-                    className="absolute bottom-full left-0 mb-2 z-[100] w-64 bg-card border border-border rounded-2xl shadow-2xl p-4 animate-in fade-in slide-in-from-bottom-2"
+                    className="absolute bottom-full left-0 mb-3 z-[100] w-72 bg-folio-surface border border-folio-border rounded-[24px] shadow-folio p-5 animate-fade-in"
                 >
-                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-border">
-                        <div className="flex items-center gap-2">
-                            <div className={`p-1.5 rounded-lg ${getColorClass().split(' ').slice(0, 2).join(' ')}`}>
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-folio-border/50">
+                        <div className="flex items-center gap-2.5">
+                            <div className={`p-2 rounded-xl border ${getColorClass().split(' ').slice(0, 3).join(' ')}`}>
                                 {getIcon()}
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                            <span className="text-[10px] font-bold uppercase tracking-[1.5px] text-folio-text-dim">
                                 {type}
                             </span>
                         </div>
-                        {id && <span className="text-[9px] font-mono text-muted-foreground">#{id.slice(0, 8)}</span>}
+                        {id && <span className="text-[10px] font-mono text-folio-text-dim/40 bg-folio-bg px-1.5 py-0.5 rounded border border-folio-border">#{id.slice(0, 6)}</span>}
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {type === 'CLIENTE' || type === 'PROFISSIONAL' ? (
                             <>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center font-bold text-lg text-foreground overflow-hidden border border-border">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-folio-surface2 flex items-center justify-center font-bold text-lg text-folio-text overflow-hidden border border-folio-border shadow-sm">
                                         {data?.avatar_url ? (
                                             <img src={data.avatar_url} alt="" className="w-full h-full object-cover" />
                                         ) : (
@@ -101,76 +101,76 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                                         )}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-bold text-foreground leading-tight truncate">{data?.displayName || data?.name || label || 'Usuário'}</p>
-                                        <p className="text-[10px] text-muted-foreground font-mono truncate">{data?.email || `ID: ${data?.id?.split('-')[0] || 'N/A'}`}</p>
+                                        <p className="text-[14px] font-bold text-folio-text leading-tight truncate">{data?.displayName || data?.name || label || 'Usuário'}</p>
+                                        <p className="text-[10px] text-folio-text-dim font-medium tracking-tight truncate opacity-60">{data?.email || `ID: ${data?.id?.split('-')[0] || 'N/A'}`}</p>
                                     </div>
                                 </div>
                                 <TrustScore score={data?.trustScore || 85} size="sm" />
-                                <div className="grid grid-cols-2 gap-2 mt-2">
-                                    <div className="bg-muted/30 rounded-lg p-2 text-center border border-border/50">
-                                        <p className="text-[8px] uppercase font-bold text-muted-foreground">Pedidos</p>
-                                        <p className="text-xs font-bold">{data?.totalOrders || 0}</p>
+                                <div className="grid grid-cols-2 gap-3 mt-1">
+                                    <div className="bg-folio-bg rounded-xl p-2.5 text-center border border-folio-border/50 shadow-inner">
+                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim tracking-wider mb-1">Pedidos</p>
+                                        <p className="text-xs font-black text-folio-text">{data?.totalOrders || 0}</p>
                                     </div>
-                                    <div className="bg-muted/30 rounded-lg p-2 text-center border border-border/50">
-                                        <p className="text-[8px] uppercase font-bold text-muted-foreground">Disputas</p>
-                                        <p className="text-xs font-bold text-red-500">{data?.disputes || 0}</p>
+                                    <div className="bg-folio-bg rounded-xl p-2.5 text-center border border-folio-border/50 shadow-inner">
+                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim tracking-wider mb-1">Disputas</p>
+                                        <p className="text-xs font-black text-error">{data?.disputes || 0}</p>
                                     </div>
                                 </div>
                             </>
                         ) : type === 'SERVICO' ? (
-                            <div className="space-y-2">
-                                <p className="text-xs font-bold text-foreground leading-tight">{data?.title || label}</p>
-                                <div className="flex justify-between items-center bg-muted/40 p-2 rounded-lg border border-border/50">
-                                    <span className="text-[9px] font-bold text-muted-foreground uppercase">Categoria</span>
-                                    <span className="text-[10px] font-semibold text-purple-600 dark:text-purple-400">{data?.category || 'Geral'}</span>
+                            <div className="space-y-3">
+                                <p className="text-[13px] font-bold text-folio-text leading-tight">{data?.title || label}</p>
+                                <div className="flex justify-between items-center bg-folio-bg p-2.5 rounded-xl border border-folio-border/50">
+                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-wider">Categoria</span>
+                                    <span className="text-[10px] font-bold text-accent px-2 py-0.5 rounded-lg border border-accent/20">{data?.category || 'Geral'}</span>
                                 </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
-                                        <p className="text-[8px] uppercase font-bold text-muted-foreground">Preço Médio</p>
-                                        <p className="text-[10px] font-bold">R$ {formatNumber(data?.avgPrice)}</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-folio-bg rounded-xl p-2.5 border border-folio-border/50 shadow-inner">
+                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim mb-1">Preço Médio</p>
+                                        <p className="text-[11px] font-black text-folio-text">R$ {formatNumber(data?.avgPrice)}</p>
                                     </div>
-                                    <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
-                                        <p className="text-[8px] uppercase font-bold text-muted-foreground">Taxa Disputa</p>
-                                        <p className="text-[10px] font-bold text-orange-500">{data?.disputeRate || '0'}%</p>
+                                    <div className="bg-folio-bg rounded-xl p-2.5 border border-folio-border/50 shadow-inner">
+                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim mb-1">Taxa Disputa</p>
+                                        <p className="text-[11px] font-black text-warning">{data?.disputeRate || '0'}%</p>
                                     </div>
                                 </div>
                             </div>
                         ) : type === 'VALOR' ? (
-                            <div className="space-y-2">
-                                <div className="bg-muted/30 p-3 rounded-xl border border-border/50 space-y-2">
-                                    <div className="flex justify-between items-center text-[10px] font-medium text-muted-foreground">
-                                        <span>Valor Bruto (Escrow)</span>
-                                        <span className="font-bold text-foreground">R$ {formatNumber(data?.totalAmount || 0)}</span>
+                            <div className="space-y-3">
+                                <div className="bg-folio-bg p-4 rounded-2xl border border-folio-border space-y-3 shadow-inner">
+                                    <div className="flex justify-between items-center text-[10px] font-bold text-folio-text-dim">
+                                        <span className="uppercase tracking-wider">Bruto (Escrow)</span>
+                                        <span className="text-folio-text">R$ {formatNumber(data?.totalAmount || 0)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-[10px] font-medium text-red-500/80">
-                                        <span>Taxa Plattform (10%)</span>
-                                        <span className="font-bold">- R$ {formatNumber((data?.totalAmount || 0) * 0.1)}</span>
+                                    <div className="flex justify-between items-center text-[10px] font-bold text-error/80">
+                                        <span className="uppercase tracking-wider">Taxa (10%)</span>
+                                        <span>- R$ {formatNumber((data?.totalAmount || 0) * 0.1)}</span>
                                     </div>
-                                    <div className="pt-2 border-t border-border flex justify-between items-center">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-foreground">Repasse Profissional</span>
-                                        <span className="text-sm font-black text-green-500">R$ {formatNumber((data?.totalAmount || 0) * 0.9)}</span>
+                                    <div className="pt-3 border-t border-folio-border flex justify-between items-center">
+                                        <span className="text-[10px] font-black uppercase tracking-[1.5px] text-folio-text">Líquido Prof.</span>
+                                        <span className="text-md font-black text-success">R$ {formatNumber((data?.totalAmount || 0) * 0.9)}</span>
                                     </div>
                                 </div>
                             </div>
                         ) : type === 'PEDIDO' ? (
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-start gap-2">
-                                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest pt-1">Serviço</span>
-                                    <span className="text-xs font-bold text-foreground text-right">{data?.service?.title || 'Relacionado'}</span>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-start gap-4 p-1">
+                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-[1.5px] pt-1 shrink-0">Serviço</span>
+                                    <span className="text-[11px] font-bold text-folio-text text-right leading-tight">{data?.service?.title || 'Relacionado'}</span>
                                 </div>
-                                <div className="bg-muted/30 p-2 rounded-lg border border-border/50 flex justify-between items-center">
-                                    <span className="text-[9px] font-bold text-muted-foreground uppercase">Status Global</span>
-                                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-green-500/10 text-green-600 rounded-md uppercase tracking-wider">
+                                <div className="bg-folio-bg p-3 rounded-xl border border-folio-border flex justify-between items-center shadow-inner">
+                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-wider">Status Geral</span>
+                                    <span className="text-[9px] font-black px-2 py-1 bg-success/10 text-success rounded-lg border border-success/20 uppercase tracking-widest">
                                         {data?.status || 'Ativo'}
                                     </span>
                                 </div>
-                                <div className="pt-2 border-t border-border flex justify-between items-center">
-                                    <span className="text-[9px] font-bold text-muted-foreground uppercase">Valor Total</span>
-                                    <span className="text-xs font-black text-foreground">R$ {formatNumber(data?.total_amount)}</span>
+                                <div className="pt-3 border-t border-folio-border flex justify-between items-end p-1">
+                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-wider">Liquidez Total</span>
+                                    <span className="text-[16px] font-black text-folio-text tabular-nums">R$ {formatNumber(data?.total_amount)}</span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-[10px] text-muted-foreground leading-relaxed italic">
+                            <div className="text-[11px] text-folio-text-dim leading-relaxed italic opacity-80 p-1">
                                 {data?.description || 'Dados contextuais de inteligência não disponíveis para esta negociação.'}
                             </div>
                         )}
@@ -178,9 +178,9 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
 
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="w-full mt-4 py-2 bg-muted hover:bg-muted/80 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-colors"
+                        className="w-full mt-5 py-3 bg-folio-bg hover:bg-folio-surface2/50 border border-folio-border rounded-xl text-[9px] font-black uppercase tracking-[2px] text-folio-text-dim transition-all active:scale-95 shadow-sm"
                     >
-                        Fechar Painel
+                        FECHAR
                     </button>
                 </div>
             )}

@@ -3,7 +3,7 @@ import {
     Users, Search, ShieldCheck, ShieldAlert, ShieldX,
     Clock, Activity, AlertTriangle, CheckCircle2, XCircle,
     Lock, Unlock, ChevronRight, RefreshCw, TrendingUp, Star, X,
-    ArrowUp, ArrowDown, Eye
+    ArrowUp, ArrowDown, Eye, Briefcase, Zap, Scale, ArrowRight
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { resolveUserName } from '../utils/userUtils';
@@ -77,7 +77,6 @@ const UserManagement: React.FC = () => {
                 const profile = allProfiles.find(p => p.user_id === u.id);
                 let kycStatus = profile?.documents_status || u.kyc_status || 'pending';
 
-                // Robustness: If files exist but status is still pending, it means it's submitted for analysis
                 if (kycStatus === 'pending' && profile?.doc_front_path) {
                     kycStatus = 'submitted';
                 }
@@ -113,7 +112,6 @@ const UserManagement: React.FC = () => {
                 await supabase.from('provider_profiles').update({ documents_status: 'rejected' }).eq('user_id', user.id);
             }
             try {
-                // Try update users table as well (governance)
                 await (supabase as any).from('users').update(updates).eq('id', user.id);
             } catch (userErr) {
                 console.warn("Could not update users table, but profile was updated:", userErr);
@@ -153,94 +151,99 @@ const UserManagement: React.FC = () => {
     const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
 
     return (
-        <div className="space-y-5 pb-12">
+        <div className="space-y-6 pb-12 animate-fade-in">
 
-            {/* ── AlertDialog — Confirmação de Ação ── */}
+            {/* ── AlertDialog ── */}
             <AlertDialog open={!!actionModal} onOpenChange={(open) => { if (!open) { setActionModal(null); setActionReason(''); } }}>
-                <AlertDialogContent>
+                <AlertDialogContent className="bg-folio-surface border border-folio-border rounded-[32px] p-8 shadow-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Intervenção de Usuário</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Usuário: <strong>{actionModal && resolveUserName(actionModal.user)}</strong>. Esta ação será registrada em auditoria.
+                        <AlertDialogTitle className="text-lg font-black text-folio-text uppercase tracking-tight">Intervenção de Usuário</AlertDialogTitle>
+                        <AlertDialogDescription className="text-xs font-medium text-folio-text-dim/70 mt-2">
+                            Ação crítica para o usuário: <strong className="text-folio-text">{actionModal && resolveUserName(actionModal.user)}</strong>. Justificativa obrigatória para auditoria.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <div className="space-y-2 py-2">
-                        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Justificativa (Auditoria)</label>
+                    <div className="space-y-3 py-6">
+                        <label className="text-[10px] font-black text-folio-text-dim uppercase tracking-[3px] opacity-40">Motivo da Decisão</label>
                         <textarea
                             value={actionReason} onChange={e => setActionReason(e.target.value)}
-                            className="w-full h-24 rounded-lg p-3 text-xs outline-none bg-background border border-border text-foreground focus:border-primary transition-all resize-none"
-                            placeholder="Descreva o motivo para auditoria..."
+                            className="w-full h-32 rounded-2xl p-4 text-sm outline-none bg-folio-bg border border-folio-border text-folio-text focus:border-folio-accent transition-all resize-none shadow-inner"
+                            placeholder="Descreva as evidências consideradas..."
                         />
                     </div>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => { setActionModal(null); setActionReason(''); }}>Cancelar</AlertDialogCancel>
+                    <AlertDialogFooter className="gap-3">
+                        <AlertDialogCancel onClick={() => { setActionModal(null); setActionReason(''); }} className="h-12 px-6 rounded-2xl border border-folio-border text-[11px] font-black uppercase tracking-widest text-folio-text-dim hover:bg-folio-bg transition-all">Cancelar</AlertDialogCancel>
                         <AlertDialogAction
                             disabled={!actionReason || isProcessing}
                             onClick={performAction}
-                            className={actionModal?.type === 'BLOCK' || actionModal?.type === 'KYC_REJECT' ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' : ''}
+                            className={`h-12 px-8 rounded-2xl border-none text-[11px] font-black uppercase tracking-widest text-white shadow-glow transition-all active:scale-95 ${actionModal?.type === 'BLOCK' || actionModal?.type === 'KYC_REJECT' ? 'bg-[#E24B4A] hover:bg-[#CC2200]' : 'bg-folio-accent hover:opacity-90'}`}
                         >
-                            {isProcessing ? (
-                                <span className="relative inline-block">
-                                    Processando
-                                    <span className="absolute left-full ml-1 top-0">...</span>
-                                </span>
-                            ) : 'Confirmar & Logar'}
+                            {isProcessing ? 'PROCESSANDO...' : 'CONFIRMAR & REGISTRAR'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* ── Sheet — Dossier de Usuário ── */}
+            {/* ── Sheet — Dossier ── */}
             <Sheet open={!!selectedUser} onOpenChange={(open) => { if (!open) setSelectedUser(null); }}>
-                <SheetContent side="right" className="w-full max-w-xl p-0 flex flex-col gap-0 overflow-hidden">
+                <SheetContent side="right" className="w-full max-w-xl p-0 flex flex-col gap-0 overflow-hidden bg-folio-bg border-l border-folio-border shadow-2xl">
                     {selectedUser && (
                         <>
-                            <SheetHeader className="px-5 py-4 border-b border-border bg-card flex-row items-center gap-3 space-y-0">
-                                <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm shrink-0">
+                            <SheetHeader className="px-8 py-6 border-b border-folio-border bg-folio-surface flex-row items-center gap-4 space-y-0">
+                                <div className="w-14 h-14 rounded-2xl bg-folio-bg border border-folio-border text-folio-accent flex items-center justify-center font-black text-xl shrink-0 shadow-inner">
                                     {resolveUserName(selectedUser).charAt(0).toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <SheetTitle className="text-sm font-semibold text-foreground leading-tight">{resolveUserName(selectedUser)}</SheetTitle>
-                                    <p className="text-[10px] text-muted-foreground font-mono truncate">{selectedUser.email}</p>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <SheetTitle className="text-lg font-black text-folio-text uppercase tracking-tight leading-none">{resolveUserName(selectedUser)}</SheetTitle>
+                                        <span className="px-2 py-0.5 rounded-md bg-folio-accent/10 border border-folio-accent/20 text-folio-accent text-[9px] font-black tracking-widest uppercase">{selectedUser.role}</span>
+                                    </div>
+                                    <p className="text-[11px] text-folio-text-dim/60 font-mono tracking-tight font-medium">{selectedUser.email}</p>
                                 </div>
+                                <button onClick={() => setSelectedUser(null)} className="w-10 h-10 rounded-xl bg-folio-bg border border-folio-border flex items-center justify-center text-folio-text-dim hover:text-folio-text transition-colors">
+                                    <X size={18} />
+                                </button>
                             </SheetHeader>
 
-                            <div className="flex px-5 border-b border-border bg-card">
+                            <div className="flex px-8 border-b border-folio-border bg-folio-surface gap-2">
                                 {['profile', 'orders', 'risk', 'actions'].map(tab => (
                                     <button key={tab} onClick={() => setDossierTab(tab)}
-                                        className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-widest border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
-                                        {tab === 'profile' ? 'Perfil' : tab === 'orders' ? 'Pedidos' : tab === 'risk' ? 'Risco & KYC' : 'Ações Admin'}
+                                        className={`px-4 py-4 text-[10px] font-black uppercase tracking-[2px] border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
+                                        {tab === 'profile' ? 'Perfil' : tab === 'orders' ? 'Pedidos' : tab === 'risk' ? 'Risco & KYC' : 'Ações'}
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-6">
+                            <div className="flex-1 overflow-y-auto p-8 space-y-8">
                                 {dossierTab === 'profile' && (
-                                    <div className="space-y-5">
-                                        <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
                                             {[
-                                                { label: 'Pedidos Feitos', value: selectedUser.totalClientOrders, color: 'text-primary' },
-                                                { label: 'Serviços Prestados', value: selectedUser.totalProviderOrders, color: 'text-green-600 dark:text-green-400' },
-                                                { label: 'Disputas Abertas', value: selectedUser.openDisputes, color: selectedUser.openDisputes > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground' },
-                                                { label: 'Avaliação Média', value: selectedUser.avgRating ? `${selectedUser.avgRating.toFixed(1)} ★` : '—', color: 'text-yellow-500' },
+                                                { label: 'Pedidos Realizados', value: selectedUser.totalClientOrders, color: 'text-folio-accent', icon: <Briefcase size={12} /> },
+                                                { label: 'Serviços Prestados', value: selectedUser.totalProviderOrders, color: 'text-[#1DB97A]', icon: <Zap size={12} /> },
+                                                { label: 'Disputas Ativas', value: selectedUser.openDisputes, color: selectedUser.openDisputes > 0 ? 'text-[#E24B4A]' : 'text-folio-text-dim', icon: <Scale size={12} /> },
+                                                { label: 'Score Avaliação', value: selectedUser.avgRating ? `${selectedUser.avgRating.toFixed(1)} ★` : '—', color: 'text-[#F5C842]', icon: <Star size={12} /> },
                                             ].map(s => (
-                                                <div key={s.label} className="bg-card border border-border rounded-xl p-4">
-                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">{s.label}</p>
-                                                    <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
+                                                <div key={s.label} className="bg-folio-surface border border-folio-border rounded-[24px] p-5 shadow-sm group hover:shadow-glow-dim transition-all">
+                                                    <div className="flex items-center gap-2 mb-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                                                        <span className={s.color}>{s.icon}</span>
+                                                        <p className="text-[10px] text-folio-text-dim font-black uppercase tracking-[2px]">{s.label}</p>
+                                                    </div>
+                                                    <p className={`text-2xl font-black tabular-nums tracking-tighter ${s.color}`}>{s.value}</p>
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+                                        <div className="bg-folio-surface border border-folio-border rounded-[28px] p-6 space-y-4 shadow-folio">
+                                            <p className="text-[10px] font-black text-folio-text-dim/40 uppercase tracking-[3px] mb-2">Detalhes da Identidade</p>
                                             {[
-                                                { label: 'E-mail', value: selectedUser.email },
-                                                { label: 'Função', value: selectedUser.role },
-                                                { label: 'KYC Status', value: selectedUser.kyc_status || 'Não iniciado' },
-                                                { label: 'Conta criada', value: formatDate(selectedUser.created_at) },
-                                                { label: 'ID', value: selectedUser.id?.slice(0, 16) + '...' },
+                                                { label: 'E-mail Principal', value: selectedUser.email },
+                                                { label: 'Perfil de Acesso', value: selectedUser.role.toUpperCase() },
+                                                { label: 'Verificação KYC', value: selectedUser.kyc_status?.toUpperCase() || 'Pendente' },
+                                                { label: 'Membro desde', value: formatDate(selectedUser.created_at) },
+                                                { label: 'Identificador Global', value: selectedUser.id },
                                             ].map(row => (
-                                                <div key={row.label} className="flex justify-between items-center border-b border-border last:border-0 pb-3 last:pb-0">
-                                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{row.label}</span>
-                                                    <span className="text-xs font-medium text-foreground font-mono">{row.value || '—'}</span>
+                                                <div key={row.label} className="flex flex-col gap-1 border-b border-folio-border last:border-0 pb-4 last:pb-0">
+                                                    <span className="text-[9px] font-black text-folio-text-dim/50 uppercase tracking-[2px]">{row.label}</span>
+                                                    <span className="text-xs font-bold text-folio-text font-mono truncate">{row.value || '—'}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -248,66 +251,50 @@ const UserManagement: React.FC = () => {
                                 )}
 
                                 {dossierTab === 'risk' && (
-                                    <div className="space-y-6">
-                                        <div className="bg-card border border-border rounded-xl p-5 flex items-center justify-between">
-                                            <div>
-                                                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Score de Risco</p>
-                                                <h3 className={`text-4xl font-semibold leading-none ${selectedUser.riskLevel === 'high' ? 'text-red-500' : selectedUser.riskLevel === 'medium' ? 'text-yellow-500' : 'text-green-500'}`}>
-                                                    {selectedUser.riskScore}<span className="text-base text-muted-foreground font-medium ml-1">/100</span>
+                                    <div className="space-y-8">
+                                        <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 flex items-center justify-between shadow-folio relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                <ShieldAlert size={80} />
+                                            </div>
+                                            <div className="relative z-10">
+                                                <p className="text-[10px] font-black text-folio-text-dim uppercase tracking-[3px] mb-2">Score de Risco Operacional</p>
+                                                <h3 className={`text-6xl font-black leading-none tracking-tighter tabular-nums ${selectedUser.riskScore > 60 ? 'text-[#E24B4A]' : selectedUser.riskScore > 30 ? 'text-[#F5C842]' : 'text-[#1DB97A]'}`}>
+                                                    {selectedUser.riskScore}<span className="text-xl text-folio-text-dim/30 font-black ml-2 uppercase tracking-tight">/100</span>
                                                 </h3>
                                             </div>
-                                            <StatusBadge status={selectedUser.riskLevel === 'high' ? 'open' : selectedUser.riskLevel === 'medium' ? 'in_review' : 'resolved'} size="md" />
+                                            <div className="relative z-10">
+                                                <div className={`px-4 py-2 rounded-xl font-black text-[12px] tracking-[2px] uppercase border ${selectedUser.riskLevel === 'high' ? 'bg-[#E24B4A]/10 border-[#E24B4A]/30 text-[#E24B4A]' : 'bg-[#1DB97A]/10 border-[#1DB97A]/30 text-[#1DB97A]'
+                                                    }`}>
+                                                    {selectedUser.riskLevel === 'high' ? 'Crítico' : 'Seguro'}
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        {/* KYC Documents Section */}
-                                        <div className="bg-card border border-border rounded-xl p-4 space-y-4">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Documentação KYC</p>
-                                                <StatusBadge status={selectedUser.kyc_status || 'pending'} size="sm" />
+                                        <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 space-y-6 shadow-folio">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <ShieldCheck className="text-folio-accent" size={20} />
+                                                    <h4 className="text-sm font-black text-folio-text uppercase tracking-widest">Documentação Comprobatória</h4>
+                                                </div>
+                                                <span className="px-3 py-1 rounded-lg bg-folio-bg border border-folio-border text-[9px] font-black text-folio-text-dim tracking-widest uppercase">{selectedUser.kyc_status}</span>
                                             </div>
 
                                             {selectedUser.profile?.doc_front_path ? (
-                                                <div className="grid grid-cols-1 gap-4">
-                                                    <div>
-                                                        <p className="text-[9px] font-bold text-muted-foreground uppercase mb-2">Frente do Documento</p>
-                                                        <div className="aspect-video rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center relative group">
+                                                <div className="grid grid-cols-1 gap-6">
+                                                    <div className="space-y-2">
+                                                        <p className="text-[10px] font-black text-folio-text-dim/50 uppercase tracking-[2px] ml-1">Frente do Documento</p>
+                                                        <div className="aspect-[16/10] rounded-[24px] overflow-hidden border border-folio-border bg-folio-bg flex items-center justify-center relative group shadow-inner">
                                                             <img
                                                                 src={supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_front_path).data.publicUrl}
-                                                                className="w-full h-full object-contain cursor-zoom-in transition-transform group-hover:scale-105"
+                                                                className="w-full h-full object-contain cursor-zoom-in transition-all duration-500 group-hover:scale-105"
                                                                 onClick={() => window.open(supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_front_path).data.publicUrl, '_blank')}
                                                             />
                                                         </div>
                                                     </div>
-
-                                                    {selectedUser.profile.doc_back_path && (
-                                                        <div>
-                                                            <p className="text-[9px] font-bold text-muted-foreground uppercase mb-2">Verso do Documento</p>
-                                                            <div className="aspect-video rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center relative group">
-                                                                <img
-                                                                    src={supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_back_path).data.publicUrl}
-                                                                    className="w-full h-full object-contain cursor-zoom-in transition-transform group-hover:scale-105"
-                                                                    onClick={() => window.open(supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_back_path).data.publicUrl, '_blank')}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {selectedUser.profile.selfie_path && (
-                                                        <div>
-                                                            <p className="text-[9px] font-bold text-muted-foreground uppercase mb-2">Selfie de Verificação</p>
-                                                            <div className="aspect-square rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center relative group">
-                                                                <img
-                                                                    src={supabase.storage.from('documents').getPublicUrl(selectedUser.profile.selfie_path).data.publicUrl}
-                                                                    className="w-full h-full object-cover cursor-zoom-in transition-transform group-hover:scale-105"
-                                                                    onClick={() => window.open(supabase.storage.from('documents').getPublicUrl(selectedUser.profile.selfie_path).data.publicUrl, '_blank')}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    )}
                                                 </div>
                                             ) : (
-                                                <div className="py-10 text-center bg-muted/30 rounded-lg border border-dashed border-border">
-                                                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Nenhum documento enviado</p>
+                                                <div className="py-16 text-center bg-folio-bg/50 rounded-[28px] border-2 border-dashed border-folio-border">
+                                                    <p className="text-[11px] font-black text-folio-text-dim uppercase tracking-[3px] opacity-40">Aguardando envio de documentação</p>
                                                 </div>
                                             )}
                                         </div>
@@ -315,20 +302,23 @@ const UserManagement: React.FC = () => {
                                 )}
 
                                 {dossierTab === 'actions' && (
-                                    <div className="space-y-3">
-                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">Painel de Intervenção Operacional</p>
-                                        <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <Lock className="text-[#E24B4A]" size={20} />
+                                            <h4 className="text-sm font-black text-folio-text uppercase tracking-widest">Controles de Governança</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
                                             {[
-                                                { icon: <Lock size={18} />, label: 'Bloquear Conta', desc: 'Suspende acesso imediato.', type: 'BLOCK', color: 'text-red-600 dark:text-red-400 hover:bg-red-500/10' },
-                                                { icon: <Unlock size={18} />, label: 'Reativar Conta', desc: 'Restaura acesso completo.', type: 'ACTIVATE', color: 'text-green-600 dark:text-green-400 hover:bg-green-500/10' },
-                                                { icon: <CheckCircle2 size={18} />, label: 'Aprovar KYC', desc: 'Valida documentos.', type: 'KYC_APPROVE', color: 'text-primary hover:bg-primary/10' },
-                                                { icon: <XCircle size={18} />, label: 'Recusar KYC', desc: 'Rejeita verificação.', type: 'KYC_REJECT', color: 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10' },
+                                                { icon: <Lock size={20} />, label: 'Bloquear Conta', desc: 'Suspende acesso imediato.', type: 'BLOCK', color: 'text-[#E24B4A] hover:bg-[#E24B4A]/10 border-[#E24B4A]/20' },
+                                                { icon: <Unlock size={20} />, label: 'Reativar Conta', desc: 'Restaura acesso completo.', type: 'ACTIVATE', color: 'text-[#1DB97A] hover:bg-[#1DB97A]/10 border-[#1DB97A]/20' },
+                                                { icon: <CheckCircle2 size={20} />, label: 'Aprovar KYC', desc: 'Finaliza verificação.', type: 'KYC_APPROVE', color: 'text-folio-accent hover:bg-folio-accent/10 border-folio-accent/20' },
+                                                { icon: <XCircle size={20} />, label: 'Recusar KYC', desc: 'Invalida documentos.', type: 'KYC_REJECT', color: 'text-[#F5C842] hover:bg-[#F5C842]/10 border-[#F5C842]/20' },
                                             ].map(a => (
                                                 <button key={a.type} onClick={() => setActionModal({ type: a.type, user: selectedUser })}
-                                                    className={`p-4 text-left bg-card border border-border rounded-xl transition-all group ${a.color}`}>
-                                                    <div className="mb-3 transition-transform group-hover:scale-110">{a.icon}</div>
-                                                    <p className="text-xs font-semibold text-foreground mb-1">{a.label}</p>
-                                                    <p className="text-[10px] text-muted-foreground leading-relaxed">{a.desc}</p>
+                                                    className={`p-6 text-left bg-folio-surface border rounded-[28px] transition-all group flex flex-col shadow-sm hover:shadow-glow-dim ${a.color}`}>
+                                                    <div className="mb-4 transition-transform group-hover:scale-110 group-hover:rotate-6">{a.icon}</div>
+                                                    <p className="text-sm font-black text-folio-text mb-2 uppercase tracking-tight">{a.label}</p>
+                                                    <p className="text-[11px] font-medium text-folio-text-dim leading-relaxed opacity-70">{a.desc}</p>
                                                 </button>
                                             ))}
                                         </div>
@@ -336,9 +326,10 @@ const UserManagement: React.FC = () => {
                                 )}
 
                                 {dossierTab === 'orders' && (
-                                    <div className="h-48 flex flex-col items-center justify-center text-muted-foreground opacity-40">
-                                        <Activity size={40} className="mb-3 animate-pulse" />
-                                        <p className="text-xs font-semibold uppercase tracking-widest">Histórico em breve</p>
+                                    <div className="py-24 flex flex-col items-center justify-center text-folio-text-dim opacity-30 text-center">
+                                        <Activity size={64} className="mb-4 animate-pulse text-folio-accent" />
+                                        <p className="text-[12px] font-black uppercase tracking-[4px]">Monitoramento em Tempo Real</p>
+                                        <p className="text-[10px] font-medium mt-2">Indexando histórico de transações...</p>
                                     </div>
                                 )}
                             </div>
@@ -350,134 +341,127 @@ const UserManagement: React.FC = () => {
             {/* ── Page Header ── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-semibold text-foreground">Gestão de Usuários</h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">KYC, risco, governança e controle de acesso</p>
+                    <h1 className="text-2xl font-black text-folio-text uppercase tracking-tight leading-none">Gestão de Usuários</h1>
+                    <p className="text-[11px] font-bold text-folio-text-dim/50 uppercase tracking-[2px] mt-2">Governança, KYC e Análise de Risco</p>
                 </div>
                 <button onClick={fetchUsers}
-                    className="p-2 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:rotate-180 transition-all duration-500">
-                    <RefreshCw size={16} />
+                    className="w-11 h-11 flex items-center justify-center rounded-2xl border border-folio-border bg-folio-surface text-folio-text-dim hover:text-folio-accent hover:rotate-180 transition-all duration-700 shadow-sm">
+                    <RefreshCw size={18} />
                 </button>
             </div>
 
-            {/* ── Loading — Skeleton ── */}
             {loading ? (
-                <div className="space-y-5">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
-                    </div>
-                    <div className="bg-card border border-border rounded-xl overflow-hidden">
-                        {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-border last:border-0">
-                                <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
-                                <div className="flex-1 space-y-2">
-                                    <Skeleton className="h-3 w-32" />
-                                    <Skeleton className="h-2.5 w-48" />
-                                </div>
-                                <Skeleton className="h-5 w-16 rounded-full" />
-                                <Skeleton className="h-3 w-24" />
-                            </div>
-                        ))}
+                <div className="space-y-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-[28px] bg-folio-surface border border-folio-border" />)}
                     </div>
                 </div>
             ) : (
                 <>
                     {/* ── KPI Strip ── */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <KpiCard label="Total de Usuários" value={users.length} icon={<Users size={16} />} />
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <KpiCard label="Total de Usuários" value={users.length} icon={<Users size={18} />} trend="Global" tooltip="Volume total de clientes e profissionais cadastrados no banco de dados." />
                         <KpiCard label="Alto Risco" value={users.filter(u => u.riskLevel === 'high').length}
-                            icon={<ShieldAlert size={16} />} color="text-red-600 dark:text-red-400" bg="bg-red-500/10" />
-                        <KpiCard label="KYC Pendente" value={users.filter(u => u.kyc_status === 'submitted').length}
-                            icon={<Clock size={16} />} color="text-yellow-600 dark:text-yellow-400" bg="bg-yellow-500/10" />
-                        <KpiCard label="KYC Aprovado" value={users.filter(u => u.kyc_status === 'approved').length}
-                            icon={<ShieldCheck size={16} />} color="text-green-600 dark:text-green-400" bg="bg-green-500/10" />
+                            icon={<ShieldAlert size={18} />} color="text-[#E24B4A]" bg="bg-[#E24B4A]/10" trend="Crítico" tooltip="Usuários com comportamento suspeito, alto índice de cancelamento ou denúncias." />
+                        <KpiCard label="KYC em Análise" value={users.filter(u => u.kyc_status === 'submitted').length}
+                            icon={<Clock size={18} />} color="text-[#F5C842]" bg="bg-[#F5C842]/10" trend="Pendente" tooltip="Profissionais que enviaram documentos e aguardam validação humana para operar." />
+                        <KpiCard label="Verificados" value={users.filter(u => u.kyc_status === 'approved').length}
+                            icon={<ShieldCheck size={18} />} color="text-[#1DB97A]" bg="bg-[#1DB97A]/10" trend="Aprovado" tooltip="Usuários com identidade validada e aptos a transacionar na plataforma." />
                     </div>
 
                     {/* ── Toolbar ── */}
-                    <div className="bg-card border border-border rounded-xl p-3 flex flex-col md:flex-row gap-3">
+                    <div className="bg-folio-surface border border-folio-border rounded-[24px] p-4 flex flex-col md:flex-row gap-4 shadow-folio">
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-folio-text-dim" size={16} />
                             <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                                placeholder="Buscar por nome, email ou ID..."
-                                className="w-full h-9 rounded-lg pl-9 pr-4 text-sm outline-none bg-background border border-border text-foreground focus:border-primary transition-all"
+                                placeholder="ID, Email ou Nome do usuário..."
+                                className="w-full h-11 rounded-xl pl-11 pr-4 text-sm outline-none bg-folio-bg border border-folio-border text-folio-text focus:border-folio-accent transition-all placeholder:text-folio-text-dim/30"
                             />
                         </div>
                         <div className="flex gap-2 flex-wrap items-center">
                             {[{ val: 'all', label: 'Todos' }, { val: 'client', label: 'Clientes' }, { val: 'provider', label: 'Profissionais' }].map(opt => (
                                 <button key={opt.val} onClick={() => setFilterRole(opt.val)}
-                                    className={`h-9 px-4 rounded-lg text-[11px] font-semibold uppercase tracking-wide transition-all ${filterRole === opt.val ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground border border-border'}`}>
+                                    className={`h-11 px-5 rounded-xl text-[10px] font-black uppercase tracking-[1.5px] transition-all border ${filterRole === opt.val ? 'bg-folio-accent border-folio-accent text-white shadow-glow' : 'bg-folio-bg border-folio-border text-folio-text-dim hover:text-folio-text hover:border-folio-text-dim/30'}`}>
                                     {opt.label}
                                 </button>
                             ))}
                             <select value={filterRisk} onChange={e => setFilterRisk(e.target.value)}
-                                className="h-9 px-3 rounded-lg text-[11px] font-semibold outline-none bg-muted border border-border text-muted-foreground cursor-pointer">
-                                <option value="all">Todos os Riscos</option>
-                                <option value="high">Alto Risco</option>
-                                <option value="medium">Atenção</option>
-                                <option value="low">Seguros</option>
+                                className="h-11 px-4 rounded-xl text-[10px] font-black outline-none bg-folio-bg border border-folio-border text-folio-text-dim cursor-pointer uppercase tracking-[1.5px] focus:border-folio-accent transition-all">
+                                <option value="all">TODOS OS RISCOS</option>
+                                <option value="high">ALTO RISCO</option>
+                                <option value="medium">ATENÇÃO</option>
+                                <option value="low">SEGUROS</option>
                             </select>
                         </div>
                     </div>
 
-                    {/* ── Users Table ── */}
-                    <div className="bg-card border border-border rounded-xl overflow-hidden">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b border-border bg-muted/50">
-                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Usuário</th>
-                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Papel / KYC</th>
-                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('risk')}>
-                                        <span className="flex items-center gap-1.5">Risco {sortField === 'risk' ? (sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />) : null}</span>
-                                    </th>
-                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Pedidos</th>
-                                    <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => toggleSort('created')}>
-                                        <span className="flex items-center gap-1.5">Cadastro {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />) : null}</span>
-                                    </th>
-                                    <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Dossier</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredUsers.length === 0 ? (
-                                    <tr><td colSpan={6} className="py-16 text-center opacity-30">
-                                        <Users size={36} className="mx-auto mb-3" />
-                                        <p className="text-[10px] font-semibold uppercase tracking-widest">Nenhum usuário</p>
-                                    </td></tr>
-                                ) : filteredUsers.map(u => (
-                                    <tr key={u.id}
-                                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-all cursor-pointer"
-                                        onClick={() => { setSelectedUser(u); setDossierTab('profile'); }}>
-                                        <td className="px-5 py-3.5">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-semibold text-xs shrink-0">
-                                                    {resolveUserName(u).charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-semibold text-foreground leading-tight">{resolveUserName(u)}</p>
-                                                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{u.email}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-5 py-3.5">
-                                            <div className="flex flex-col gap-1">
-                                                <StatusBadge status={u.role} />
-                                                <StatusBadge status={u.kyc_status || 'pending'} />
-                                            </div>
-                                        </td>
-                                        <td className="px-5 py-3.5"><RiskBar score={u.riskScore} /></td>
-                                        <td className="px-5 py-3.5">
-                                            <span className="text-xs font-medium text-foreground tabular-nums">{u.totalClientOrders + u.totalProviderOrders}</span>
-                                        </td>
-                                        <td className="px-5 py-3.5">
-                                            <span className="text-[10px] text-muted-foreground font-mono">{formatDate(u.created_at)}</span>
-                                        </td>
-                                        <td className="px-5 py-3.5 text-right">
-                                            <button className="p-1.5 rounded-lg border border-border hover:bg-foreground hover:text-background hover:border-transparent transition-all">
-                                                <Eye size={13} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    {/* ── Users List ── */}
+                    <div className="space-y-4">
+                        <div className="hidden md:grid grid-cols-12 px-8 py-4 bg-folio-surface2/30 rounded-2xl border border-folio-border/50">
+                            <div className="col-span-4 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">Usuário / Protocolo</div>
+                            <div className="col-span-2 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">Papel / Verificação</div>
+                            <div className="col-span-2 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px] cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('risk')}>
+                                <span className="flex items-center gap-2">SCORE RISCO {sortField === 'risk' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
+                            </div>
+                            <div className="col-span-1 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">Pedidos</div>
+                            <div className="col-span-2 text-[10px] font-black text-folio-text-dim uppercase tracking-[2px] cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('created')}>
+                                <span className="flex items-center gap-2">CADASTRO {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
+                            </div>
+                            <div className="col-span-1 text-right text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">Ação</div>
+                        </div>
+
+                        {filteredUsers.length === 0 ? (
+                            <div className="py-24 text-center bg-folio-surface border border-dashed border-folio-border rounded-[32px] opacity-40">
+                                <Users size={56} className="mx-auto mb-4 text-folio-accent" />
+                                <p className="text-[12px] font-black uppercase tracking-[3px]">Nenhum usuário localizado</p>
+                            </div>
+                        ) : filteredUsers.map(u => (
+                            <div key={u.id}
+                                className="grid grid-cols-12 items-center px-8 py-5 bg-folio-surface border border-folio-border rounded-[32px] hover:border-folio-accent/40 shadow-sm hover:shadow-glow-dim transition-all duration-300 group cursor-pointer"
+                                onClick={() => { setSelectedUser(u); setDossierTab('profile'); }}>
+
+                                <div className="col-span-4 flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-folio-bg border border-folio-border flex items-center justify-center font-black text-lg text-folio-accent shadow-inner group-hover:scale-105 transition-transform duration-300">
+                                        {resolveUserName(u).charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-black text-folio-text uppercase tracking-tight">{resolveUserName(u)}</p>
+                                        <p className="text-[10px] text-folio-text-dim/50 font-mono mt-1 group-hover:text-folio-accent transition-colors">{u.email}</p>
+                                    </div>
+                                </div>
+
+                                <div className="col-span-2 flex flex-col gap-1.5 justify-center">
+                                    <div className={`px-2 py-0.5 rounded-lg border text-[9px] font-black tracking-widest text-center ${u.role === 'provider' ? 'bg-folio-accent/10 border-folio-accent/20 text-folio-accent' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+                                        }`}>
+                                        {u.role.toUpperCase()}
+                                    </div>
+                                    <div className={`px-2 py-0.5 rounded-lg border text-[9px] font-black tracking-widest text-center ${u.kyc_status === 'approved' ? 'bg-[#1DB97A]/10 border-[#1DB97A]/20 text-[#1DB97A]' : 'bg-[#F5C842]/10 border-[#F5C842]/20 text-[#F5C842]'
+                                        }`}>
+                                        KYC: {u.kyc_status?.toUpperCase() || 'NONE'}
+                                    </div>
+                                </div>
+
+                                <div className="col-span-2 px-4">
+                                    <RiskBar score={u.riskScore} />
+                                </div>
+
+                                <div className="col-span-1 text-center">
+                                    <span className="text-sm font-black text-folio-text tabular-nums tracking-tighter shadow-glow px-2 py-1 bg-folio-bg rounded-xl border border-folio-border">
+                                        {u.totalClientOrders + u.totalProviderOrders}
+                                    </span>
+                                </div>
+
+                                <div className="col-span-2 text-center">
+                                    <span className="text-[11px] font-bold text-folio-text-dim/60 font-mono uppercase tracking-widest">{formatDate(u.created_at)}</span>
+                                </div>
+
+                                <div className="col-span-1 text-right">
+                                    <button className="w-10 h-10 flex items-center justify-center rounded-2xl border border-folio-border bg-folio-bg text-folio-text-dim group-hover:bg-folio-accent group-hover:text-white group-hover:border-folio-accent transition-all shadow-sm">
+                                        <Eye size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </>
             )}

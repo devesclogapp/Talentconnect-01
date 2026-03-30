@@ -4,7 +4,7 @@ import {
     Search, TrendingUp, Users, Briefcase, ShieldAlert,
     Clock, Activity, Zap, Plus, Scale, ShieldCheck,
     CreditCard, MessageSquare, X, History, RefreshCw,
-    Smartphone, Info, Target, AlertTriangle, ArrowRight
+    Smartphone, Info, Target, AlertTriangle, ArrowRight, Eye
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Badge } from '../components/ui/Badge';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Separator } from '../components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from "../components/ui/tooltip";
 
 // --- Helpers de Auditoria ---
 const logAdminAction = async (action: string, entityType: string, entityId: string, details: string, reason: string) => {
@@ -259,7 +260,7 @@ const AdminDashboard: React.FC = () => {
                                 { title: 'Transações', icon: <CreditCard />, results: [] },
                             ].map(({ title, icon, results }) => (
                                 <div key={title} className="bg-white/5 border border-white/10 rounded-2xl p-5 h-64 flex flex-col">
-                                    <h4 className="text-white text-[11px] font-semibold uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <h4 className="text-white text-sm font-normal capitalize mb-4 flex items-center gap-2">
                                         {React.cloneElement(icon as React.ReactElement, { size: 14 })} {title}
                                     </h4>
                                     <div className="flex-1 space-y-2 overflow-y-auto">
@@ -271,7 +272,7 @@ const AdminDashboard: React.FC = () => {
                                         )) : (
                                             <div className="h-full flex flex-col items-center justify-center opacity-20">
                                                 <Search size={32} className="text-white mb-2" />
-                                                <p className="text-[10px] text-white font-semibold uppercase">Sem resultados</p>
+                                                <p className="text-sm text-white font-normal capitalize">Sem resultados</p>
                                             </div>
                                         )}
                                     </div>
@@ -295,178 +296,242 @@ const AdminDashboard: React.FC = () => {
                     onAction={performRiskAction} />
             )}
 
-            {/* ── Page Header ── */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-xl font-semibold text-foreground tracking-tight">Centro de Comando</h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">Orquestração e inteligência operacional em tempo real</p>
+            {/* ── Folioblox Hero Banner ── */}
+            <div className="hero">
+                <div className="flex items-start justify-between relative z-10">
+                    <div>
+
+                        <h1 className="text-3xl font-bold font-display leading-tight">
+                            R$ {stats.totalVolume.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </h1>
+                        <p className="text-sm text-white/70 font-medium flex items-center gap-2 mt-1">
+                            Volume Total Transacionado <span className="px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-bold">+4.2%</span>
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => fetchDashboardStats(true)}
+                            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all ${isRefreshing ? 'animate-spin' : ''}`}
+                        >
+                            <RefreshCw size={16} />
+                        </button>
+                        <button
+                            onClick={() => setActiveModal('communication')}
+                            className="bg-white text-folio-accent px-5 h-10 rounded-full text-xs font-bold hover:shadow-xl hover:scale-105 transition-all"
+                        >
+                            NOVA AUDITORIA
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => fetchDashboardStats(true)}
-                        className={`w-9 h-9 flex items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all ${isRefreshing ? 'animate-spin' : ''}`}
-                    >
-                        <RefreshCw size={15} />
-                    </button>
-                    <button
-                        onClick={() => setIsSearchOpen(true)}
-                        className="w-9 h-9 flex items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                    >
-                        <Search size={15} />
-                    </button>
-                    <button
-                        onClick={() => setActiveModal('communication')}
-                        className="flex items-center gap-2 px-4 h-9 bg-primary text-primary-foreground rounded-lg text-[12px] font-semibold hover:opacity-90 transition-all"
-                    >
-                        <MessageSquare size={14} /> Comunicado
-                    </button>
+
+                <div className="hero-pills relative z-10">
+                    <div className="hp interactive" onClick={() => setIsEscrowSheetOpen(true)}>
+                        <div className="hp-num">#01 garantia protegida</div>
+                        <div className="hp-val text-sm font-normal capitalize">garantia protegida</div>
+                        <div className="hp-val">R$ {stats.inEscrow.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</div>
+                    </div>
+                    <div className="hd" />
+                    <div className="hp interactive" onClick={() => handleDrillDown('ADMIN_FINANCE')}>
+                        <div className="hp-num">#02 liquidação pendente</div>
+                        <div className="hp-val text-sm font-normal capitalize">liquidação pendente</div>
+                        <div className="hp-val">R$ {(stats.operatorEarnings / 1.5).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</div>
+                    </div>
+                    <div className="hd" />
+                    <div className="hp interactive" onClick={() => handleDrillDown('ADMIN_DISPUTES')}>
+                        <div className="hp-num">#03 disputas abertas</div>
+                        <div className="hp-val text-sm font-normal capitalize">disputas abertas</div>
+                        <div className="hp-val">{stats.openDisputes} Casos</div>
+                    </div>
+                    <div className="hd" />
+                    <div className="hp interactive" onClick={() => handleDrillDown('ADMIN_FINANCE')}>
+                        <div className="hp-num">#04 taxa plataforma</div>
+                        <div className="hp-val text-sm font-normal capitalize">taxa plataforma</div>
+                        <div className="hp-val">R$ {stats.operatorEarnings.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</div>
+                    </div>
                 </div>
             </div>
 
             {isRefreshing && (
-                <div className="h-0.5 w-full rounded-full overflow-hidden bg-muted">
-                    <div className="h-full bg-primary animate-pulse w-full" />
+                <div className="h-0.5 w-full rounded-full overflow-hidden bg-muted absolute top-0 left-0 z-[100]">
+                    <div className="h-full bg-folio-accent animate-pulse w-full" />
                 </div>
             )}
 
-            {/* ── KPI Row ── */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* ── KPI Grid (Folioblox Skin) ── */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <KpiCard
-                    label="Volume em Garantia" value={`R$ ${stats.inEscrow.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                    icon={<ShieldCheck size={16} />} color="text-primary" bg="bg-primary/10"
-                    trend="+4.2%" trendDir="up"
+                    label="Pedidos Concluídos" value={stats.totalOrders}
+                    icon={<Zap size={16} />} color="text-success" bg="bg-success/10"
+                    trend="+12%" trendDir="up"
+                    onClick={() => handleDrillDown('ADMIN_ORDERS')}
+                    tooltip="Total de serviços finalizados com sucesso, com pagamento processado e repasse concluído."
+                />
+                <KpiCard
+                    label="Garantia Protegida" value={`R$ ${(stats.inEscrow / 1000).toFixed(1)}k`}
+                    icon={<ShieldCheck size={16} />} color="text-warning" bg="bg-warning/10"
+                    trend="Em Escrow"
                     onClick={() => setIsEscrowSheetOpen(true)}
+                    tooltip="Saldo retido em Escrow (garantia) aguardando a finalização dos serviços para liberação."
                 />
                 <KpiCard
-                    label="Receita Operadora" value={`R$ ${stats.operatorEarnings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                    icon={<TrendingUp size={16} />} color="text-green-600 dark:text-green-400" bg="bg-green-500/10"
-                    trend={stats.revenueVariaction} trendDir="up"
-                    onClick={() => handleDrillDown('ADMIN_FINANCE')}
-                />
-                <KpiCard
-                    label="Repasses Pendentes" value={`R$ ${stats.pendingPayouts.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                    icon={<CreditCard size={16} />} color="text-yellow-600 dark:text-yellow-400" bg="bg-yellow-500/10"
-                    trend="Ação Necessária"
-                    onClick={() => handleDrillDown('ADMIN_FINANCE')}
-                />
-                <KpiCard
-                    label="Disputas Abertas" value={stats.openDisputes}
-                    icon={<Scale size={16} />}
-                    color={stats.openDisputes > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}
-                    bg={stats.openDisputes > 0 ? 'bg-red-500/10' : 'bg-muted'}
-                    trend={stats.openDisputes > 0 ? 'Urgente' : 'Limpo'}
-                    trendDir={stats.openDisputes > 0 ? 'down' : 'up'}
+                    label="Disputas Ativas" value={stats.openDisputes}
+                    icon={<Scale size={16} />} color="text-error" bg="bg-error/10"
+                    trend={stats.openDisputes > 0 ? "Crítico" : "Limpo"}
                     onClick={() => handleDrillDown('ADMIN_DISPUTES')}
+                    tooltip="Casos em mediação onde houve contestação. Exige intervenção administrativa manual."
+                />
+                <KpiCard
+                    label="Prestadores Ativos" value={stats.totalUsers - stats.highRiskUsers}
+                    icon={<Users size={16} />} color="text-folio-accent" bg="bg-folio-accent/10"
+                    trend="Verificados"
+                    onClick={() => handleDrillDown('ADMIN_USERS')}
+                    tooltip="Número de profissionais com cadastro aprovado (KYC) e habilitados para receber novos pedidos."
                 />
             </div>
 
             {/* ── Secondary KPIs ── */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-4">
                 {[
-                    { label: 'Total de Usuários', value: stats.totalUsers, icon: <Users size={14} /> },
-                    { label: 'Total de Pedidos', value: stats.totalOrders, icon: <Briefcase size={14} /> },
-                    { label: 'Em Execução', value: stats.ordersInExecution, icon: <Zap size={14} /> },
-                    { label: 'KYC Pendente', value: stats.pendingVerifications, icon: <Clock size={14} /> },
+                    { label: 'Total de Usuários', value: stats.totalUsers, icon: <Users size={16} />, color: 'text-blue-500', tooltip: 'Volume total de contas registradas (Clientes e Profissionais).' },
+                    { label: 'Total de Pedidos', value: stats.totalOrders, icon: <Briefcase size={16} />, color: 'text-folio-accent', tooltip: 'Histórico acumulado de todas as intenções de contratação geradas.' },
+                    { label: 'Em Execução', value: stats.ordersInExecution, icon: <Zap size={16} />, color: 'text-[#F5C842]', tooltip: 'Serviços ocorrendo agora ou aguardando confirmação de término.' },
+                    { label: 'KYC Pendente', value: stats.pendingVerifications, icon: <Clock size={16} />, color: 'text-folio-text-dim', tooltip: 'Profissionais aguardando validação de documentos para operar.' },
                 ].map((item) => (
-                    <div key={item.label} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-muted text-muted-foreground">{item.icon}</div>
+                    <div key={item.label} className="bg-folio-surface border border-folio-border rounded-3xl p-5 flex items-center gap-4 shadow-sm group hover:shadow-glow-dim transition-all relative">
+                        {/* Info Icon Tooltip */}
+                        <div className="absolute top-4 right-4" onClick={e => e.stopPropagation()}>
+                            <TooltipProvider>
+                                <Tooltip delayDuration={200}>
+                                    <TooltipTrigger asChild>
+                                        <button className="p-1 rounded-full hover:bg-slate-500/5 transition-colors text-slate-400/20 hover:text-slate-400/60 outline-none">
+                                            <Info size={12} strokeWidth={2} />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal>
+                                        <TooltipContent side="top" className="max-w-[200px] text-center bg-slate-900 border-slate-800 z-[9999]">
+                                            {item.tooltip}
+                                        </TooltipContent>
+                                    </TooltipPortal>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+
+                        <div className={`p-3 rounded-2xl bg-folio-bg border border-folio-border ${item.color} shadow-inner group-hover:scale-110 transition-transform`}>
+                            {item.icon}
+                        </div>
                         <div>
-                            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{item.label}</p>
-                            <p className="text-lg font-semibold text-foreground">{item.value}</p>
+                            <p className="text-sm font-normal text-folio-text-dim capitalize opacity-60">{item.label}</p>
+                            <p className="text-xl font-black text-folio-text tabular-nums tracking-tighter">{item.value}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* ── Main Content Grid ── */}
-            <div className="grid grid-cols-12 gap-4 flex-1 min-h-0">
+            <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
 
                 {/* Left: Decision Queue + Risk */}
-                <div className="col-span-12 lg:col-span-8 space-y-4 flex flex-col">
+                <div className="col-span-12 lg:col-span-8 space-y-6 flex flex-col">
 
                     {/* Decision Queue */}
-                    <div className="bg-card border border-border rounded-xl p-5 flex flex-col">
-                        <div className="flex items-center justify-between mb-4">
+                    <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 flex flex-col shadow-folio">
+                        <div className="flex items-start justify-between mb-8">
                             <div>
-                                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                                    <Target className="text-primary" size={14} /> Fila de Decisão
+                                <h3 className="text-lg font-normal text-folio-text flex items-center gap-3 capitalize tracking-tight">
+                                    <Target className="text-folio-accent" size={20} /> fila de decisão
                                 </h3>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">Triagem operacional por prioridade e SLA</p>
+                                <p className="text-sm font-normal text-folio-text-dim/50 mt-1 capitalize">Triagem operacional por prioridade e sla</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="px-2.5 py-1 bg-red-500/10 text-red-600 dark:text-red-400 rounded-full text-[10px] font-semibold uppercase">{stats.openDisputes} Críticos</span>
-                                <span className="px-2.5 py-1 bg-muted text-muted-foreground rounded-full text-[10px] font-semibold uppercase">{stats.pendingVerifications} Triagem</span>
+                            <div className="flex items-center gap-3">
+                                <span className="px-3 py-1 bg-error/10 text-error border border-error/20 rounded-full text-sm font-normal capitalize">{stats.openDisputes} críticos</span>
+                                <span className="px-3 py-1 bg-folio-bg border border-folio-border text-folio-text-dim rounded-full text-sm font-normal capitalize">{stats.pendingVerifications} triagem</span>
                             </div>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {stats.openDisputes > 0 && (
-                                <InboxItem title="Disputas em Aberto" desc="Litígios aguardando sentença operacional"
+                                <InboxItem title="Disputas em Aberto" desc="Litígios aguardando sentença operacional imediata"
                                     count={stats.openDisputes} priority="Alta" sla="há 2h" action="Mediação"
                                     onClick={() => handleDrillDown('ADMIN_DISPUTES')} />
                             )}
                             {stats.pendingVerifications > 0 && (
-                                <InboxItem title="Revisão de KYC" desc="Validação de documentos de novos profissionais"
+                                <InboxItem title="Revisão de KYC" desc="Validação de documentos e identidade de profissionais"
                                     count={stats.pendingVerifications} priority="Média" sla="há 1 dia" action="Validar"
                                     onClick={() => navigate(ADMIN_ROUTE_MAP['USER_MANAGEMENT']!)} />
                             )}
                             {stats.ordersDelayed > 0 && (
-                                <InboxItem title="SLA: Pedidos Atrasados" desc="Sem aceite há mais de 24h"
+                                <InboxItem title="SLA: Pedidos Atrasados" desc="Negociações sem aceite ativo há mais de 24h"
                                     count={stats.ordersDelayed} priority="Alta" sla="VIOLADO" action="Intervir"
                                     onClick={() => handleDrillDown('ADMIN_ORDERS')} />
                             )}
                             {stats.openDisputes === 0 && stats.pendingVerifications === 0 && stats.ordersDelayed === 0 && (
-                                <div className="py-8 text-center">
-                                    <ShieldCheck className="mx-auto mb-2 text-green-500" size={32} />
-                                    <p className="text-sm font-semibold text-muted-foreground">Fila limpa — nenhuma ação necessária</p>
+                                <div className="py-12 text-center rounded-[24px] border-2 border-dashed border-folio-border bg-folio-bg/50">
+                                    <ShieldCheck className="mx-auto mb-3 text-[#1DB97A] opacity-50" size={48} />
+                                    <p className="text-sm font-normal text-folio-text-dim capitalize">fila limpa — nenhuma ação pendente</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Risk & Fraud */}
-                    <div className="bg-card border border-border rounded-xl p-5 flex-1">
-                        <div className="flex items-center justify-between mb-4">
+                    <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 flex-1 shadow-folio">
+                        <div className="flex items-start justify-between mb-8">
                             <div>
-                                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                                    <ShieldAlert className="text-red-500" size={14} /> Risco & Fraude
+                                <h3 className="text-lg font-normal text-folio-text flex items-center gap-3 capitalize tracking-tight">
+                                    <ShieldAlert className="text-error" size={20} /> risco & fraude
                                 </h3>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">Detecção de padrões e comportamento anômalo</p>
+                                <p className="text-sm font-normal text-folio-text-dim/50 mt-1 capitalize">Detecção de padrões e comportamento anômalo em transações</p>
                             </div>
                             <button
                                 onClick={() => navigate(ADMIN_ROUTE_MAP['USER_MANAGEMENT']!)}
-                                className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
+                                className="px-4 py-2 bg-folio-bg border border-folio-border rounded-xl text-sm font-normal text-folio-text-dim capitalize hover:text-folio-accent hover:border-folio-accent/30 transition-all flex items-center gap-2"
                             >
-                                Ver Todos <ArrowRight size={12} />
+                                ver tudo <ArrowRight size={14} />
                             </button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {riskSignals.length > 0 ? riskSignals.map((signal, i) => (
-                                <div key={i} className="p-4 bg-muted/40 border border-border rounded-xl hover:bg-muted/70 transition-all">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div>
-                                            <span className="text-[9px] font-semibold text-red-600 border border-red-200 dark:border-red-800 px-2 py-0.5 rounded uppercase tracking-widest">{signal.type}</span>
-                                            <h4 className="text-sm font-semibold text-foreground mt-1.5">{signal.user}</h4>
+                                <div key={i} className="p-6 bg-folio-bg border border-folio-border rounded-[28px] hover:border-folio-accent/30 transition-all group shadow-sm hover:shadow-glow-dim">
+                                    <div className="flex justify-between items-start mb-5">
+                                        <div className="flex flex-col gap-1.5">
+                                            <div className="flex gap-2 items-center">
+                                                <span className="w-2 h-2 rounded-full bg-error shadow-[0_0_10px_var(--red)] animate-pulse" />
+                                                <span className="text-sm font-normal text-error capitalize">{signal.type}</span>
+                                            </div>
+                                            <h4 className="text-md font-normal text-folio-text tracking-tight capitalize leading-none">{signal.user}</h4>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[9px] font-semibold text-muted-foreground uppercase">Risk</p>
-                                            <p className="text-xl font-semibold text-red-600 dark:text-red-400">{signal.score}</p>
+                                            <p className="text-sm font-normal text-folio-text-dim/30 capitalize mb-1">audit score</p>
+                                            <div className="px-2 py-0.5 bg-warning/10 border border-warning/20 rounded-lg">
+                                                <p className="text-xl font-black text-warning font-display leading-none">{signal.score}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">"{signal.reason}"</p>
-                                    <div className="flex gap-2">
+
+                                    <div className="flex flex-wrap gap-2 mb-5">
+                                        <span className="px-2.5 py-1 rounded-lg bg-folio-surface border border-folio-border text-[10px] font-mono text-folio-text-dim">#{signal.id.slice(0, 10)}</span>
+                                        <span className={`px-2.5 py-1 rounded-lg bg-folio-surface border text-sm font-normal ${signal.type === 'Conflito' ? 'text-error border-error/20 shadow-[inset_0_0_8px_var(--red-dim)]' : 'text-folio-text-dim border-folio-border'
+                                            }`}>
+                                            {signal.type === 'Conflito' ? 'crítico' : 'em revisão'}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-[12px] font-medium text-folio-text-dim/80 mb-6 leading-relaxed line-clamp-2 italic">"{signal.reason}"</p>
+
+                                    <div className="flex gap-3">
                                         <button
                                             onClick={() => { setSelectedUser(signal); setActiveModal('risk'); }}
-                                            className="flex-1 py-1.5 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-lg text-[11px] font-semibold hover:bg-red-500/20 transition-all"
-                                        >Bloquear</button>
-                                        <button className="w-8 h-8 flex items-center justify-center bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-all">
-                                            <Info size={12} />
+                                            className="flex-1 h-12 bg-error text-white rounded-2xl text-[11px] font-black lowercase hover:opacity-90 transition-all shadow-glow active:scale-95"
+                                        >agir agora</button>
+                                        <button className="w-12 h-12 flex items-center justify-center bg-folio-surface border border-folio-border rounded-2xl text-folio-text-dim hover:text-folio-text transition-all hover:bg-folio-surface2 shadow-sm">
+                                            <Eye size={18} />
                                         </button>
                                     </div>
                                 </div>
                             )) : (
-                                <div className="col-span-2 py-8 text-center bg-muted/20 border border-dashed border-border rounded-xl">
-                                    <ShieldCheck className="mx-auto mb-2 text-primary opacity-20" size={32} />
-                                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Nenhuma ameaça detectada</p>
+                                <div className="col-span-2 py-16 text-center border-2 border-dashed border-folio-border bg-folio-bg/30 rounded-[28px]">
+                                    <ShieldCheck className="mx-auto mb-4 text-folio-accent opacity-20" size={56} />
+                                    <p className="text-[12px] font-black text-folio-text-dim lowercase opacity-40">zona segura — nenhuma anomalia detectada</p>
                                 </div>
                             )}
                         </div>
@@ -474,30 +539,38 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Right: Live Events + Shortcuts */}
-                <div className="col-span-12 lg:col-span-4 space-y-4 flex flex-col">
+                <div className="col-span-12 lg:col-span-4 space-y-6 flex flex-col">
 
                     {/* Live Events Feed */}
-                    <div className="bg-card border border-border rounded-xl p-5 flex flex-col flex-1">
-                        <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                                <Zap size={14} className="text-primary" /> Eventos Ao Vivo
+                    <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 flex flex-col flex-1 shadow-folio">
+                        <div className="flex items-center justify-between mb-8">
+                            <h4 className="text-md font-normal text-folio-text flex items-center gap-3 capitalize tracking-tight">
+                                <Zap size={18} className="text-folio-accent animate-pulse" /> eventos em tempo real
                             </h4>
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-normal text-folio-accent capitalize">live</span>
+                                <span className="w-2 h-2 rounded-full bg-success animate-ping" />
+                            </div>
                         </div>
-                        <ScrollArea className="flex-1 -mx-2 px-2 max-h-[420px]">
-                            <div className="space-y-1">
+                        <ScrollArea className="flex-1 -mx-2 px-2 max-h-[480px]">
+                            <div className="flex flex-col gap-1">
                                 {liveEvents.map((evt) => (
-                                    <div key={evt.id} className="flex gap-3 py-2.5 px-2 rounded-lg hover:bg-muted/50 transition-all cursor-pointer group border-b border-border last:border-0">
-                                        <div className="mt-0.5 shrink-0">
-                                            <div className={`w-2 h-2 rounded-full ${EVENT_TYPE_COLOR[evt.type] || 'bg-muted-foreground'}`} />
+                                    <div key={evt.id} className="flex gap-4 py-4 px-2 border-b border-folio-border/50 last:border-0 group cursor-pointer hover:bg-folio-bg/50 rounded-2xl transition-all">
+                                        <div className={`w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center border shadow-sm ${evt.type === 'payment' ? 'bg-success/10 text-success border-success/20' :
+                                            evt.type === 'dispute' ? 'bg-error/10 text-error border-error/20' :
+                                                evt.type === 'kyc' ? 'bg-info/10 text-info border-info/20' :
+                                                    'bg-folio-accent/10 text-folio-accent border-folio-accent/20'
+                                            }`}>
+                                            <div className="w-2 h-2 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start">
-                                                <p className="text-[12px] font-semibold text-foreground uppercase leading-tight">{evt.action}</p>
-                                                <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{evt.time}</span>
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <p className="text-sm font-normal text-folio-accent capitalize">{evt.action}</p>
+                                                <span className="text-[10px] font-bold text-folio-text-dim/40 tabular-nums">{evt.time}</span>
                                             </div>
-                                            <p className="text-[11px] text-muted-foreground truncate mt-0.5">{evt.name}</p>
-                                            <p className="text-[10px] text-muted-foreground/60 mt-0.5">{evt.user}</p>
+                                            <p className="text-[12px] text-folio-text-dim leading-relaxed">
+                                                <span className="text-folio-text font-normal capitalize text-sm tracking-tight">{evt.user}</span> • {evt.name}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}
@@ -505,20 +578,20 @@ const AdminDashboard: React.FC = () => {
                         </ScrollArea>
                         <button
                             onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)}
-                            className="w-full mt-3 py-2.5 border border-dashed border-border rounded-lg text-[11px] font-semibold text-muted-foreground uppercase tracking-wide hover:bg-muted transition-all"
+                            className="w-full mt-6 py-4 border-2 border-dashed border-folio-border rounded-2xl text-sm font-normal text-folio-text-dim capitalize hover:bg-folio-bg hover:text-folio-accent hover:border-folio-accent/30 transition-all"
                         >
-                            Ver Logs Completos
+                            acessar logs de auditoria
                         </button>
                     </div>
 
                     {/* Quick Shortcuts */}
-                    <div className="bg-card border border-border rounded-xl p-4">
-                        <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Ações Rápidas</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            <SimpleShortcut icon={<Plus size={16} />} label="Admin" />
-                            <SimpleShortcut icon={<RefreshCw size={16} />} label="Sync" onClick={() => fetchDashboardStats(true)} />
-                            <SimpleShortcut icon={<Smartphone size={16} />} label="Mobile" />
-                            <SimpleShortcut icon={<History size={16} />} label="Logs" onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)} />
+                    <div className="bg-folio-surface border border-folio-border rounded-[32px] p-6 shadow-folio">
+                        <h4 className="text-sm font-normal text-folio-text-dim capitalize mb-4 opacity-40 text-center">Protocolos Rápidos</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                            <SimpleShortcut icon={<Plus size={18} />} label="ADMIN" />
+                            <SimpleShortcut icon={<RefreshCw size={18} />} label="SYNC" onClick={() => fetchDashboardStats(true)} />
+                            <SimpleShortcut icon={<Smartphone size={18} />} label="APP" />
+                            <SimpleShortcut icon={<History size={18} />} label="AUDIT" onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)} />
                         </div>
                     </div>
                 </div>
@@ -541,7 +614,7 @@ const AdminDashboard: React.FC = () => {
                         </SheetHeader>
 
                         <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Total Consolidado</p>
+                            <p className="text-sm font-normal text-muted-foreground capitalize mb-1">Total Consolidado</p>
                             <p className="text-2xl font-bold text-foreground">
                                 R$ {stats.inEscrow.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </p>
@@ -592,7 +665,7 @@ const AdminDashboard: React.FC = () => {
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
                                     <Activity size={32} className="mb-2" />
-                                    <p className="text-xs font-semibold uppercase tracking-widest leading-relaxed">
+                                    <p className="text-xs font-semibold lowercase leading-relaxed">
                                         Nenhuma transação<br />em garantia
                                     </p>
                                 </div>

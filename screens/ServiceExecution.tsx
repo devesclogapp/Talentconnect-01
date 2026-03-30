@@ -225,7 +225,10 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                         <h1 className="text-2xl font-bold text-black dark:text-white">
                             Status do Serviço
                         </h1>
-                        <p className="meta-bold text-black tracking-widest !text-[9px] mt-1">ID: #{order?.id.slice(0, 8)}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                            <p className="meta-bold text-black tracking-widest !text-[9px]">ID: #{order?.id.slice(0, 8)}</p>
+                            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                        </div>
                     </div>
                     <Badge variant={status === 'in_progress' ? 'success' : 'secondary'}>
                         <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${status === 'in_progress' ? 'bg-white animate-pulse' : 'bg-neutral-400'}`}></div>
@@ -485,8 +488,8 @@ const ServiceExecution: React.FC<ServiceExecutionProps> = ({ order, onBack, onCo
                             onClick={handleStartService}
                             disabled={isProcessing || !canStart}
                             className={`w-full py-6 rounded-[24px] label-semibold tracking-widest shadow-xl flex items-center justify-center gap-3 transition-all ${canStart
-                                    ? 'bg-primary-green text-black shadow-primary-green/20 active:scale-[0.98]'
-                                    : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 grayscale opacity-60 cursor-not-allowed shadow-none'
+                                ? 'bg-primary-green text-black shadow-primary-green/20 active:scale-[0.98]'
+                                : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-600 grayscale opacity-60 cursor-not-allowed shadow-none'
                                 }`}
                         >
                             <Play size={20} fill="currentColor" />
