@@ -45,6 +45,10 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
         return filePath;
     };
 
+    const [submittedSuccessfully, setSubmittedSuccessfully] = useState(false);
+
+    // ... handleFileSelect remains the same ...
+
     const handleSubmit = async () => {
         if (!docFront || !selfie || (documentType === 'rg' && !docBack)) {
             setError('Por favor, envie todas as fotos solicitadas.');
@@ -56,15 +60,9 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
 
         try {
             const paths: Record<string, string> = {};
-
-            // 1. Upload files (Safe-try)
             const tryUpload = async (file: File, p: string, key: string) => {
-                try {
-                    const filePath = await uploadFile(file, p);
-                    paths[key] = filePath;
-                } catch (e) {
-                    console.warn(`Upload skipped/failed for ${p}:`, e);
-                }
+                const filePath = await uploadFile(file, p);
+                paths[key] = filePath;
             };
 
             await tryUpload(docFront, 'document_front', 'doc_front_path');
@@ -73,7 +71,6 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
             }
             await tryUpload(selfie, 'selfie_verification', 'selfie_path');
 
-            // 2. Update User Metadata (includes status and paths)
             const metadataUpdates = {
                 documents_status: 'submitted',
                 documents_submitted_at: new Date().toISOString(),
@@ -86,22 +83,11 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
 
             if (updateError) throw updateError;
 
-            // 3. Update public.provider_profiles table (for Admin ERP)
-            // We omit documents_status here because if 'submitted' is not in the Enum, 
-            // it blocks the whole update (including paths). 
-            // The ERP now detects 'submitted' if paths exist.
-            const { error: profileError } = await supabase
-                .from('provider_profiles')
-                .update({
-                    ...paths
-                })
-                .eq('user_id', user.id);
+            await (supabase.from('provider_profiles') as any).update({
+                ...paths,
+                documents_status: 'submitted'
+            }).eq('user_id', user.id);
 
-            if (profileError) {
-                console.warn('Could not update provider_profiles, metadata used as fallback:', profileError);
-            }
-
-            // 4. Update local state
             setUser({
                 ...user,
                 user_metadata: {
@@ -110,8 +96,10 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
                 }
             } as any);
 
-            // 5. Navigate Success
-            onSubmissionSuccess();
+            setSubmittedSuccessfully(true);
+            setTimeout(() => {
+                onSubmissionSuccess();
+            }, 3000);
 
         } catch (err: any) {
             console.error('Error submitting verification:', err);
@@ -120,6 +108,26 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
             setLoading(false);
         }
     };
+
+    if (submittedSuccessfully) {
+        return (
+            <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                <div className="w-24 h-24 bg-success/10 text-success rounded-full flex items-center justify-center mb-6 animate-bounce">
+                    <ShieldCheck size={48} />
+                </div>
+                <h2 className="text-2xl font-bold text-text-primary mb-2">Documentos Enviados!</h2>
+                <p className="text-text-secondary mb-8 max-w-xs mx-auto">
+                    Sua identificação foi recebida com sucesso. Nossa equipe analisará os dados em até 24 horas úteis.
+                </p>
+                <div className="w-full max-w-xs bg-bg-secondary h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-success h-full animate-progress-fast" />
+                </div>
+                <p className="text-[10px] text-text-tertiary mt-4 uppercase tracking-widest font-black">
+                    Redirecionando para o perfil...
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-bg-primary animate-fade-in pb-20">
@@ -233,24 +241,52 @@ const DocumentSubmission: React.FC<Props> = ({ onBack, onSubmissionSuccess }) =>
     );
 };
 
-const UploadCard = ({ title, desc, file, onSelect, icon }: any) => (
-    <div className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all ${file ? 'border-success bg-success/5' : 'border-border-medium hover:border-accent-primary hover:bg-bg-secondary'}`}>
-        <input
-            type="file"
-            accept="image/*"
-            onChange={onSelect}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-        />
-        <div className="flex flex-col items-center gap-2 pointer-events-none">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-1 ${file ? 'bg-success/20 text-success' : 'bg-bg-tertiary text-text-tertiary'}`}>
-                {file ? <ShieldCheck size={24} /> : icon}
-            </div>
-            <h4 className="font-bold text-text-primary text-sm">{file ? 'Arquivo Selecionado' : title}</h4>
-            <p className="text-xs text-text-tertiary max-w-[200px] mx-auto">
-                {file ? file.name : desc}
-            </p>
+const UploadCard = ({ title, desc, file, onSelect, icon }: any) => {
+    const [preview, setPreview] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        if (!file) {
+            setPreview(null);
+            return;
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => setPreview(reader.result as string);
+        reader.readAsDataURL(file);
+    }, [file]);
+
+    return (
+        <div className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all min-h-[160px] flex flex-col justify-center ${file ? 'border-success bg-success/5' : 'border-border-medium hover:border-accent-primary hover:bg-bg-secondary'}`}>
+            <input
+                type="file"
+                accept="image/*"
+                onChange={onSelect}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
+            {preview ? (
+                <div className="flex flex-col items-center gap-3 animate-fade-in">
+                    <div className="w-24 h-16 rounded-xl overflow-hidden border-2 border-success shadow-lg">
+                        <img src={preview} className="w-full h-full object-cover" alt="Preview" />
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <h4 className="font-bold text-success text-sm flex items-center gap-1">
+                            <ShieldCheck size={16} /> Arquivo Pronto
+                        </h4>
+                        <p className="text-[10px] text-text-tertiary truncate max-w-[150px]">{file.name}</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center gap-2 pointer-events-none">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-1 bg-bg-tertiary text-text-tertiary`}>
+                        {icon}
+                    </div>
+                    <h4 className="font-bold text-text-primary text-sm">{title}</h4>
+                    <p className="text-xs text-text-tertiary max-w-[200px] mx-auto leading-tight">
+                        {desc}
+                    </p>
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 export default DocumentSubmission;

@@ -195,7 +195,7 @@ const ServiceRegistration: React.FC<Props> = ({ onBack, onComplete, serviceId })
 
                   {/* Dropdown Menu */}
                   {dropdownOpen && (
-                    <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-bg-primary border border-border-subtle rounded-2xl shadow-xl overflow-y-auto max-h-[300px] animate-in fade-in zoom-in-95 duration-200 z-50">
+                    <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-bg-secondary border border-border-subtle rounded-2xl shadow-2xl overflow-y-auto max-h-[300px] animate-in fade-in zoom-in-95 duration-200 z-50">
                       <div className="p-2 space-y-1">
                         {CATEGORIES.map(cat => (
                           <button

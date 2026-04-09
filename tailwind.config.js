@@ -66,6 +66,24 @@ export default {
                 error: 'var(--red)',
                 warning: 'var(--yellow)',
                 info: 'var(--blue)',
+
+                // App Specific Tokens (from index.css vars)
+                'app-bg': 'var(--bg)',
+                'app-surface': 'var(--surface)',
+                'app-surface-2': 'var(--surface2)',
+                'app-text': 'var(--text)',
+                'app-muted': 'var(--text2)',
+
+                // Design System Legacy/Compatibility
+                'bg-primary': 'var(--bg)',
+                'bg-secondary': 'var(--surface)',
+                'bg-tertiary': 'var(--surface2)',
+                'text-primary': 'var(--text)',
+                'text-secondary': 'var(--text2)',
+                'text-tertiary': 'var(--text3)',
+                'accent-primary': 'var(--accent)',
+                'accent-secondary': 'var(--accent2)',
+                'brand-primary': 'var(--accent)',
             },
             fontFamily: {
                 sans: ['"DM Sans"', 'Inter', 'system-ui', 'sans-serif'],

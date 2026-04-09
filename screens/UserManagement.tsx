@@ -105,11 +105,17 @@ const UserManagement: React.FC = () => {
             if (type === 'ACTIVATE') updates.active = true;
             if (type === 'KYC_APPROVE') {
                 updates.kyc_status = 'approved';
-                await supabase.from('provider_profiles').update({ documents_status: 'approved' }).eq('user_id', user.id);
+                await (supabase.from('provider_profiles') as any).update({
+                    documents_status: 'approved',
+                    kyc_notes: 'Documentação validada por auditoria admin.'
+                }).eq('user_id', user.id);
             }
             if (type === 'KYC_REJECT') {
                 updates.kyc_status = 'rejected';
-                await supabase.from('provider_profiles').update({ documents_status: 'rejected' }).eq('user_id', user.id);
+                await (supabase.from('provider_profiles') as any).update({
+                    documents_status: 'rejected',
+                    kyc_notes: actionReason || 'Documentação recusada por inconsistência nos dados.'
+                }).eq('user_id', user.id);
             }
             try {
                 await (supabase as any).from('users').update(updates).eq('id', user.id);
@@ -276,25 +282,38 @@ const UserManagement: React.FC = () => {
                                                     <ShieldCheck className="text-folio-accent" size={20} />
                                                     <h4 className="text-sm font-black text-folio-text uppercase tracking-widest">Documentação Comprobatória</h4>
                                                 </div>
-                                                <span className="px-3 py-1 rounded-lg bg-folio-bg border border-folio-border text-[9px] font-black text-folio-text-dim tracking-widest uppercase">{selectedUser.kyc_status}</span>
+                                                <div className={`px-3 py-1 rounded-lg border text-[9px] font-black tracking-widest uppercase ${selectedUser.kyc_status === 'approved' ? 'bg-success/10 border-success/20 text-success' :
+                                                    selectedUser.kyc_status === 'submitted' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                                                        'bg-folio-bg border-folio-border text-folio-text-dim'
+                                                    }`}>
+                                                    {selectedUser.kyc_status}
+                                                </div>
                                             </div>
 
                                             {selectedUser.profile?.doc_front_path ? (
-                                                <div className="grid grid-cols-1 gap-6">
-                                                    <div className="space-y-2">
-                                                        <p className="text-[10px] font-black text-folio-text-dim/50 uppercase tracking-[2px] ml-1">Frente do Documento</p>
-                                                        <div className="aspect-[16/10] rounded-[24px] overflow-hidden border border-folio-border bg-folio-bg flex items-center justify-center relative group shadow-inner">
-                                                            <img
-                                                                src={supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_front_path).data.publicUrl}
-                                                                className="w-full h-full object-contain cursor-zoom-in transition-all duration-500 group-hover:scale-105"
-                                                                onClick={() => window.open(supabase.storage.from('documents').getPublicUrl(selectedUser.profile.doc_front_path).data.publicUrl, '_blank')}
-                                                            />
-                                                        </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <KycImageCard
+                                                        title="Frente do Documento"
+                                                        path={selectedUser.profile.doc_front_path}
+                                                    />
+                                                    {selectedUser.profile.doc_back_path && (
+                                                        <KycImageCard
+                                                            title="Verso do Documento"
+                                                            path={selectedUser.profile.doc_back_path}
+                                                        />
+                                                    )}
+                                                    <div className="md:col-span-2">
+                                                        <KycImageCard
+                                                            title="Selfie de Confirmação"
+                                                            path={selectedUser.profile.selfie_path}
+                                                            aspect="aspect-video"
+                                                        />
                                                     </div>
                                                 </div>
                                             ) : (
                                                 <div className="py-16 text-center bg-folio-bg/50 rounded-[28px] border-2 border-dashed border-folio-border">
                                                     <p className="text-[11px] font-black text-folio-text-dim uppercase tracking-[3px] opacity-40">Aguardando envio de documentação</p>
+                                                    <p className="text-[9px] text-folio-text-dim/60 mt-2 font-medium">Nenhum arquivo localizado no storage para este perfil.</p>
                                                 </div>
                                             )}
                                         </div>
@@ -465,6 +484,39 @@ const UserManagement: React.FC = () => {
                     </div>
                 </>
             )}
+        </div>
+    );
+};
+
+const KycImageCard = ({ title, path, aspect = 'aspect-[16/10]' }: { title: string, path: string, aspect?: string }) => {
+    const imageUrl = supabase.storage.from('documents').getPublicUrl(path).data.publicUrl;
+
+    return (
+        <div className="space-y-2 group">
+            <p className="text-[10px] font-black text-folio-text-dim/50 uppercase tracking-[2px] ml-1 group-hover:text-folio-accent transition-colors">
+                {title}
+            </p>
+            <div className={`${aspect} rounded-[24px] overflow-hidden border border-folio-border bg-folio-bg flex items-center justify-center relative group shadow-inner`}>
+                <img
+                    src={imageUrl}
+                    alt={title}
+                    className="w-full h-full object-contain cursor-zoom-in transition-all duration-500 group-hover:scale-105"
+                    onClick={() => window.open(imageUrl, '_blank')}
+                    onError={(e: any) => {
+                        e.target.onerror = null;
+                        e.target.parentElement.innerHTML = `
+                            <div class="flex flex-col items-center gap-2 text-folio-text-dim opacity-30">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                                <span class="text-[9px] font-black uppercase tracking-widest">Erro no Carregamento</span>
+                            </div>
+                        `;
+                    }}
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
+                <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-md p-2 rounded-lg text-white">
+                    <Eye size={14} />
+                </div>
+            </div>
         </div>
     );
 };
