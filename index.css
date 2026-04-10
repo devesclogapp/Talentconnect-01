@@ -1,4 +1,3 @@
-@import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
@@ -34,16 +33,46 @@
   --radius-sm: 10px;
   --radius-xs: 7px;
 
-  /* Legacy Compatibility Mapping */
+  /* ── Aliases de Compatibilidade Legacy ──────────────────── */
+  /* Radius extras */
+  --radius-lg: var(--radius);
+  /* 16px */
+  --radius-2xl: 24px;
+  /* usado em card-credit */
+  --radius-xl: 20px;
+
+  /* Border aliases */
+  --border-subtle: var(--border);
+  /* rgba(15,23,42,0.06) */
+  --border-medium: var(--border-md);
+  /* rgba(15,23,42,0.12) */
+  --border-strong: rgba(15, 23, 42, 0.20);
+
+  /* Background aliases */
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface);
+  --bg-tertiary: var(--surface2);
+
+  /* Text aliases */
+  --text-primary: var(--text);
+  --text-secondary: var(--text2);
+  --text-tertiary: var(--text3);
+
+  /* Accent aliases */
+  --accent-primary: var(--accent);
+  --accent-secondary: var(--accent2);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --glow-accent: 0 0 20px rgba(99, 102, 241, 0.20);
+
+  /* Shadcn/Legacy compatibility */
   --background: var(--bg);
   --foreground: var(--text);
   --primary: var(--accent);
   --muted: var(--surface2);
-  --accent-primary: var(--accent);
-  --bg-primary: var(--bg);
-  --bg-secondary: var(--surface);
-  --text-primary: var(--text);
-  --text-secondary: var(--text2);
 }
 
 .dark {
@@ -71,6 +100,29 @@
   --red-dim: rgba(239, 68, 68, 0.12);
   --blue: #3B82F6;
   --blue-dim: rgba(59, 130, 246, 0.12);
+
+  /* ── Dark Mode: Aliases recalculados ────────────────────── */
+  --border-subtle: var(--border);
+  /* rgba(255,255,255,0.08) */
+  --border-medium: var(--border-md);
+  /* rgba(255,255,255,0.14) */
+  --border-strong: rgba(255, 255, 255, 0.22);
+
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface);
+  --bg-tertiary: var(--surface2);
+
+  --text-primary: var(--text);
+  --text-secondary: var(--text2);
+  --text-tertiary: var(--text3);
+
+  --accent-primary: var(--accent);
+  --accent-secondary: var(--accent2);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.30);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.40);
+  --glow-accent: 0 0 20px rgba(129, 140, 248, 0.25);
 }
 
 @layer base {
