@@ -1,128 +1,104 @@
-@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Talent Connect Design Signature - Muted Premium */
-  --bg: #F8FAFC;
-  --surface: #FFFFFF;
-  --surface2: #F1F5F9;
-  --card: #FFFFFF;
-  --border: rgba(15, 23, 42, 0.06);
-  --border-md: rgba(15, 23, 42, 0.12);
+  /* Talent Connect - Base HSL Values for Opacity Compatibility */
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
 
-  --accent: #6366F1;
-  --accent2: #4F46E5;
-  --accent-dim: rgba(99, 102, 241, 0.08);
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
 
-  --text: #0F172A;
-  --text2: rgba(15, 23, 42, 0.56);
-  --text3: rgba(15, 23, 42, 0.36);
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
 
-  --green: #478D74;
-  --green-dim: rgba(71, 141, 116, 0.08);
-  --yellow: #9B8468;
-  --yellow-dim: rgba(155, 132, 104, 0.08);
-  --red: #9F5D5D;
-  --red-dim: rgba(159, 93, 93, 0.08);
-  --blue: #607EB9;
-  --blue-dim: rgba(96, 126, 185, 0.08);
+  --primary: 239 84% 67%;
+  --primary-foreground: 0 0% 100%;
 
-  --radius: 16px;
-  --radius-sm: 10px;
-  --radius-xs: 7px;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222 47% 11.2%;
 
-  /* ── Aliases de Compatibilidade Legacy ──────────────────── */
-  /* Radius extras */
-  --radius-lg: var(--radius);
-  /* 16px */
-  --radius-2xl: 24px;
-  /* usado em card-credit */
-  --radius-xl: 20px;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
 
-  /* Border aliases */
-  --border-subtle: var(--border);
-  /* rgba(15,23,42,0.06) */
-  --border-medium: var(--border-md);
-  /* rgba(15,23,42,0.12) */
-  --border-strong: rgba(15, 23, 42, 0.20);
+  --accent: 239 84% 67%;
+  --accent-foreground: 222 47% 11.2%;
 
-  /* Background aliases */
-  --bg-primary: var(--bg);
-  --bg-secondary: var(--surface);
-  --bg-tertiary: var(--surface2);
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
 
-  /* Text aliases */
-  --text-primary: var(--text);
-  --text-secondary: var(--text2);
-  --text-tertiary: var(--text3);
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 239 84% 67%;
 
-  /* Accent aliases */
-  --accent-primary: var(--accent);
-  --accent-secondary: var(--accent2);
+  --radius: 0.75rem;
 
-  /* Shadows */
+  /* Application Specific Patterns (HSL versions for opacity) */
+  --success: 160 33% 42%;
+  --warning: 33 20% 51%;
+  --error: 0 84.2% 60.2%;
+  --info: 220 38% 55%;
+
+  /* Talent Connect Identity (Direct HSL Aliases for Utility Support) */
+  --bg-primary: var(--background);
+  --bg-secondary: var(--card);
+  --bg-tertiary: var(--muted);
+
+  --text-primary: var(--foreground);
+  --text-secondary: 215.4 16.3% 46.9%;
+  /* Muted Foreground */
+  --text-tertiary: 215.4 16.3% 56.9%;
+
+  --accent-primary: var(--primary);
+  --accent-secondary: var(--accent);
+
+  /* Shadow Patterns */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --glow-accent: 0 0 20px rgba(99, 102, 241, 0.20);
-
-  /* Shadcn/Legacy compatibility */
-  --background: var(--bg);
-  --foreground: var(--text);
-  --primary: var(--accent);
-  --muted: var(--surface2);
 }
 
 .dark {
-  /* Talent Connect Dark Mode (Slate Deep) */
-  --bg: #0F172A;
-  --surface: #1E293B;
-  --surface2: #020617;
-  --card: #1E293B;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-md: rgba(255, 255, 255, 0.14);
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
 
-  --accent: #818CF8;
-  --accent2: #A5B4FC;
-  --accent-dim: rgba(129, 140, 248, 0.12);
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
 
-  --text: #F8FAFC;
-  --text2: rgba(248, 250, 252, 0.56);
-  --text3: rgba(248, 250, 252, 0.28);
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
 
-  --green: #10B981;
-  --green-dim: rgba(16, 185, 129, 0.12);
-  --yellow: #F59E0B;
-  --yellow-dim: rgba(245, 158, 11, 0.12);
-  --red: #EF4444;
-  --red-dim: rgba(239, 68, 68, 0.12);
-  --blue: #3B82F6;
-  --blue-dim: rgba(59, 130, 246, 0.12);
+  --primary: 235 90% 74%;
+  --primary-foreground: 222.2 47.4% 11.2%;
 
-  /* ── Dark Mode: Aliases recalculados ────────────────────── */
-  --border-subtle: var(--border);
-  /* rgba(255,255,255,0.08) */
-  --border-medium: var(--border-md);
-  /* rgba(255,255,255,0.14) */
-  --border-strong: rgba(255, 255, 255, 0.22);
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
 
-  --bg-primary: var(--bg);
-  --bg-secondary: var(--surface);
-  --bg-tertiary: var(--surface2);
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
 
-  --text-primary: var(--text);
-  --text-secondary: var(--text2);
-  --text-tertiary: var(--text3);
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
 
-  --accent-primary: var(--accent);
-  --accent-secondary: var(--accent2);
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.30);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.40);
-  --glow-accent: 0 0 20px rgba(129, 140, 248, 0.25);
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 235 90% 74%;
+
+  /* Talent Connect Identity - Dark Aliases */
+  --bg-primary: var(--background);
+  --bg-secondary: var(--card);
+  --bg-tertiary: var(--muted);
+
+  --text-primary: var(--foreground);
+  --text-secondary: 215 20.2% 65.1%;
+  --text-tertiary: 215 20.2% 55.1%;
+
+  --accent-primary: var(--primary);
+  --accent-secondary: var(--accent);
 }
 
 @layer base {
@@ -132,10 +108,8 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: none !important;
   }
 }
 

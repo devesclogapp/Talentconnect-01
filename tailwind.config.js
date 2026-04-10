@@ -16,90 +16,74 @@ export default {
         },
         extend: {
             colors: {
-                // Folioblox Design System Tokens
-                'folio-bg': 'var(--bg)',
-                'folio-surface': 'var(--surface)',
-                'folio-surface2': 'var(--surface2)',
-                'folio-card': 'var(--card)',
-                'folio-accent': 'var(--accent)',
-                'folio-accent-dim': 'var(--accent-dim)',
-                'folio-text': 'var(--text)',
-                'folio-text-dim': 'var(--text2)',
-
-                // Keep Shadcn/Existing compatibility but map to Folioblox
-                border: "var(--border)",
-                input: "var(--border)",
-                ring: "var(--accent)",
-                background: "var(--bg)",
-                foreground: "var(--text)",
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
                 primary: {
-                    DEFAULT: "var(--accent)",
-                    foreground: "#FFFFFF",
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
                 },
                 secondary: {
-                    DEFAULT: "var(--surface2)",
-                    foreground: "var(--text)",
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
                 },
                 destructive: {
-                    DEFAULT: "var(--red)",
-                    foreground: "#FFFFFF",
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
                 },
                 muted: {
-                    DEFAULT: "var(--surface2)",
-                    foreground: "var(--text2)",
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
                 },
                 accent: {
-                    DEFAULT: "var(--accent-dim)",
-                    foreground: "var(--accent)",
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
                 },
                 popover: {
-                    DEFAULT: "var(--surface)",
-                    foreground: "var(--text)",
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
                 },
                 card: {
-                    DEFAULT: "var(--card)",
-                    foreground: "var(--text)",
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))",
                 },
 
-                // Semantic
-                success: 'var(--green)',
-                error: 'var(--red)',
-                warning: 'var(--yellow)',
-                info: 'var(--blue)',
+                // Semantic Tokens
+                success: 'hsl(var(--success))',
+                warning: 'hsl(var(--warning))',
+                error: 'hsl(var(--error))',
+                info: 'hsl(var(--info))',
 
-                // App Specific Tokens (from index.css vars)
-                'app-bg': 'var(--bg)',
-                'app-surface': 'var(--surface)',
-                'app-surface-2': 'var(--surface2)',
-                'app-text': 'var(--text)',
-                'app-muted': 'var(--text2)',
+                // App Specific Tokens (from index.html)
+                'app-bg': 'hsl(var(--background))',
+                'app-text': 'hsl(var(--foreground))',
 
-                // Design System Legacy/Compatibility
-                'bg-primary': 'var(--bg)',
-                'bg-secondary': 'var(--surface)',
-                'bg-tertiary': 'var(--surface2)',
-                'text-primary': 'var(--text)',
-                'text-secondary': 'var(--text2)',
-                'text-tertiary': 'var(--text3)',
-                'accent-primary': 'var(--accent)',
-                'accent-secondary': 'var(--accent2)',
-                'brand-primary': 'var(--accent)',
+                // Talent Connect Legacy Compatibility (Mapped to New HSL)
+                'bg-primary': 'hsl(var(--background))',
+                'bg-secondary': 'hsl(var(--card))',
+                'bg-tertiary': 'hsl(var(--muted))',
+                'text-primary': 'hsl(var(--foreground))',
+                'text-secondary': 'hsl(var(--muted-foreground))',
+                'text-tertiary': 'hsl(var(--muted-foreground))',
+                'accent-primary': 'hsl(var(--primary))',
+                'accent-secondary': 'hsl(var(--accent))',
             },
             fontFamily: {
                 sans: ['"DM Sans"', 'Inter', 'system-ui', 'sans-serif'],
                 display: ['"DM Sans"', 'sans-serif'],
             },
             borderRadius: {
-                'lg': 'var(--radius)',
-                'md': 'var(--radius-sm)',
-                'sm': 'var(--radius-xs)',
-                'full': '9999px',
+                xl: "calc(var(--radius) + 4px)",
+                lg: "var(--radius)",
+                md: "calc(var(--radius) - 2px)",
+                sm: "calc(var(--radius) - 4px)",
             },
             boxShadow: {
-                'folio': '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+                'sm': 'var(--shadow-sm)',
                 'md': 'var(--shadow-md)',
                 'lg': 'var(--shadow-lg)',
-                'glow': 'var(--glow-accent)',
             },
             spacing: {
                 'safe-top': 'env(safe-area-inset-top)',
