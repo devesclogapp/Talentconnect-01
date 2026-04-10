@@ -66,13 +66,13 @@ const DecisionIntelligence: React.FC<DecisionIntelligenceProps> = ({ negotiation
     return (
         <div className="space-y-4">
             <div className="bg-card border border-border rounded-2xl p-5 space-y-6">
-                <p className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2">
+                <p className="text-xs font-black text-primary tracking-widest flex items-center gap-2">
                     <BrainCircuit size={14} /> Recomendação da IA de Decisão
                 </p>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <div className="flex justify-between text-xs font-bold tracking-widest text-muted-foreground">
                             <span>Razão Cliente: {probs.client}%</span>
                             <span>Razão Profissional: {probs.provider}%</span>
                         </div>
@@ -83,7 +83,7 @@ const DecisionIntelligence: React.FC<DecisionIntelligenceProps> = ({ negotiation
                     </div>
 
                     <div className="p-4 bg-muted/30 rounded-xl border border-border/50">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <p className="text-xs font-bold text-muted-foreground tracking-widest mb-1 flex items-center gap-1.5">
                             <Scale size={12} /> Resumo Analítico
                         </p>
                         <p className="text-xs text-foreground leading-relaxed italic">
@@ -98,8 +98,8 @@ const DecisionIntelligence: React.FC<DecisionIntelligenceProps> = ({ negotiation
                             {probs.client > probs.provider ? <CheckCircle size={16} /> : <Target size={16} />}
                         </div>
                         <div>
-                            <p className="text-[8px] font-bold text-muted-foreground uppercase">Tendência</p>
-                            <p className="text-[10px] font-bold">Favorável Cliente</p>
+                            <p className="text-xs font-bold text-muted-foreground">Tendência</p>
+                            <p className="text-xs font-bold">Favorável Cliente</p>
                         </div>
                     </div>
                     <div className="p-3 rounded-xl bg-card border border-border flex items-center gap-3">
@@ -107,8 +107,8 @@ const DecisionIntelligence: React.FC<DecisionIntelligenceProps> = ({ negotiation
                             {probs.provider > probs.client ? <CheckCircle size={16} /> : <Target size={16} />}
                         </div>
                         <div>
-                            <p className="text-[8px] font-bold text-muted-foreground uppercase">Tendência</p>
-                            <p className="text-[10px] font-bold">Favorável Prof.</p>
+                            <p className="text-xs font-bold text-muted-foreground">Tendência</p>
+                            <p className="text-xs font-bold">Favorável Prof.</p>
                         </div>
                     </div>
                 </div>

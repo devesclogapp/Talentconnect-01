@@ -38,7 +38,7 @@ interface Dispute {
         provider: { id: string; name: string; email: string; avatar_url?: string; trustScore?: number; };
         service: { id: string; title: string; category?: string; };
         scheduled_at: string;
-    };
+    } | null;
 }
 
 const AdminDisputes: React.FC = () => {
@@ -84,7 +84,7 @@ const AdminDisputes: React.FC = () => {
                     order: { ...orderRaw, client: clientObj || { id: orderRaw.client_id }, provider: providerObj || { id: orderRaw.provider_id }, service: serviceObj || { id: orderRaw.service_id } }
                 };
             });
-            setDisputes(formattedData as any);
+            setDisputes(formattedData as Dispute[]);
         } catch (error) { console.error(error); }
         finally { setIsLoading(false); }
     };
@@ -131,7 +131,7 @@ const AdminDisputes: React.FC = () => {
     };
 
     const performAction = async () => {
-        if (!selectedDispute || !pendingAction) return;
+        if (!selectedDispute || !pendingAction || !selectedDispute.order) return;
         setIsProcessing(selectedDispute.id);
         try {
             let newStatus = selectedDispute.status;
@@ -164,9 +164,9 @@ const AdminDisputes: React.FC = () => {
             resolved: 'bg-[#1DB97A]/10 text-[#1DB97A] border-[#1DB97A]/20',
             closed: 'bg-folio-text-dim/10 text-folio-text-dim border-folio-border'
         };
-        const labels = { open: 'ABERTO', in_review: 'EM ANÁLISE', resolved: 'RESOLVIDO', closed: 'FECHADO' };
+        const labels = { open: 'Aberto', in_review: 'Em análise', resolved: 'Resolvido', closed: 'Fechado' };
         return (
-            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black border uppercase tracking-widest ${colors[status as keyof typeof colors]}`}>
+            <span className={`px-2.5 py-1 rounded-lg text-xs font-black border tracking-widest ${colors[status as keyof typeof colors]}`}>
                 {labels[status as keyof typeof labels]}
             </span>
         );
@@ -182,8 +182,8 @@ const AdminDisputes: React.FC = () => {
                 <AlertDialogContent className="sm:!max-w-[720px] w-[95vw] !rounded-[32px] p-0 bg-folio-bg border-folio-border shadow-2xl overflow-hidden flex flex-col !top-1/2 !left-1/2 !-translate-x-1/2 !-translate-y-1/2 max-h-[90vh]">
                     <div className="p-8 pb-4 shrink-0">
                         <AlertDialogHeader className="mb-0">
-                            <AlertDialogTitle className="text-xl font-black text-folio-text tracking-tight uppercase">
-                                {pendingAction === 'analyze' ? 'Elevar para Análise Crítica' : pendingAction === 'resolve_release' ? 'Liberar Pagamento' : 'Estornar Valor'}
+                            <AlertDialogTitle className="text-xl font-black text-folio-text tracking-tight">
+                                {pendingAction === 'analyze' ? 'Elevar para análise crítica' : pendingAction === 'resolve_release' ? 'Liberar pagamento' : 'Estornar valor'}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="text-xs font-medium text-folio-text-dim/60">
                                 {pendingAction === 'analyze' ? 'O protocolo de mediação será ativado.' : 'Esta decisão é irreversível e será auditada.'}
@@ -197,7 +197,7 @@ const AdminDisputes: React.FC = () => {
                                 <DecisionIntelligence negotiationData={{ order: selectedDispute?.order, dispute: selectedDispute }} />
 
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-folio-text-dim/40 uppercase tracking-[3px] ml-1">Evidências Consideradas</label>
+                                    <label className="text-xs font-black text-folio-text-dim/40 tracking-[3px] ml-1">Evidências Consideradas</label>
                                     <div className="grid grid-cols-2 gap-3">
                                         {[
                                             { id: 'LATENCIA', label: 'Latência de Início', icon: <Clock size={16} /> },
@@ -210,7 +210,7 @@ const AdminDisputes: React.FC = () => {
                                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedProofs.includes(proof.label) ? 'border-folio-accent' : 'border-folio-border'}`}>
                                                     {selectedProofs.includes(proof.label) && <div className="w-2 h-2 rounded-full bg-folio-accent shadow-glow" />}
                                                 </div>
-                                                <span className="font-black text-[10px] uppercase tracking-widest">{proof.label}</span>
+                                                <span className="font-black text-xs tracking-widest">{proof.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -234,16 +234,16 @@ const AdminDisputes: React.FC = () => {
                     <div className="p-6 pt-4 border-t border-folio-border bg-folio-surface shrink-0 flex justify-end gap-3 rounded-b-[32px]">
                         <button
                             onClick={() => { setPendingAction(null); setActionReason(''); }}
-                            className="h-12 px-6 rounded-xl border border-folio-border text-[10px] font-black uppercase tracking-widest text-folio-text-dim hover:bg-folio-bg transition-all"
+                            className="h-12 px-6 rounded-xl border border-folio-border text-xs font-black tracking-widest text-folio-text-dim hover:bg-folio-bg transition-all"
                         >
                             Descartar
                         </button>
                         <button
                             disabled={!actionReason || isProcessing === selectedDispute?.id}
                             onClick={performAction}
-                            className={`h-12 px-8 rounded-xl border-none text-[10px] font-black uppercase tracking-widest text-white shadow-glow transition-all active:scale-95 ${pendingAction === 'resolve_refund' ? 'bg-[#E24B4A]' : 'bg-folio-accent'} disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed`}
+                            className={`h-12 px-8 rounded-xl border-none text-xs font-black tracking-widest text-white shadow-glow transition-all active:scale-95 ${pendingAction === 'resolve_refund' ? 'bg-[#E24B4A]' : 'bg-folio-accent'} disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed`}
                         >
-                            {isProcessing ? 'PROCESSANDO...' : 'EXECUTAR SENTENÇA'}
+                            {isProcessing ? 'Processando...' : 'Executar sentença'}
                         </button>
                     </div>
                 </AlertDialogContent>
@@ -258,9 +258,9 @@ const AdminDisputes: React.FC = () => {
                                 <NegotiationDossier data={selectedDispute} auditLogs={auditLogs} onBack={() => setSelectedDispute(null)} />
                             </div>
                             <div className="p-6 border-t border-folio-border bg-folio-surface flex flex-wrap gap-2">
-                                <button onClick={() => setPendingAction('resolve_release')} className="flex-1 min-w-[120px] h-12 bg-[#1DB97A]/10 text-[#1DB97A] border border-[#1DB97A]/20 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#1DB97A] hover:text-white transition-all">Liberar Escrow</button>
-                                <button onClick={() => setPendingAction('resolve_refund')} className="flex-1 min-w-[120px] h-12 bg-[#E24B4A]/10 text-[#E24B4A] border border-[#E24B4A]/20 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#E24B4A] hover:text-white transition-all">Estornar Cliente</button>
-                                <button onClick={() => setPendingAction('analyze')} className="w-full h-12 bg-folio-text text-folio-bg rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2"><Zap size={16} className="text-folio-accent" /> ANALISAR CASO</button>
+                                <button onClick={() => setPendingAction('resolve_release')} className="flex-1 min-w-[120px] h-12 bg-[#1DB97A]/10 text-[#1DB97A] border border-[#1DB97A]/20 rounded-xl text-xs font-black tracking-widest hover:bg-[#1DB97A] hover:text-white transition-all">Liberar escrow</button>
+                                <button onClick={() => setPendingAction('resolve_refund')} className="flex-1 min-w-[120px] h-12 bg-[#E24B4A]/10 text-[#E24B4A] border border-[#E24B4A]/20 rounded-xl text-xs font-black tracking-widest hover:bg-[#E24B4A] hover:text-white transition-all">Estornar cliente</button>
+                                <button onClick={() => setPendingAction('analyze')} className="w-full h-12 bg-folio-text text-folio-bg rounded-xl text-xs font-black tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2"><Zap size={16} className="text-folio-accent" /> Analisar caso</button>
                             </div>
                         </div>
                     )}
@@ -269,8 +269,8 @@ const AdminDisputes: React.FC = () => {
 
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-folio-text uppercase tracking-tight leading-none">Mediação de Conflitos</h1>
-                    <p className="text-[11px] font-bold text-folio-text-dim/50 uppercase tracking-[2px] mt-2">Dossiê e Governança de Escrow Operacional</p>
+                    <h1 className="text-2xl font-black text-folio-text tracking-tight leading-none">Mediação de Conflitos</h1>
+                    <p className="text-xs font-bold text-folio-text-dim/50 tracking-[2px] mt-2">Dossiê e Governança de Escrow Operacional</p>
                 </div>
                 <button onClick={fetchDisputes} className="w-11 h-11 flex items-center justify-center rounded-2xl border border-folio-border bg-folio-surface text-folio-text-dim hover:text-folio-accent hover:rotate-180 transition-all duration-700 shadow-sm"><RefreshCw size={18} /></button>
             </div>
@@ -284,10 +284,10 @@ const AdminDisputes: React.FC = () => {
 
             <div className="bg-folio-surface border border-folio-border rounded-[32px] p-6 shadow-folio">
                 <div className="hidden md:grid grid-cols-12 px-8 py-4 opacity-40">
-                    <div className="col-span-3 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Caso / Protocolo</div>
-                    <div className="col-span-4 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Reclamante / Motivo</div>
-                    <div className="col-span-2 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Valor</div>
-                    <div className="col-span-2 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Status</div>
+                    <div className="col-span-3 text-xs font-black text-folio-text tracking-[2px]">Caso / Protocolo</div>
+                    <div className="col-span-4 text-xs font-black text-folio-text tracking-[2px]">Reclamante / Motivo</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text tracking-[2px]">Valor</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text tracking-[2px]">Status</div>
                     <div className="col-span-1"></div>
                 </div>
 
@@ -296,16 +296,16 @@ const AdminDisputes: React.FC = () => {
                         <div key={dispute.id} onClick={() => handleSelectDispute(dispute)}
                             className="grid grid-cols-12 items-center px-8 py-6 bg-folio-bg border border-folio-border rounded-[28px] hover:border-folio-accent/40 shadow-sm hover:shadow-glow-dim transition-all group cursor-pointer">
                             <div className="col-span-3">
-                                <p className="text-[10px] font-black text-folio-text-dim/40 font-mono mb-1 uppercase tracking-tighter">#{dispute.id.slice(0, 8)}</p>
-                                <p className="text-[11px] font-bold text-folio-text-dim/60 uppercase tracking-widest">{formatDate(dispute.created_at)}</p>
+                                <p className="text-xs font-black text-folio-text-dim/40 font-mono mb-1 tracking-tighter">#{dispute.id.slice(0, 8)}</p>
+                                <p className="text-xs font-bold text-folio-text-dim/60 tracking-widest">{formatDate(dispute.created_at)}</p>
                             </div>
                             <div className="col-span-4 pr-10">
-                                <p className="text-sm font-black text-folio-text uppercase tracking-tight truncate leading-none">{dispute.reason || 'S/ DESCRITIVO'}</p>
+                                <p className="text-sm font-black text-folio-text tracking-tight truncate leading-none">{dispute.reason || 'S/ descritivo'}</p>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border ${dispute.opened_by === 'client' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-orange-500/10 text-orange-600 border-orange-500/20'}`}>
+                                    <span className={`px-2 py-0.5 rounded-md text-xs font-black tracking-widest border ${dispute.opened_by === 'client' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-orange-500/10 text-orange-600 border-orange-500/20'}`}>
                                         {dispute.opened_by === 'client' ? 'CLI' : 'PRO'}
                                     </span>
-                                    <p className="text-[11px] font-bold text-folio-text-dim/60 truncate">{resolveUserName(dispute.opened_by === 'client' ? dispute.order?.client : dispute.order?.provider)}</p>
+                                    <p className="text-xs font-bold text-folio-text-dim/60 truncate">{resolveUserName(dispute.opened_by === 'client' ? dispute.order?.client : dispute.order?.provider)}</p>
                                 </div>
                             </div>
                             <div className="col-span-2 font-mono text-sm font-black text-folio-text tabular-nums tracking-tighter shadow-glow px-3 py-1 bg-folio-surface border border-folio-border rounded-xl w-fit">

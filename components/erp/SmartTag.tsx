@@ -63,7 +63,7 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                     if (onClick) onClick();
                 }}
                 className={`
-                    inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider
+                    inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-xs font-bold tracking-wider
                     transition-all active:scale-95 whitespace-nowrap
                     ${getColorClass()}
                 `}
@@ -82,11 +82,11 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                             <div className={`p-2 rounded-xl border ${getColorClass().split(' ').slice(0, 3).join(' ')}`}>
                                 {getIcon()}
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-[1.5px] text-folio-text-dim">
-                                {type}
+                            <span className="text-xs font-bold tracking-[1.5px] text-folio-text-dim">
+                                {type.charAt(0) + type.slice(1).toLowerCase()}
                             </span>
                         </div>
-                        {id && <span className="text-[10px] font-mono text-folio-text-dim/40 bg-folio-bg px-1.5 py-0.5 rounded border border-folio-border">#{id.slice(0, 6)}</span>}
+                        {id && <span className="text-xs font-mono text-folio-text-dim/40 bg-folio-bg px-1.5 py-0.5 rounded border border-folio-border">#{id.slice(0, 6)}</span>}
                     </div>
 
                     <div className="space-y-4">
@@ -101,53 +101,53 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                                         )}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-[14px] font-bold text-folio-text leading-tight truncate">{data?.displayName || data?.name || label || 'Usuário'}</p>
-                                        <p className="text-[10px] text-folio-text-dim font-medium tracking-tight truncate opacity-60">{data?.email || `ID: ${data?.id?.split('-')[0] || 'N/A'}`}</p>
+                                        <p className="text-sm font-bold text-folio-text leading-tight truncate">{data?.displayName || data?.name || label || 'Usuário'}</p>
+                                        <p className="text-xs text-folio-text-dim font-medium tracking-tight truncate opacity-60">{data?.email || `ID: ${data?.id?.split('-')[0] || 'N/A'}`}</p>
                                     </div>
                                 </div>
                                 <TrustScore score={data?.trustScore || 85} size="sm" />
                                 <div className="grid grid-cols-2 gap-3 mt-1">
                                     <div className="bg-folio-bg rounded-xl p-2.5 text-center border border-folio-border/50 shadow-inner">
-                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim tracking-wider mb-1">Pedidos</p>
+                                        <p className="text-xs font-bold text-folio-text-dim tracking-wider mb-1">Pedidos</p>
                                         <p className="text-xs font-black text-folio-text">{data?.totalOrders || 0}</p>
                                     </div>
                                     <div className="bg-folio-bg rounded-xl p-2.5 text-center border border-folio-border/50 shadow-inner">
-                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim tracking-wider mb-1">Disputas</p>
+                                        <p className="text-xs font-bold text-folio-text-dim tracking-wider mb-1">Disputas</p>
                                         <p className="text-xs font-black text-error">{data?.disputes || 0}</p>
                                     </div>
                                 </div>
                             </>
                         ) : type === 'SERVICO' ? (
                             <div className="space-y-3">
-                                <p className="text-[13px] font-bold text-folio-text leading-tight">{data?.title || label}</p>
+                                <p className="text-sm font-bold text-folio-text leading-tight">{data?.title || label}</p>
                                 <div className="flex justify-between items-center bg-folio-bg p-2.5 rounded-xl border border-folio-border/50">
-                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-wider">Categoria</span>
-                                    <span className="text-[10px] font-bold text-accent px-2 py-0.5 rounded-lg border border-accent/20">{data?.category || 'Geral'}</span>
+                                    <span className="text-xs font-bold text-folio-text-dim tracking-wider">Categoria</span>
+                                    <span className="text-xs font-bold text-accent px-2 py-0.5 rounded-lg border border-accent/20">{data?.category || 'Geral'}</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-folio-bg rounded-xl p-2.5 border border-folio-border/50 shadow-inner">
-                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim mb-1">Preço Médio</p>
-                                        <p className="text-[11px] font-black text-folio-text">R$ {formatNumber(data?.avgPrice)}</p>
+                                        <p className="text-xs font-bold text-folio-text-dim mb-1">Preço médio</p>
+                                        <p className="text-xs font-black text-folio-text">R$ {formatNumber(data?.avgPrice)}</p>
                                     </div>
                                     <div className="bg-folio-bg rounded-xl p-2.5 border border-folio-border/50 shadow-inner">
-                                        <p className="text-[8px] uppercase font-bold text-folio-text-dim mb-1">Taxa Disputa</p>
-                                        <p className="text-[11px] font-black text-warning">{data?.disputeRate || '0'}%</p>
+                                        <p className="text-xs font-bold text-folio-text-dim mb-1">Taxa disputa</p>
+                                        <p className="text-xs font-black text-warning">{data?.disputeRate || '0'}%</p>
                                     </div>
                                 </div>
                             </div>
                         ) : type === 'VALOR' ? (
                             <div className="space-y-3">
                                 <div className="bg-folio-bg p-4 rounded-2xl border border-folio-border space-y-3 shadow-inner">
-                                    <div className="flex justify-between items-center text-[10px] font-bold text-folio-text-dim">
-                                        <span className="uppercase tracking-wider">Bruto (Escrow)</span>
+                                    <div className="flex justify-between items-center text-xs font-bold text-folio-text-dim">
+                                        <span className="tracking-wider">Bruto (Escrow)</span>
                                         <span className="text-folio-text">R$ {formatNumber(data?.totalAmount || 0)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-[10px] font-bold text-error/80">
-                                        <span className="uppercase tracking-wider">Taxa (10%)</span>
+                                    <div className="flex justify-between items-center text-xs font-bold text-error/80">
+                                        <span className="tracking-wider">Taxa (10%)</span>
                                         <span>- R$ {formatNumber((data?.totalAmount || 0) * 0.1)}</span>
                                     </div>
                                     <div className="pt-3 border-t border-folio-border flex justify-between items-center">
-                                        <span className="text-[10px] font-black uppercase tracking-[1.5px] text-folio-text">Líquido Prof.</span>
+                                        <span className="text-xs font-black tracking-[1.5px] text-folio-text">Líquido prof.</span>
                                         <span className="text-md font-black text-success">R$ {formatNumber((data?.totalAmount || 0) * 0.9)}</span>
                                     </div>
                                 </div>
@@ -155,18 +155,18 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
                         ) : type === 'PEDIDO' ? (
                             <div className="space-y-4">
                                 <div className="flex justify-between items-start gap-4 p-1">
-                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-[1.5px] pt-1 shrink-0">Serviço</span>
-                                    <span className="text-[11px] font-bold text-folio-text text-right leading-tight">{data?.service?.title || 'Relacionado'}</span>
+                                    <span className="text-xs font-bold text-folio-text-dim tracking-[1.5px] pt-1 shrink-0">Serviço</span>
+                                    <span className="text-xs font-bold text-folio-text text-right leading-tight">{data?.service?.title || 'Relacionado'}</span>
                                 </div>
                                 <div className="bg-folio-bg p-3 rounded-xl border border-folio-border flex justify-between items-center shadow-inner">
-                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-wider">Status Geral</span>
-                                    <span className="text-[9px] font-black px-2 py-1 bg-success/10 text-success rounded-lg border border-success/20 uppercase tracking-widest">
+                                    <span className="text-xs font-bold text-folio-text-dim tracking-wider">Status geral</span>
+                                    <span className="text-xs font-black px-2 py-1 bg-success/10 text-success rounded-lg border border-success/20 tracking-widest">
                                         {data?.status || 'Ativo'}
                                     </span>
                                 </div>
                                 <div className="pt-3 border-t border-folio-border flex justify-between items-end p-1">
-                                    <span className="text-[9px] font-bold text-folio-text-dim uppercase tracking-wider">Liquidez Total</span>
-                                    <span className="text-[16px] font-black text-folio-text tabular-nums">R$ {formatNumber(data?.total_amount)}</span>
+                                    <span className="text-xs font-bold text-folio-text-dim tracking-wider">Liquidez total</span>
+                                    <span className="text-base font-black text-folio-text tabular-nums">R$ {formatNumber(data?.total_amount)}</span>
                                 </div>
                             </div>
                         ) : (
@@ -178,9 +178,9 @@ const SmartTag: React.FC<SmartTagProps> = ({ type, id, label, data, onClick }) =
 
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="w-full mt-5 py-3 bg-folio-bg hover:bg-folio-surface2/50 border border-folio-border rounded-xl text-[9px] font-black uppercase tracking-[2px] text-folio-text-dim transition-all active:scale-95 shadow-sm"
+                        className="w-full mt-5 py-3 bg-folio-bg hover:bg-folio-surface2/50 border border-folio-border rounded-xl text-xs font-black tracking-[2px] text-folio-text-dim transition-all active:scale-95 shadow-sm"
                     >
-                        FECHAR
+                        Fechar
                     </button>
                 </div>
             )}

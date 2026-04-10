@@ -92,14 +92,14 @@ const statusRing = (s: 'clean' | 'attention' | 'critical') =>
 const SectionLabel = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
     <div className="flex items-center gap-2 px-1 mb-1">
         <span className="text-muted-foreground">{icon}</span>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
+        <p className="text-xs font-semibold tracking-widest text-muted-foreground">{label}</p>
     </div>
 );
 
 const DossierRow = ({ label, value, highlight }: { label: string; value?: string; highlight?: boolean }) => (
     <div className="flex justify-between items-start gap-3 py-2 border-b border-border last:border-0">
-        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest shrink-0">{label}</span>
-        <span className={`text-[10px] text-right font-medium truncate max-w-[180px] ${highlight ? 'text-foreground font-semibold' : 'text-foreground'}`}>{value || '—'}</span>
+        <span className="text-xs font-semibold text-muted-foreground tracking-widest shrink-0">{label}</span>
+        <span className={`text-xs text-right font-medium truncate max-w-[180px] ${highlight ? 'text-foreground font-semibold' : 'text-foreground'}`}>{value || '—'}</span>
     </div>
 );
 
@@ -178,8 +178,9 @@ const AuditLogs: React.FC = () => {
             ]);
 
             const metaMap: Record<string, OrderMeta> = {};
+            const payments = (paymentsRes.data || []) as any[];
             (ordersRes.data || []).forEach((o: any) => {
-                const payment = (paymentsRes.data || []).find((p: any) => p.order_id === o.id);
+                const payment = payments.find((p) => p.order_id === o.id);
                 metaMap[o.id] = {
                     id: o.id, status: o.status || 'unknown', pricing_mode: o.pricing_mode,
                     scheduled_at: o.scheduled_at, location_text: o.location_text,
@@ -286,7 +287,7 @@ const AuditLogs: React.FC = () => {
                                     <>
                                         {/* Partes */}
                                         <div className="bg-muted/30 border border-border rounded-xl p-4 space-y-3">
-                                            <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">Partes da Negociação</p>
+                                            <p className="text-[9px] font-semibold tracking-widest text-muted-foreground">Partes da Negociação</p>
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-semibold text-xs shrink-0">
                                                     {(selectedNegotiation.meta.client_name || 'C').charAt(0).toUpperCase()}
@@ -294,7 +295,7 @@ const AuditLogs: React.FC = () => {
                                                 <div>
                                                     <p className="text-[10px] font-semibold text-foreground">{selectedNegotiation.meta.client_name}</p>
                                                     <p className="text-[9px] text-muted-foreground font-mono">{selectedNegotiation.meta.client_email}</p>
-                                                    <span className="text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">Cliente</span>
+                                                    <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">Cliente</span>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2 pl-4 opacity-40">
@@ -308,14 +309,14 @@ const AuditLogs: React.FC = () => {
                                                 <div>
                                                     <p className="text-[10px] font-semibold text-foreground">{selectedNegotiation.meta.provider_name}</p>
                                                     <p className="text-[9px] text-muted-foreground font-mono">{selectedNegotiation.meta.provider_email}</p>
-                                                    <span className="text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">Profissional</span>
+                                                    <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">Profissional</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Dados do Pedido */}
                                         <div className="bg-card border border-border rounded-xl p-4">
-                                            <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">Dados do Pedido</p>
+                                            <p className="text-[9px] font-semibold tracking-widest text-muted-foreground mb-3">Dados do Pedido</p>
                                             <DossierRow label="Serviço" value={selectedNegotiation.meta.service_title} />
                                             <DossierRow label="Modalidade" value={selectedNegotiation.meta.pricing_mode === 'hourly' ? 'Por Hora' : 'Valor Fixo'} />
                                             <DossierRow label="Status" value={orderStatusLabel[selectedNegotiation.meta.status]?.label || selectedNegotiation.meta.status} />
@@ -331,7 +332,7 @@ const AuditLogs: React.FC = () => {
 
                                         {/* Resumo de atividade */}
                                         <div className="bg-card border border-border rounded-xl p-4">
-                                            <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">Resumo de Atividade</p>
+                                            <p className="text-[9px] font-semibold tracking-widest text-muted-foreground mb-3">Resumo de Atividade</p>
                                             <div className="grid grid-cols-3 gap-3 text-center">
                                                 <div>
                                                     <p className="text-base font-semibold text-foreground">{selectedNegotiation.logs.length}</p>
@@ -351,7 +352,7 @@ const AuditLogs: React.FC = () => {
                                 ) : (
                                     <div className="py-16 text-center opacity-30">
                                         <Info size={32} className="mx-auto mb-3" />
-                                        <p className="text-[10px] font-semibold uppercase tracking-widest">Metadados do pedido não encontrados</p>
+                                        <p className="text-[10px] font-semibold tracking-widest">Metadados do pedido não encontrados</p>
                                     </div>
                                 )}
                             </div>
@@ -372,7 +373,7 @@ const AuditLogs: React.FC = () => {
                         <RefreshCw size={16} />
                     </button>
                     <button onClick={exportToCSV}
-                        className="h-9 px-4 rounded-lg text-[10px] font-semibold uppercase tracking-widest bg-foreground text-background hover:opacity-90 transition-all flex items-center gap-2">
+                        className="h-9 px-4 rounded-lg text-[10px] font-semibold tracking-widest bg-foreground text-background hover:opacity-90 transition-all flex items-center gap-2">
                         <Download size={13} /> Exportar CSV
                     </button>
                 </div>
@@ -419,7 +420,7 @@ const AuditLogs: React.FC = () => {
                         <div className="flex gap-1.5">
                             {(['all', 'negotiations', 'system'] as const).map(f => (
                                 <button key={f} onClick={() => setActiveFilter(f)}
-                                    className={`h-9 px-3 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${activeFilter === f ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground'}`}>
+                                    className={`h-9 px-3 rounded-lg text-[10px] font-semibold tracking-widest transition-all ${activeFilter === f ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground'}`}>
                                     {f === 'all' ? 'Todos' : f === 'negotiations' ? 'Negociações' : 'Sistema'}
                                 </button>
                             ))}
@@ -430,7 +431,7 @@ const AuditLogs: React.FC = () => {
                     {(filteredNeg.length + filteredSta.length) === 0 ? (
                         <div className="py-24 text-center opacity-30">
                             <AlertCircle size={40} className="mx-auto mb-3" />
-                            <p className="text-[10px] font-semibold uppercase tracking-widest">Nenhum evento encontrado</p>
+                            <p className="text-[10px] font-semibold tracking-widest">Nenhum evento encontrado</p>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -520,7 +521,7 @@ const AuditLogs: React.FC = () => {
                                                                         { label: 'Modalidade', value: group.meta.pricing_mode === 'hourly' ? 'Por Hora' : 'Valor Fixo' },
                                                                     ].map(item => (
                                                                         <div key={item.label}>
-                                                                            <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest mb-0.5">{item.label}</p>
+                                                                            <p className="text-[9px] font-semibold text-muted-foreground tracking-widest mb-0.5">{item.label}</p>
                                                                             <p className="text-[10px] font-medium text-foreground truncate">{item.value || '—'}</p>
                                                                         </div>
                                                                     ))}
@@ -589,7 +590,7 @@ const AuditLogs: React.FC = () => {
                                                     <tr className="border-b border-border bg-muted/50">
                                                         {(['Ação', 'Entidade', 'Detalhes', 'Agente', 'Timestamp'] as const).map((label, i) => (
                                                             <th key={label}
-                                                                className="relative px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground select-none group"
+                                                                className="relative px-4 py-3 text-xs font-semibold tracking-widest text-muted-foreground select-none group"
                                                                 style={{ width: colWidths[i], overflow: 'hidden' }}>
                                                                 <span className="truncate block pr-3">{label}</span>
                                                                 {/* Divisor arrastável — igual às planilhas */}
@@ -617,24 +618,24 @@ const AuditLogs: React.FC = () => {
                                                                     </span>
                                                                 </td>
                                                                 <td className="px-4 py-3" style={{ overflow: 'hidden' }}>
-                                                                    <p className="text-[9px] text-muted-foreground font-mono uppercase truncate">{log.entity_type || '—'}</p>
+                                                                    <p className="text-[10px] text-muted-foreground font-mono truncate">{log.entity_type || '—'}</p>
                                                                     {log.entity_id && (
-                                                                        <p className="text-[9px] text-muted-foreground font-mono opacity-60 truncate">{log.entity_id}</p>
+                                                                        <p className="text-[10px] text-muted-foreground font-mono opacity-60 truncate">{log.entity_id}</p>
                                                                     )}
                                                                 </td>
                                                                 <td className="px-4 py-3" style={{ overflow: 'hidden' }}>
-                                                                    <p className="text-[10px] text-muted-foreground" style={{ whiteSpace: colWidths[2] > 250 ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                    <p className="text-xs text-muted-foreground" style={{ whiteSpace: colWidths[2] > 250 ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                                         {log.details || log.payload_json?.details || '—'}
                                                                     </p>
                                                                 </td>
                                                                 <td className="px-4 py-3" style={{ overflow: 'hidden' }}>
-                                                                    <p className="text-[9px] text-muted-foreground font-mono truncate">
+                                                                    <p className="text-[10px] text-muted-foreground font-mono truncate">
                                                                         {log.actor_user_id || 'Sistema'}
                                                                     </p>
                                                                 </td>
                                                                 <td className="px-4 py-3" style={{ overflow: 'hidden' }}>
-                                                                    <p className="text-[9px] font-medium text-muted-foreground font-mono whitespace-nowrap">{formatDate(getLogTime(log))}</p>
-                                                                    <p className="text-[9px] font-mono text-muted-foreground opacity-60 whitespace-nowrap">{formatTime(getLogTime(log))}</p>
+                                                                    <p className="text-[10px] font-medium text-muted-foreground font-mono whitespace-nowrap">{formatDate(getLogTime(log))}</p>
+                                                                    <p className="text-[10px] font-mono text-muted-foreground opacity-60 whitespace-nowrap">{formatTime(getLogTime(log))}</p>
                                                                 </td>
                                                             </tr>
                                                         );

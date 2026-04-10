@@ -117,8 +117,8 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
                         <ArrowLeft size={20} />
                     </button>
                     <div className="text-center">
-                        <h1 className="text-[11px] font-black tracking-[0.2em] uppercase text-text-primary">Meus Serviços</h1>
-                        <p className="text-[9px] text-text-tertiary mt-0.5">
+                        <h1 className="text-xs font-black tracking-[0.2em] text-text-primary">Meus serviços</h1>
+                        <p className="text-xs text-text-tertiary mt-0.5">
                             {activeCount} ativos · {pausedCount} pausados
                         </p>
                     </div>
@@ -136,7 +136,7 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
                 {loading && !services.length ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-4">
                         <div className="w-10 h-10 border-4 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin" />
-                        <p className="text-[10px] font-black tracking-widest text-text-tertiary uppercase animate-pulse">Carregando...</p>
+                        <p className="text-xs font-black tracking-widest text-text-tertiary animate-pulse">Carregando...</p>
                     </div>
                 ) : services.length === 0 ? (
                     /* Empty State */
@@ -162,7 +162,7 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
                             <section>
                                 <div className="flex items-center gap-2 px-1 py-3">
                                     <div className="w-2 h-2 rounded-full bg-success" />
-                                    <span className="text-[10px] font-black tracking-widest uppercase text-text-tertiary">
+                                    <span className="text-xs font-black tracking-widest text-text-tertiary">
                                         Ativos ({activeCount})
                                     </span>
                                 </div>
@@ -186,7 +186,7 @@ const MyServices: React.FC<Props> = ({ onBack, onNavigate }) => {
                             <section>
                                 <div className="flex items-center gap-2 px-1 py-3 mt-2">
                                     <div className="w-2 h-2 rounded-full bg-text-tertiary/50" />
-                                    <span className="text-[10px] font-black tracking-widest uppercase text-text-tertiary">
+                                    <span className="text-xs font-black tracking-widest text-text-tertiary">
                                         Pausados ({pausedCount})
                                     </span>
                                 </div>
@@ -304,7 +304,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ service, isToggling, onEdit, 
                             {service.title}
                         </h3>
                         {/* Status badge */}
-                        <span className={`shrink-0 text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg ${isActive
+                        <span className={`shrink-0 text-xs font-black tracking-widest px-2 py-1 rounded-lg ${isActive
                             ? 'bg-success/10 text-success'
                             : 'bg-text-tertiary/10 text-text-tertiary'
                             }`}>
@@ -312,13 +312,13 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ service, isToggling, onEdit, 
                         </span>
                     </div>
 
-                    <p className="text-[10px] text-text-tertiary mt-1 mb-2">{service.category}</p>
+                    <p className="text-xs text-text-tertiary mt-1 mb-2">{service.category}</p>
 
                     <div className="flex items-baseline gap-1">
                         <span className="text-lg font-black text-text-primary">
                             R$ {Number(service.base_price).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
                         </span>
-                        <span className="text-[10px] text-text-tertiary">
+                        <span className="text-xs text-text-tertiary">
                             {service.pricing_mode === 'hourly' ? '/ hora' : '/ unidade'}
                         </span>
                     </div>
@@ -331,7 +331,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ service, isToggling, onEdit, 
                 <button
                     onClick={(e) => onToggle(e, service)}
                     disabled={isToggling}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-[11px] font-bold transition-colors active:scale-95 ${isActive
+                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-xs font-bold transition-colors active:scale-95 ${isActive
                         ? 'text-warning hover:bg-warning/5'
                         : 'text-success hover:bg-success/5'
                         } disabled:opacity-50`}
@@ -348,7 +348,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ service, isToggling, onEdit, 
                 {/* Edit */}
                 <button
                     onClick={(e) => onEdit(e, service.id)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 text-[11px] font-bold text-text-secondary hover:bg-accent-primary/5 hover:text-accent-primary transition-colors active:scale-95"
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 text-xs font-bold text-text-secondary hover:bg-accent-primary/5 hover:text-accent-primary transition-colors active:scale-95"
                 >
                     <Edit2 size={15} />
                     <span>Editar</span>
@@ -357,7 +357,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ service, isToggling, onEdit, 
                 {/* Delete */}
                 <button
                     onClick={(e) => onDelete(e, service.id)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 text-[11px] font-bold text-error/70 hover:bg-error/5 hover:text-error transition-colors active:scale-95"
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 text-xs font-bold text-error/70 hover:bg-error/5 hover:text-error transition-colors active:scale-95"
                 >
                     <Trash2 size={15} />
                     <span>Remover</span>

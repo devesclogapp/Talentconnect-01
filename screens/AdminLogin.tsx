@@ -68,7 +68,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                         </div>
 
                         <div className="space-y-6">
-                            <Badge variant="outline" className="border-white/10 text-white/50 bg-white/5 px-3 py-1 text-[10px] tracking-widest uppercase">
+                            <Badge variant="outline" className="border-white/10 text-white/50 bg-white/5 px-3 py-1 text-xs tracking-widest">
                                 ERP Administrativo
                             </Badge>
                             <h1 className="text-4xl xl:text-5xl font-semibold text-white leading-[1.15] tracking-tight">
@@ -88,7 +88,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                 <Globe size={18} />
                             </div>
                             <div>
-                                <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Status da Rede</p>
+                                <p className="text-xs font-bold text-white/30 tracking-widest">Status da rede</p>
                                 <p className="text-xs font-semibold text-white">Interface Operacional Global</p>
                             </div>
                         </div>
@@ -97,7 +97,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                 <LayoutDashboard size={18} />
                             </div>
                             <div>
-                                <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Painel de Controle</p>
+                                <p className="text-xs font-bold text-white/30 tracking-widest">Painel de controle</p>
                                 <p className="text-xs font-semibold text-white">Auditoria Financeira Ativa</p>
                             </div>
                         </div>
@@ -133,7 +133,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-4 text-left">
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground inline-block px-1">E-mail Corporativo</label>
+                                <label className="text-xs font-bold tracking-widest text-muted-foreground inline-block px-1">E-mail corporativo</label>
                                 <div className="relative group">
                                     <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none">
                                         <Mail size={16} />
@@ -150,7 +150,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-folio-text-dim inline-block px-1">Chave de Acesso</label>
+                                <label className="text-xs font-bold tracking-widest text-folio-text-dim inline-block px-1">Chave de acesso</label>
                                 <div className="relative group">
                                     <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-folio-text-dim group-focus-within:text-folio-accent transition-colors pointer-events-none">
                                         <Lock size={16} />
@@ -177,7 +177,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                         {error && (
                             <div className="p-3 bg-destructive/5 border border-destructive/10 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 text-left">
                                 <AlertCircle size={16} className="text-destructive shrink-0" />
-                                <p className="text-[11px] font-semibold text-destructive uppercase tracking-tight leading-tight">{error}</p>
+                                <p className="text-xs font-semibold text-destructive tracking-tight leading-tight">{error}</p>
                             </div>
                         )}
 
@@ -187,7 +187,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                 disabled={loading}
                                 className="w-full h-12 bg-primary hover:bg-primary/90 text-white rounded-xl flex items-center justify-between px-6 px-8 group shadow-lg shadow-primary/10 border-none"
                             >
-                                <span className="text-xs font-bold uppercase tracking-widest">
+                                <span className="text-xs font-bold tracking-widest">
                                     {loading ? (
                                         <span className="relative inline-block">
                                             Autenticando
@@ -202,7 +202,7 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
                                 variant="ghost"
                                 type="button"
                                 onClick={() => navigate('/login')}
-                                className="w-full h-10 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                                className="w-full h-10 text-xs font-bold tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/30"
                             >
                                 Voltar ao Acesso do Usuário
                             </Button>
@@ -211,9 +211,9 @@ const AdminLogin: React.FC<Props> = ({ onLoginSuccess }) => {
 
                     <div className="mt-16 flex flex-col items-center gap-4">
                         <div className="h-px w-8 bg-border/50"></div>
-                        <p className="text-[9px] font-bold text-muted-foreground/60 text-center uppercase tracking-[0.2em] leading-relaxed">
+                        <p className="text-xs font-bold text-muted-foreground/60 text-center tracking-[0.2em] leading-relaxed">
                             Talent Connect Operational Console <br />
-                            <span className="text-[8px] opacity-40">Encryption AES-256 Standard</span>
+                            <span className="text-xs opacity-40">Encryption AES-256 Standard</span>
                         </p>
                     </div>
                 </div>

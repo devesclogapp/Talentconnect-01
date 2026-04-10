@@ -33,8 +33,8 @@ const TrustScore: React.FC<TrustScoreProps> = ({ score, size = 'md', showLabel =
     };
 
     const dimensions = {
-        sm: { icon: 12, text: 'text-[9px]', padding: 'px-1.5 py-0.5', gap: 'gap-1' },
-        md: { icon: 14, text: 'text-[10px]', padding: 'px-2 py-1', gap: 'gap-1.5' },
+        sm: { icon: 12, text: 'text-xs', padding: 'px-1.5 py-0.5', gap: 'gap-1' },
+        md: { icon: 14, text: 'text-xs', padding: 'px-2 py-1', gap: 'gap-1.5' },
         lg: { icon: 18, text: 'text-xs', padding: 'px-3 py-1.5', gap: 'gap-2' },
     }[size];
 
@@ -43,10 +43,10 @@ const TrustScore: React.FC<TrustScoreProps> = ({ score, size = 'md', showLabel =
             {getIcon(score, dimensions.icon)}
             {showLabel && (
                 <div className="flex flex-col leading-none">
-                    <span className={`${dimensions.text} font-bold ${getScoreColor(score)} uppercase tracking-widest`}>
+                    <span className={`${dimensions.text} font-bold ${getScoreColor(score)} tracking-widest`}>
                         {getLabel(score)}
                     </span>
-                    <span className="text-[8px] text-muted-foreground font-mono mt-0.5">
+                    <span className="text-xs text-muted-foreground font-mono mt-0.5">
                         Confiança: {score}/100
                     </span>
                 </div>

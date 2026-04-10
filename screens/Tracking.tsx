@@ -128,7 +128,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
         <div className="flex-1 text-center">
           <h2 className="heading-md text-[12px] text-black dark:text-white leading-none">Status do pedido</h2>
           <div className="flex items-center justify-center gap-1.5 mt-1">
-            <p className="text-black font-normal !text-[9px]">ID: #{activeOrder.id.slice(0, 8)}</p>
+            <p className="text-black font-normal !text-xs">ID: #{activeOrder.id.slice(0, 8)}</p>
             <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
           </div>
         </div>
@@ -243,12 +243,12 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                 </div>
                 <div>
                   <h4 className="heading-md !text-lg mb-0 text-white">Pagamento pendente</h4>
-                  <p className="text-white/40 font-normal !text-[9px]">O profissional aceitou seu pedido!</p>
+                  <p className="text-white/40 font-normal !text-xs">O profissional aceitou seu pedido!</p>
                 </div>
               </div>
               <div className="bg-white/5 p-4 rounded-2xl">
                 <div className="flex justify-between items-baseline mb-2">
-                  <span className="text-[10px] font-black text-white uppercase tracking-[0.12em] opacity-40">Total à pagar</span>
+                  <span className="text-xs font-black text-white tracking-[0.12em] opacity-40">Total à pagar</span>
                   <div className="flex items-baseline gap-1">
                     <span className="text-xs font-bold text-white opacity-40">R$</span>
                     <span className="text-2xl font-bold text-white tracking-tighter">
@@ -256,7 +256,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
                     </span>
                   </div>
                 </div>
-                <p className="text-[10px] text-white/30 font-normal">O valor ficará retido com segurança até a conclusão.</p>
+                <p className="text-xs text-white/30 font-normal">O valor ficará retido com segurança até a conclusão.</p>
               </div>
               <button
                 onClick={() => onPay?.(activeOrder)} // In App.tsx, we can handle the navigation
@@ -305,7 +305,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
             <div className="container !px-0 flex flex-col gap-4">
               <div className="flex items-center gap-2 justify-center">
                 <AlertCircle size={16} className="text-black-green" />
-                <p className="font-normal text-[10px]">O profissional indicou o início do serviço</p>
+                <p className="font-normal text-xs">O profissional indicou o início do serviço</p>
               </div>
               <button
                 onClick={async () => {
@@ -328,7 +328,7 @@ const Tracking: React.FC<Props> = ({ onBack, onSupport, onPay }) => {
             <div className="container !px-0 flex flex-col gap-4">
               <div className="flex items-center gap-2 justify-center">
                 <AlertCircle size={16} className="text-black-green" />
-                <p className="font-normal text-[10px]">Profissional solicitou finalização</p>
+                <p className="font-normal text-xs">Profissional solicitou finalização</p>
               </div>
               <button
                 onClick={handleConfirmFinish}
@@ -380,7 +380,7 @@ const ProgressStep = ({ title, desc, icon, active, completed, pulse, last, varia
       </div>
       <div className="pt-2 flex-1">
         <p className={`font-bold transition-colors`} style={{ color: titleColor }}>{title}</p>
-        {desc && <p className={`text-[10px] font-normal mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
+        {desc && <p className={`text-xs font-normal mt-1 leading-relaxed ${active ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>{desc}</p>}
       </div>
     </div>
   );
@@ -411,7 +411,7 @@ const IntermediateStep = ({ label, active, completed, variant = 'warning' }: any
         </div>
       </div>
       <div className="py-3 flex-1">
-        <p style={{ color: textColor }} className={`text-[11px] font-normal transition-colors`}>
+        <p style={{ color: textColor }} className={`text-xs font-normal transition-colors`}>
           {label}
         </p>
       </div>

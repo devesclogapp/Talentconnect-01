@@ -211,7 +211,7 @@ const AdminServices: React.FC = () => {
             <div className="w-64 h-full p-6 space-y-8 overflow-y-auto shrink-0 border-r border-border-subtle">
                 <div className="flex items-center gap-2">
                     <ShieldAlert size={16} className="text-accent-primary" />
-                    <h3 className="text-[10px] font-semibold text-text-secondary uppercase tracking-widest">Governança Editorial</h3>
+                    <h3 className="text-xs font-semibold text-text-secondary tracking-widest">Governança Editorial</h3>
                 </div>
 
                 <div className="space-y-6">
@@ -226,7 +226,7 @@ const AdminServices: React.FC = () => {
                             onClick={() => setFilters({ ...filters, reports: !filters.reports })}
                             className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all duration-[120ms] ${filters.reports ? 'bg-error/10 border-error/20 text-error' : 'bg-bg-secondary border-border-subtle text-text-tertiary hover:bg-bg-tertiary'}`}
                         >
-                            <span className="text-[10px] font-semibold uppercase tracking-widest">Denunciados</span>
+                            <span className="text-xs font-semibold tracking-widest">Denunciados</span>
                             <AlertTriangle size={13} />
                         </button>
                     </FilterGroup>
@@ -248,12 +248,12 @@ const AdminServices: React.FC = () => {
                             }}
                         >
                             <div className="p-7 border-b border-border-subtle" style={{ background: 'var(--bg-secondary)' }}>
-                                <h2 className="text-[18px] font-semibold text-text-primary mb-1">Intervenção Editorial</h2>
+                                <h2 className="text-lg font-semibold text-text-primary mb-1">Intervenção Editorial</h2>
                                 <p className="text-xs text-text-tertiary">Serviço: {actionModal.service.title}</p>
                             </div>
                             <div className="p-7 space-y-5">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Justificativa Operacional</label>
+                                    <label className="text-xs font-semibold text-text-tertiary tracking-widest">Justificativa Operacional</label>
                                     <textarea
                                         value={actionReason}
                                         onChange={(e) => setActionReason(e.target.value)}
@@ -268,13 +268,13 @@ const AdminServices: React.FC = () => {
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => setActionModal(null)}
-                                        className="flex-1 py-3 rounded-[8px] text-[10px] font-semibold uppercase text-text-primary transition-all hover:bg-bg-tertiary"
+                                        className="flex-1 py-3 rounded-[8px] text-xs font-semibold text-text-primary transition-all hover:bg-bg-tertiary"
                                         style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,0,0,0.06)' }}
                                     >Cancelar</button>
                                     <button
                                         disabled={!actionReason || isUpdating}
                                         onClick={performServiceAction}
-                                        className="flex-1 py-3 rounded-[8px] text-[10px] font-semibold uppercase text-white transition-all hover:opacity-90 disabled:opacity-30"
+                                        className="flex-1 py-3 rounded-[8px] text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-30"
                                         style={{ background: 'var(--text-primary)', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
                                     >
                                         Aplicar & Logar
@@ -297,7 +297,7 @@ const AdminServices: React.FC = () => {
                                     <div className="p-3 rounded-[8px] bg-accent-primary text-white"><Tag size={20} /></div>
                                     <div>
                                         <h2 className="text-base font-semibold text-text-primary leading-tight">{selectedService.title}</h2>
-                                        <p className="text-[10px] text-text-tertiary font-medium">ID: {selectedService.id.slice(0, 8)}</p>
+                                        <p className="text-xs text-text-tertiary font-medium">ID: {selectedService.id.slice(0, 8)}</p>
                                     </div>
                                 </div>
                                 <button
@@ -313,7 +313,7 @@ const AdminServices: React.FC = () => {
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
-                                        className={`px-5 py-4 text-[10px] font-semibold uppercase tracking-widest border-b-2 transition-all shrink-0 ${activeTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}
+                                        className={`px-5 py-4 text-xs font-semibold tracking-widest border-b-2 transition-all shrink-0 ${activeTab === tab ? 'border-accent-primary text-accent-primary' : 'border-transparent text-text-tertiary hover:text-text-primary'}`}
                                     >
                                         {tab === 'summary' ? 'Resumo' : tab === 'edits' ? 'Edições' : tab === 'ratings' ? 'Avaliações' : tab === 'disputes' ? 'Incidentes' : 'Audit Log'}
                                     </button>
@@ -331,7 +331,7 @@ const AdminServices: React.FC = () => {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-4">
-                                                <h4 className="text-[10px] font-semibold uppercase text-text-tertiary tracking-widest">Governança do Profissional</h4>
+                                                <h4 className="text-xs font-semibold text-text-tertiary tracking-widest">Governança do Profissional</h4>
                                                 <div
                                                     className="p-6 space-y-4"
                                                     style={{
@@ -343,18 +343,18 @@ const AdminServices: React.FC = () => {
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-[8px] bg-accent-primary text-white flex items-center justify-center font-semibold text-sm">{(resolveUserName(selectedService.provider)).charAt(0)}</div>
                                                         <div>
-                                                            <p className="text-xs font-semibold text-text-primary uppercase">{resolveUserName(selectedService.provider)}</p>
-                                                            <p className="text-[10px] text-text-tertiary font-mono">{selectedService.provider.email}</p>
+                                                            <p className="text-xs font-semibold text-text-primary">{resolveUserName(selectedService.provider)}</p>
+                                                            <p className="text-xs text-text-tertiary font-mono">{selectedService.provider.email}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="pt-3 border-t border-border-subtle flex justify-between items-center text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">
+                                                    <div className="pt-3 border-t border-border-subtle flex justify-between items-center text-xs font-semibold tracking-widest text-text-tertiary">
                                                         <span>Status Profissional</span>
                                                         <span className="text-success">Verificado</span>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
-                                                <h4 className="text-[10px] font-semibold uppercase text-text-tertiary tracking-widest">Painel de Decisão</h4>
+                                                <h4 className="text-xs font-semibold text-text-tertiary tracking-widest">Painel de Decisão</h4>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <ControlButton icon={<CheckCircle2 />} label="Aprovar" onClick={() => setActionModal({ open: true, type: 'APPROVE', service: selectedService })} />
                                                     <ControlButton icon={<EyeOff />} label="Ocultar" onClick={() => setActionModal({ open: true, type: 'HIDE', service: selectedService })} />
@@ -368,7 +368,7 @@ const AdminServices: React.FC = () => {
                                 {activeTab !== 'summary' && (
                                     <div className="h-full flex flex-col items-center justify-center opacity-30">
                                         <Activity size={48} className="animate-pulse" />
-                                        <p className="mt-4 text-sm font-semibold uppercase tracking-widest">Sincronizando Dossiê Global...</p>
+                                        <p className="mt-4 text-sm font-semibold tracking-widest">Sincronizando Dossiê Global...</p>
                                     </div>
                                 )}
                             </div>
@@ -379,8 +379,8 @@ const AdminServices: React.FC = () => {
                 {/* Header Principal */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-[22px] font-semibold text-text-primary">Catálogo Global</h1>
-                        <p className="text-[13px] text-text-secondary mt-0.5">Controle de qualidade, performance e risco editorial</p>
+                        <h1 className="text-xl font-semibold text-text-primary">Catálogo Global</h1>
+                        <p className="text-sm text-text-secondary mt-0.5">Controle de qualidade, performance e risco editorial</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <button
@@ -391,7 +391,7 @@ const AdminServices: React.FC = () => {
                             <RefreshCcw size={18} />
                         </button>
                         <button
-                            className="h-10 px-5 rounded-[8px] text-[10px] font-semibold uppercase tracking-widest text-white flex items-center gap-2 transition-all hover:opacity-90"
+                            className="h-10 px-5 rounded-[8px] text-xs font-semibold tracking-widest text-white flex items-center gap-2 transition-all hover:opacity-90"
                             style={{ background: 'var(--text-primary)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
                         >
                             <BarChart3 size={14} /> Relatórios
@@ -426,7 +426,7 @@ const AdminServices: React.FC = () => {
                     <select
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
-                        className="h-12 px-4 rounded-[8px] text-[10px] font-semibold uppercase outline-none focus:border-accent-primary transition-all"
+                        className="h-12 px-4 rounded-[8px] text-xs font-semibold outline-none focus:border-accent-primary transition-all"
                         style={{
                             background: 'var(--bg-secondary)',
                             border: '1px solid rgba(0,0,0,0.06)',
@@ -451,18 +451,18 @@ const AdminServices: React.FC = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-border-subtle" style={{ background: 'var(--bg-secondary)' }}>
-                                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Serviço / Pro</th>
-                                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Saúde / Risco</th>
-                                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Métricas</th>
-                                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Receita (30d)</th>
-                                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-text-tertiary text-right">Decisão</th>
+                                <th className="px-6 py-4 text-xs font-semibold tracking-widest text-text-tertiary">Serviço / Pro</th>
+                                <th className="px-6 py-4 text-xs font-semibold tracking-widest text-text-tertiary">Saúde / Risco</th>
+                                <th className="px-6 py-4 text-xs font-semibold tracking-widest text-text-tertiary">Métricas</th>
+                                <th className="px-6 py-4 text-xs font-semibold tracking-widest text-text-tertiary">Receita (30d)</th>
+                                <th className="px-6 py-4 text-xs font-semibold tracking-widest text-text-tertiary text-right">Decisão</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
                                 <tr><td colSpan={5} className="py-20 text-center">
                                     <RefreshCcw className="animate-spin mx-auto mb-3 text-accent-primary" size={24} />
-                                    <p className="text-[10px] font-semibold uppercase tracking-widest text-text-tertiary">Consolidando Catálogo...</p>
+                                    <p className="text-xs font-semibold tracking-widest text-text-tertiary">Consolidando Catálogo...</p>
                                 </td></tr>
                             ) : filteredServices.map(service => (
                                 <tr
@@ -476,12 +476,12 @@ const AdminServices: React.FC = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
                                             <p className="text-xs font-semibold text-text-primary group-hover:text-accent-primary transition-colors">{service.title}</p>
-                                            <p className="text-[10px] text-text-tertiary mt-0.5">{resolveUserName(service.provider)}</p>
+                                            <p className="text-xs text-text-tertiary mt-0.5">{resolveUserName(service.provider)}</p>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-[10px] font-medium ${service.risk_level === 'high' ? 'bg-error/10 text-error' : service.risk_level === 'medium' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}`}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-xs font-medium ${service.risk_level === 'high' ? 'bg-error/10 text-error' : service.risk_level === 'medium' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}`}
                                         >
                                             <span className={`w-1.5 h-1.5 rounded-full ${service.risk_level === 'high' ? 'bg-error' : service.risk_level === 'medium' ? 'bg-warning' : 'bg-success'}`} />
                                             {service.risk_score}% Risco
@@ -519,7 +519,7 @@ const AdminServices: React.FC = () => {
 // --- Subcomponentes Locais ---
 const FilterGroup = ({ label, children }: any) => (
     <div className="space-y-3">
-        <h4 className="text-[9px] font-semibold uppercase text-text-tertiary tracking-widest border-b border-border-subtle pb-2">{label}</h4>
+        <h4 className="text-xs font-semibold text-text-tertiary tracking-widest border-b border-border-subtle pb-2">{label}</h4>
         <div className="flex flex-col gap-1.5">{children}</div>
     </div>
 );
@@ -527,7 +527,7 @@ const FilterGroup = ({ label, children }: any) => (
 const FilterButton = ({ active, label, color, onClick }: any) => (
     <button
         onClick={onClick}
-        className="text-left px-3 py-2.5 rounded-[8px] text-[10px] font-medium uppercase tracking-widest transition-all duration-[120ms]"
+        className="text-left px-3 py-2.5 rounded-[8px] text-xs font-medium tracking-widest transition-all duration-[120ms]"
         style={active
             ? { background: 'var(--text-primary)', color: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }
             : { background: 'var(--bg-secondary)', color: 'var(--text-tertiary)', border: '1px solid rgba(0,0,0,0.06)' }
@@ -571,7 +571,7 @@ const DetailStat = ({ label, value, icon, color, tooltip }: any) => {
                 {React.cloneElement(icon as React.ReactElement, { size: 20, strokeWidth: 1.5 })}
             </div>
             <div>
-                <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest mb-1">{label}</p>
+                <p className="text-xs font-medium text-text-tertiary tracking-widest mb-1">{label}</p>
                 <h3 className="text-xl font-semibold text-text-primary leading-none tracking-tight">{value}</h3>
             </div>
         </div>
@@ -588,12 +588,12 @@ const ControlButton = ({ icon, label, color, onClick }: any) => (
         }}
     >
         <div className="transition-transform group-hover:scale-110">{React.cloneElement(icon as React.ReactElement, { size: 20, strokeWidth: 1.5 })}</div>
-        <span className="text-[9px] font-semibold uppercase tracking-widest">{label}</span>
+        <span className="text-xs font-semibold tracking-widest">{label}</span>
     </button>
 );
 
 const InfoRow = ({ label, value }: any) => (
-    <div className="flex justify-between items-center py-3 border-b border-border-subtle text-[10px] uppercase font-medium tracking-widest">
+    <div className="flex justify-between items-center py-3 border-b border-border-subtle text-xs font-medium tracking-widest">
         <span className="text-text-tertiary">{label}</span>
         <span className="text-text-primary">{value || 'N/A'}</span>
     </div>

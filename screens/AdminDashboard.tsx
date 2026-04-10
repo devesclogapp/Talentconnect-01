@@ -267,7 +267,7 @@ const AdminDashboard: React.FC = () => {
                                         {results?.length > 0 ? results.map((res: any, i: number) => (
                                             <div key={i} className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer">
                                                 <p className="text-sm font-semibold text-white">{res.name || res.title || res.id}</p>
-                                                <p className="text-[10px] text-white/40 uppercase">{res.email || `R$ ${res.value}`}</p>
+                                                <p className="text-xs text-white/40 tracking-tight">{res.email || `R$ ${res.value}`}</p>
                                             </div>
                                         )) : (
                                             <div className="h-full flex flex-col items-center justify-center opacity-20">
@@ -305,7 +305,7 @@ const AdminDashboard: React.FC = () => {
                             R$ {stats.totalVolume.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </h1>
                         <p className="text-sm text-white/70 font-medium flex items-center gap-2 mt-1">
-                            Volume Total Transacionado <span className="px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-bold">+4.2%</span>
+                            Volume Total Transacionado <span className="px-1.5 py-0.5 bg-white/20 rounded text-xs font-bold">+4.2%</span>
                         </p>
                     </div>
 
@@ -320,7 +320,7 @@ const AdminDashboard: React.FC = () => {
                             onClick={() => setActiveModal('communication')}
                             className="bg-white text-folio-accent px-5 h-10 rounded-full text-xs font-bold hover:shadow-xl hover:scale-105 transition-all"
                         >
-                            NOVA AUDITORIA
+                            Nova Auditoria
                         </button>
                     </div>
                 </div>
@@ -421,7 +421,7 @@ const AdminDashboard: React.FC = () => {
                             {item.icon}
                         </div>
                         <div>
-                            <p className="text-sm font-normal text-folio-text-dim capitalize opacity-60">{item.label}</p>
+                            <p className="text-sm font-normal text-folio-text-dim opacity-60">{item.label}</p>
                             <p className="text-xl font-black text-folio-text tabular-nums tracking-tighter">{item.value}</p>
                         </div>
                     </div>
@@ -438,10 +438,10 @@ const AdminDashboard: React.FC = () => {
                     <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 flex flex-col shadow-folio">
                         <div className="flex items-start justify-between mb-8">
                             <div>
-                                <h3 className="text-lg font-normal text-folio-text flex items-center gap-3 capitalize tracking-tight">
-                                    <Target className="text-folio-accent" size={20} /> fila de decisão
+                                <h3 className="text-lg font-normal text-folio-text flex items-center gap-3 tracking-tight">
+                                    <Target className="text-folio-accent" size={20} /> Fila de Decisão
                                 </h3>
-                                <p className="text-sm font-normal text-folio-text-dim/50 mt-1 capitalize">Triagem operacional por prioridade e sla</p>
+                                <p className="text-sm font-normal text-folio-text-dim/50 mt-1">Triagem operacional por prioridade e SLA</p>
                             </div>
                             <div className="flex items-center gap-3">
                                 <span className="px-3 py-1 bg-error/10 text-error border border-error/20 rounded-full text-sm font-normal capitalize">{stats.openDisputes} críticos</span>
@@ -477,10 +477,10 @@ const AdminDashboard: React.FC = () => {
                     <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 flex-1 shadow-folio">
                         <div className="flex items-start justify-between mb-8">
                             <div>
-                                <h3 className="text-lg font-normal text-folio-text flex items-center gap-3 capitalize tracking-tight">
-                                    <ShieldAlert className="text-error" size={20} /> risco & fraude
+                                <h3 className="text-lg font-normal text-folio-text flex items-center gap-3 tracking-tight">
+                                    <ShieldAlert className="text-error" size={20} /> Risco & Fraude
                                 </h3>
-                                <p className="text-sm font-normal text-folio-text-dim/50 mt-1 capitalize">Detecção de padrões e comportamento anômalo em transações</p>
+                                <p className="text-sm font-normal text-folio-text-dim/50 mt-1">Detecção de padrões e comportamento anômalo em transações</p>
                             </div>
                             <button
                                 onClick={() => navigate(ADMIN_ROUTE_MAP['USER_MANAGEMENT']!)}
@@ -501,7 +501,7 @@ const AdminDashboard: React.FC = () => {
                                             <h4 className="text-md font-normal text-folio-text tracking-tight capitalize leading-none">{signal.user}</h4>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-normal text-folio-text-dim/30 capitalize mb-1">audit score</p>
+                                            <p className="text-sm font-normal text-folio-text-dim/30 mb-1">Audit Score</p>
                                             <div className="px-2 py-0.5 bg-warning/10 border border-warning/20 rounded-lg">
                                                 <p className="text-xl font-black text-warning font-display leading-none">{signal.score}</p>
                                             </div>
@@ -509,20 +509,20 @@ const AdminDashboard: React.FC = () => {
                                     </div>
 
                                     <div className="flex flex-wrap gap-2 mb-5">
-                                        <span className="px-2.5 py-1 rounded-lg bg-folio-surface border border-folio-border text-[10px] font-mono text-folio-text-dim">#{signal.id.slice(0, 10)}</span>
+                                        <span className="px-2.5 py-1 rounded-lg bg-folio-surface border border-folio-border text-xs font-mono text-folio-text-dim">#{signal.id.slice(0, 10)}</span>
                                         <span className={`px-2.5 py-1 rounded-lg bg-folio-surface border text-sm font-normal ${signal.type === 'Conflito' ? 'text-error border-error/20 shadow-[inset_0_0_8px_var(--red-dim)]' : 'text-folio-text-dim border-folio-border'
                                             }`}>
-                                            {signal.type === 'Conflito' ? 'crítico' : 'em revisão'}
+                                            {signal.type === 'Conflito' ? 'Crítico' : 'Em revisão'}
                                         </span>
                                     </div>
 
-                                    <p className="text-[12px] font-medium text-folio-text-dim/80 mb-6 leading-relaxed line-clamp-2 italic">"{signal.reason}"</p>
+                                    <p className="text-sm font-medium text-folio-text-dim/80 mb-6 leading-relaxed line-clamp-2 italic">"{signal.reason}"</p>
 
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => { setSelectedUser(signal); setActiveModal('risk'); }}
-                                            className="flex-1 h-12 bg-error text-white rounded-2xl text-[11px] font-black lowercase hover:opacity-90 transition-all shadow-glow active:scale-95"
-                                        >agir agora</button>
+                                            className="flex-1 h-12 bg-error text-white rounded-2xl text-xs font-black hover:opacity-90 transition-all shadow-glow active:scale-95"
+                                        >Agir agora</button>
                                         <button className="w-12 h-12 flex items-center justify-center bg-folio-surface border border-folio-border rounded-2xl text-folio-text-dim hover:text-folio-text transition-all hover:bg-folio-surface2 shadow-sm">
                                             <Eye size={18} />
                                         </button>
@@ -531,7 +531,7 @@ const AdminDashboard: React.FC = () => {
                             )) : (
                                 <div className="col-span-2 py-16 text-center border-2 border-dashed border-folio-border bg-folio-bg/30 rounded-[28px]">
                                     <ShieldCheck className="mx-auto mb-4 text-folio-accent opacity-20" size={56} />
-                                    <p className="text-[12px] font-black text-folio-text-dim lowercase opacity-40">zona segura — nenhuma anomalia detectada</p>
+                                    <p className="text-[12px] font-black text-folio-text-dim opacity-40">Zona segura — nenhuma anomalia detectada</p>
                                 </div>
                             )}
                         </div>
@@ -544,8 +544,8 @@ const AdminDashboard: React.FC = () => {
                     {/* Live Events Feed */}
                     <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 flex flex-col flex-1 shadow-folio">
                         <div className="flex items-center justify-between mb-8">
-                            <h4 className="text-md font-normal text-folio-text flex items-center gap-3 capitalize tracking-tight">
-                                <Zap size={18} className="text-folio-accent animate-pulse" /> eventos em tempo real
+                            <h4 className="text-md font-normal text-folio-text flex items-center gap-3 tracking-tight">
+                                <Zap size={18} className="text-folio-accent animate-pulse" /> Eventos em Tempo Real
                             </h4>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-normal text-folio-accent capitalize">live</span>
@@ -565,11 +565,11 @@ const AdminDashboard: React.FC = () => {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline mb-1">
-                                                <p className="text-sm font-normal text-folio-accent capitalize">{evt.action}</p>
-                                                <span className="text-[10px] font-bold text-folio-text-dim/40 tabular-nums">{evt.time}</span>
+                                                <p className="text-sm font-normal text-folio-accent">{evt.action}</p>
+                                                <span className="text-xs font-bold text-folio-text-dim/40 tabular-nums">{evt.time}</span>
                                             </div>
                                             <p className="text-[12px] text-folio-text-dim leading-relaxed">
-                                                <span className="text-folio-text font-normal capitalize text-sm tracking-tight">{evt.user}</span> • {evt.name}
+                                                <span className="text-folio-text font-normal text-sm tracking-tight">{evt.user}</span> • {evt.name}
                                             </p>
                                         </div>
                                     </div>
@@ -578,9 +578,9 @@ const AdminDashboard: React.FC = () => {
                         </ScrollArea>
                         <button
                             onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)}
-                            className="w-full mt-6 py-4 border-2 border-dashed border-folio-border rounded-2xl text-sm font-normal text-folio-text-dim capitalize hover:bg-folio-bg hover:text-folio-accent hover:border-folio-accent/30 transition-all"
+                            className="w-full mt-6 py-4 border-2 border-dashed border-folio-border rounded-2xl text-sm font-normal text-folio-text-dim hover:bg-folio-bg hover:text-folio-accent hover:border-folio-accent/30 transition-all"
                         >
-                            acessar logs de auditoria
+                            Acessar logs de auditoria
                         </button>
                     </div>
 
@@ -588,10 +588,10 @@ const AdminDashboard: React.FC = () => {
                     <div className="bg-folio-surface border border-folio-border rounded-[32px] p-6 shadow-folio">
                         <h4 className="text-sm font-normal text-folio-text-dim capitalize mb-4 opacity-40 text-center">Protocolos Rápidos</h4>
                         <div className="grid grid-cols-2 gap-3">
-                            <SimpleShortcut icon={<Plus size={18} />} label="ADMIN" />
-                            <SimpleShortcut icon={<RefreshCw size={18} />} label="SYNC" onClick={() => fetchDashboardStats(true)} />
-                            <SimpleShortcut icon={<Smartphone size={18} />} label="APP" />
-                            <SimpleShortcut icon={<History size={18} />} label="AUDIT" onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)} />
+                            <SimpleShortcut icon={<Plus size={18} />} label="Admin" />
+                            <SimpleShortcut icon={<RefreshCw size={18} />} label="Sync" onClick={() => fetchDashboardStats(true)} />
+                            <SimpleShortcut icon={<Smartphone size={18} />} label="App" />
+                            <SimpleShortcut icon={<History size={18} />} label="Audit" onClick={() => navigate(ADMIN_ROUTE_MAP['AUDIT_LOGS']!)} />
                         </div>
                     </div>
                 </div>
@@ -619,7 +619,7 @@ const AdminDashboard: React.FC = () => {
                                 R$ {stats.inEscrow.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </p>
                             <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="secondary" className="bg-primary/10 text-primary border-none text-[10px]">
+                                <Badge variant="secondary" className="bg-primary/10 text-primary border-none text-xs">
                                     {escrowList.length} transações ativas
                                 </Badge>
                             </div>
@@ -637,7 +637,7 @@ const AdminDashboard: React.FC = () => {
                                                     <p className="text-xs font-semibold text-foreground truncate max-w-[200px]">
                                                         #{payment.id?.slice(0, 8) || 'ID INDISP.'}
                                                     </p>
-                                                    <p className="text-[10px] text-muted-foreground font-mono">
+                                                    <p className="text-xs text-muted-foreground font-mono">
                                                         {new Date(payment.created_at).toLocaleDateString('pt-BR')} às {new Date(payment.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
                                                 </div>
@@ -645,15 +645,15 @@ const AdminDashboard: React.FC = () => {
                                                     <p className="text-xs font-bold text-foreground">
                                                         R$ {payment.amount_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                     </p>
-                                                    <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">+ R$ {payment.operator_fee?.toFixed(2)} FEE</p>
+                                                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">+ R$ {payment.operator_fee?.toFixed(2)} FEE</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Badge variant="outline" className="text-[9px] h-5 border-border bg-muted/30 font-mono text-muted-foreground">
+                                                <Badge variant="outline" className="text-xs h-5 border-border bg-muted/30 font-mono text-muted-foreground">
                                                     ORDER: {payment.order_id?.slice(0, 6)}
                                                 </Badge>
                                                 {new Date(payment.created_at) < (new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) && (
-                                                    <Badge variant="destructive" className="text-[9px] h-5 px-1.5 py-0 bg-red-500/10 text-red-600 dark:text-red-400 border-none">
+                                                    <Badge variant="destructive" className="text-xs h-5 px-1.5 py-0 bg-red-500/10 text-red-600 dark:text-red-400 border-none">
                                                         Aging {'>'} 7d
                                                     </Badge>
                                                 )}

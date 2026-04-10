@@ -130,8 +130,8 @@ const AdminOrders: React.FC = () => {
                                     <Package size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-black text-folio-text uppercase tracking-tight">Dossiê do Pedido</h2>
-                                    <p className="text-[11px] text-folio-text-dim/60 font-mono font-bold tracking-[2px] mt-1">ID: {selectedOrder.id}</p>
+                                    <h2 className="text-lg font-black text-folio-text tracking-tight">Dossiê do Pedido</h2>
+                                    <p className="text-xs text-folio-text-dim/60 font-mono font-bold tracking-[2px] mt-1">ID: {selectedOrder.id}</p>
                                 </div>
                             </div>
                             <button onClick={() => setSelectedOrder(null)} className="w-12 h-12 rounded-2xl bg-folio-bg border border-folio-border flex items-center justify-center text-folio-text-dim hover:text-folio-text transition-all">
@@ -142,7 +142,7 @@ const AdminOrders: React.FC = () => {
                         <div className="flex px-10 border-b border-folio-border bg-folio-surface gap-2">
                             {['summary', 'financial', 'intervention'].map(tab => (
                                 <button key={tab} onClick={() => setDossierTab(tab)}
-                                    className={`px-4 py-5 text-[10px] font-black uppercase tracking-[2px] border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
+                                    className={`px-4 py-5 text-xs font-black tracking-[2px] border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
                                     {tab === 'summary' ? 'Operacional' : tab === 'financial' ? 'Financeiro' : 'Governança'}
                                 </button>
                             ))}
@@ -158,7 +158,7 @@ const AdminOrders: React.FC = () => {
                                             { label: 'Risco', value: <RiskBar score={selectedOrder.riskScore} /> },
                                         ].map(s => (
                                             <div key={s.label} className="bg-folio-surface border border-folio-border rounded-[24px] p-6 shadow-sm">
-                                                <p className="text-[9px] text-folio-text-dim/50 font-black uppercase tracking-[2px] mb-3">{s.label}</p>
+                                                <p className="text-xs text-folio-text-dim/50 font-black tracking-[2px] mb-3">{s.label}</p>
                                                 <div className="flex items-center">{s.value}</div>
                                             </div>
                                         ))}
@@ -172,8 +172,8 @@ const AdminOrders: React.FC = () => {
                                             { label: 'Local de Prestação', value: selectedOrder.location_text || 'Remoto/Não Definido' },
                                         ].map(row => (
                                             <div key={row.label} className="flex flex-col gap-1.5 border-b border-folio-border last:border-0 pb-5 last:pb-0">
-                                                <span className="text-[9px] font-black text-folio-text-dim/50 uppercase tracking-[2px]">{row.label}</span>
-                                                <span className="text-sm font-bold text-folio-text uppercase tracking-tight">{row.value || '—'}</span>
+                                                <span className="text-xs font-black text-folio-text-dim/50 tracking-[2px]">{row.label}</span>
+                                                <span className="text-sm font-bold text-folio-text tracking-tight">{row.value || '—'}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -184,22 +184,22 @@ const AdminOrders: React.FC = () => {
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 shadow-folio">
-                                            <p className="text-[9px] text-folio-text-dim/50 font-black uppercase tracking-[2px] mb-2">Total Transacionado</p>
+                                            <p className="text-xs text-folio-text-dim/50 font-black tracking-[2px] mb-2">Total Transacionado</p>
                                             <p className="text-3xl font-black text-folio-text tabular-nums tracking-tighter">{formatCurrency(selectedOrder.payment?.amount_total || 0)}</p>
                                         </div>
                                         <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 shadow-folio">
-                                            <p className="text-[9px] text-folio-text-dim/50 font-black uppercase tracking-[2px] mb-2">Estado de Liquidez</p>
+                                            <p className="text-xs text-folio-text-dim/50 font-black tracking-[2px] mb-2">Estado de Liquidez</p>
                                             <div className="mt-2"><StatusBadge status={selectedOrder.payment?.escrow_status || 'pending'} /></div>
                                         </div>
                                     </div>
                                     <div className="p-8 bg-folio-bg border border-folio-border rounded-[32px]">
                                         <div className="flex justify-between items-center mb-4">
-                                            <span className="text-[10px] font-black text-folio-text-dim uppercase tracking-[2px]">Fee Plataforma (10%)</span>
+                                            <span className="text-xs font-black text-folio-text-dim tracking-[2px]">Fee Plataforma (10%)</span>
                                             <span className="text-sm font-black text-[#F5C842] font-mono">{formatCurrency(selectedOrder.payment?.operator_fee || 0)}</span>
                                         </div>
                                         <div className="h-px bg-folio-border my-6" />
                                         <div className="flex justify-between items-center text-folio-text">
-                                            <span className="text-[10px] font-black uppercase tracking-[2.5px]">Repasse ao Profissional</span>
+                                            <span className="text-xs font-black tracking-[2.5px]">Repasse ao Profissional</span>
                                             <span className="text-xl font-black font-mono tracking-tighter">{formatCurrency((selectedOrder.payment?.amount_total || 0) * 0.9)}</span>
                                         </div>
                                     </div>
@@ -210,20 +210,20 @@ const AdminOrders: React.FC = () => {
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-3 mb-6">
                                         <ShieldCheck className="text-[#1DB97A]" size={20} />
-                                        <h4 className="text-sm font-black text-folio-text uppercase tracking-[2px]">Intervenção de Governança</h4>
+                                        <h4 className="text-sm font-black text-folio-text tracking-[2px]">Intervenção de Governança</h4>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <button onClick={() => performIntervention('FORCE_COMPLETE')} disabled={isProcessing === selectedOrder.id}
                                             className="p-8 text-left bg-folio-surface border border-folio-border rounded-[32px] hover:bg-[#1DB97A]/10 hover:border-[#1DB97A]/30 text-[#1DB97A] transition-all group disabled:opacity-30 shadow-sm hover:shadow-glow-dim">
                                             <CheckCircle2 size={24} className="mb-4 transition-transform group-hover:scale-110" />
-                                            <p className="text-sm font-black text-folio-text mb-2 uppercase tracking-tight">Forçar Conclusão</p>
+                                            <p className="text-sm font-black text-folio-text mb-2 tracking-tight">Forçar Conclusão</p>
                                             <p className="text-[11px] font-medium text-folio-text-dim leading-relaxed opacity-70">Libera o repasse e finaliza o ciclo operacional.</p>
                                         </button>
                                         <button onClick={() => performIntervention('FORCE_CANCEL')} disabled={isProcessing === selectedOrder.id}
                                             className="p-8 text-left bg-folio-surface border border-folio-border rounded-[32px] hover:bg-[#E24B4A]/10 hover:border-[#E24B4A]/30 text-[#E24B4A] transition-all group disabled:opacity-30 shadow-sm hover:shadow-glow-dim">
                                             <XCircle size={24} className="mb-4 transition-transform group-hover:scale-110" />
-                                            <p className="text-sm font-black text-folio-text mb-2 uppercase tracking-tight">Forçar Cancelamento</p>
-                                            <p className="text-[11px] font-medium text-folio-text-dim leading-relaxed opacity-70">Cancela o pedido e estorna os valores ao cliente.</p>
+                                            <p className="text-sm font-black text-folio-text mb-2 tracking-tight">Forçar Cancelamento</p>
+                                            <p className="text-xs font-medium text-folio-text-dim leading-relaxed opacity-70">Cancela o pedido e estorna os valores ao cliente.</p>
                                         </button>
                                     </div>
                                 </div>
@@ -235,8 +235,8 @@ const AdminOrders: React.FC = () => {
 
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-folio-text uppercase tracking-tight leading-none">Gestão Operacional de Pedidos</h1>
-                    <p className="text-[11px] font-bold text-folio-text-dim/50 uppercase tracking-[2px] mt-2">Controle de Ciclo de Vida e Monitoramento de SLA</p>
+                    <h1 className="text-2xl font-black text-folio-text tracking-tight leading-none">Gestão Operacional de Pedidos</h1>
+                    <p className="text-xs font-bold text-folio-text-dim/50 tracking-[2px] mt-2">Controle de Ciclo de Vida e Monitoramento de SLA</p>
                 </div>
                 <button onClick={fetchOrders} className="w-11 h-11 flex items-center justify-center rounded-2xl border border-folio-border bg-folio-surface text-folio-text-dim hover:text-folio-accent hover:rotate-180 transition-all duration-700 shadow-sm"><RefreshCw size={18} /></button>
             </div>
@@ -259,7 +259,7 @@ const AdminOrders: React.FC = () => {
                 <div className="flex gap-2 flex-wrap">
                     {[{ val: 'all', label: 'Todos' }, { val: 'sent', label: 'Enviados' }, { val: 'in_execution', label: 'Em Execução' }, { val: 'completed', label: 'Concluídos' }].map(opt => (
                         <button key={opt.val} onClick={() => setFilterStatus(opt.val)}
-                            className={`h-11 px-5 rounded-xl text-[10px] font-black uppercase tracking-[1.5px] transition-all border ${filterStatus === opt.val ? 'bg-folio-accent border-folio-accent text-white shadow-glow' : 'bg-folio-bg border-folio-border text-folio-text-dim hover:text-folio-text hover:border-folio-text-dim/30'}`}>
+                            className={`h-11 px-5 rounded-xl text-xs font-black tracking-[1.5px] transition-all border ${filterStatus === opt.val ? 'bg-folio-accent border-folio-accent text-white shadow-glow' : 'bg-folio-bg border-folio-border text-folio-text-dim hover:text-folio-text hover:border-folio-text-dim/30'}`}>
                             {opt.label}
                         </button>
                     ))}
@@ -268,10 +268,10 @@ const AdminOrders: React.FC = () => {
 
             <div className="bg-folio-surface border border-folio-border rounded-[32px] p-6 shadow-folio">
                 <div className="hidden md:grid grid-cols-12 px-8 py-4 opacity-40">
-                    <div className="col-span-3 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Pedido / Serviço</div>
-                    <div className="col-span-3 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Partes</div>
-                    <div className="col-span-2 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Estado</div>
-                    <div className="col-span-2 text-[10px] font-black text-folio-text uppercase tracking-[2px]">Aging / Risco</div>
+                    <div className="col-span-3 text-xs font-black text-folio-text tracking-[2px]">Pedido / Serviço</div>
+                    <div className="col-span-3 text-xs font-black text-folio-text tracking-[2px]">Partes</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text tracking-[2px]">Estado</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text tracking-[2px]">Aging / Risco</div>
                     <div className="col-span-2 text-right"></div>
                 </div>
 
@@ -300,14 +300,14 @@ const AdminOrders: React.FC = () => {
                     ) : filteredOrders.length === 0 ? (
                         <div className="py-24 text-center border-2 border-dashed border-folio-border bg-folio-bg/30 rounded-[28px]">
                             <Package className="mx-auto mb-4 text-folio-accent opacity-20" size={56} />
-                            <p className="text-[12px] font-black text-folio-text-dim uppercase tracking-[3px] opacity-40">Nenhum pedido encontrado</p>
+                            <p className="text-[12px] font-black text-folio-text-dim tracking-[3px] opacity-40">Nenhum pedido encontrado</p>
                         </div>
                     ) : (
                         filteredOrders.map(o => (
                             <div key={o.id} onClick={() => setSelectedOrder(o)}
                                 className="grid grid-cols-12 items-center px-8 py-6 bg-folio-bg border border-folio-border rounded-[28px] hover:border-folio-accent/40 shadow-sm hover:shadow-glow-dim transition-all group cursor-pointer">
                                 <div className="col-span-3">
-                                    <p className="text-[10px] font-black text-folio-text-dim/40 font-mono mb-1 uppercase tracking-tighter">#{o.id.slice(0, 8)}</p>
+                                    <p className="text-xs font-black text-folio-text-dim/40 font-mono mb-1 tracking-tighter">#{o.id.slice(0, 8)}</p>
                                     <div className="flex items-center gap-2 mb-1.5 h-1">
                                         {['sent', 'accepted', 'paid_escrow_held', 'in_execution', 'completed'].map((s, idx) => {
                                             const steps = ['sent', 'accepted', 'paid_escrow_held', 'in_execution', 'completed'];
@@ -322,19 +322,19 @@ const AdminOrders: React.FC = () => {
                                             );
                                         })}
                                     </div>
-                                    <p className="text-sm font-black text-folio-text uppercase tracking-tight truncate leading-none">{o.service?.title || 'Serviço'}</p>
+                                    <p className="text-sm font-black text-folio-text tracking-tight truncate leading-none">{o.service?.title || 'Serviço'}</p>
                                 </div>
                                 <div className="col-span-3">
-                                    <p className="text-[11px] font-bold text-folio-text leading-none">{resolveUserName(o.client)}</p>
+                                    <p className="text-xs font-bold text-folio-text leading-none">{resolveUserName(o.client)}</p>
                                     <div className="flex items-center gap-2 mt-2">
                                         <ArrowRight size={10} className="text-folio-text-dim/30" />
-                                        <p className="text-[11px] font-bold text-folio-text-dim/60 truncate">{resolveUserName(o.provider)}</p>
+                                        <p className="text-xs font-bold text-folio-text-dim/60 truncate">{resolveUserName(o.provider)}</p>
                                     </div>
                                 </div>
                                 <div className="col-span-2"><StatusBadge status={o.status} /></div>
                                 <div className="col-span-2">
                                     <div className="flex flex-col gap-2">
-                                        <span className={`inline-flex px-2 py-0.5 rounded-md text-[9px] font-black tracking-widest border w-fit ${getSlaInfo(o.slaStatus).bg} ${getSlaInfo(o.slaStatus).color} border-current/10`}>
+                                        <span className={`inline-flex px-2 py-0.5 rounded-md text-xs font-black tracking-widest border w-fit ${getSlaInfo(o.slaStatus).bg} ${getSlaInfo(o.slaStatus).color} border-current/10`}>
                                             <Clock size={10} className="mr-1" /> {o.agingHours}H
                                         </span>
                                         <RiskBar score={o.riskScore} />

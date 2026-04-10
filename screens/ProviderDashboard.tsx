@@ -193,11 +193,11 @@ const ProviderDashboard: React.FC<Props> = ({
                             </div>
                         </div>
                         <div>
-                            <p className="meta !text-[11px] !lowercase text-text-tertiary leading-none mb-0.5">terminal do profissional</p>
+                            <p className="meta !text-xs !lowercase text-text-tertiary leading-none mb-0.5">terminal do profissional</p>
                             <h2 className="heading-lg text-text-primary">{userName}</h2>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
-                                <span className="meta !text-[11px] text-success">Operações Ativas</span>
+                                <span className="meta !text-xs text-success">Operações ativas</span>
                             </div>
                         </div>
                     </div>
@@ -248,7 +248,7 @@ const ProviderDashboard: React.FC<Props> = ({
                                     <h3 className={`font-bold text-sm ${textColor}`}>
                                         {title}
                                     </h3>
-                                    <p className="text-[11px] text-text-tertiary max-w-[200px] leading-tight mt-0.5">
+                                    <p className="text-xs text-text-tertiary max-w-[200px] leading-tight mt-0.5">
                                         {description}
                                     </p>
                                 </div>
@@ -268,11 +268,11 @@ const ProviderDashboard: React.FC<Props> = ({
                                 onClick={() => setShowFinancialDetails(!showFinancialDetails)}
                             >
                                 <div className="flex items-center gap-2 mb-3">
-                                    <p className="text-[11px] font-semibold text-neutral-200 tracking-wide uppercase">
-                                        Valor Líquido do Portfolio
+                                    <p className="text-xs font-semibold text-neutral-200 tracking-wide">
+                                        Valor líquido do portfolio
                                     </p>
                                     <div
-                                        className={`px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase cursor-pointer transition-all ${showFinancialDetails
+                                        className={`px-2 py-0.5 rounded-md text-xs font-bold tracking-wider cursor-pointer transition-all ${showFinancialDetails
                                             ? 'bg-accent-primary text-white'
                                             : 'bg-white/20 text-white border border-white/20'
                                             }`}
@@ -300,14 +300,14 @@ const ProviderDashboard: React.FC<Props> = ({
                                 )}
 
                                 <div className="flex items-center gap-3 mt-1">
-                                    <span className={`flex items-center gap-1.5 text-[12px] font-bold ${stats.growth >= 0
+                                    <span className={`flex items-center gap-1.5 text-xs font-bold ${stats.growth >= 0
                                         ? 'text-emerald-300 bg-emerald-500/20 border border-emerald-500/30'
                                         : 'text-red-300 bg-red-500/20 border border-red-500/30'
                                         } px-3 py-1.5 rounded-full`}>
                                         {stats.growth >= 0 ? <ArrowUpRight size={14} /> : <Activity size={14} className="rotate-90" />}
                                         {Math.abs(stats.growth).toFixed(1)}%
                                     </span>
-                                    <span className="text-[11px] text-neutral-300 font-medium">vs mês anterior</span>
+                                    <span className="text-xs text-neutral-300 font-medium">vs mês anterior</span>
                                 </div>
                             </div>
                         </div>
@@ -321,8 +321,8 @@ const ProviderDashboard: React.FC<Props> = ({
                                 className="flex items-center gap-2 px-4 py-2.5 bg-white/10 rounded-full border border-white/20 whitespace-nowrap interactive hover:bg-white/15 transition-colors"
                             >
                                 <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
-                                <span className="text-[11px] font-semibold text-neutral-200">Pendentes</span>
-                                <span className="text-[12px] font-black text-white ml-0.5">{stats.pendingCount}</span>
+                                <span className="text-xs font-semibold text-neutral-200">Pendentes</span>
+                                <span className="text-xs font-black text-white ml-0.5">{stats.pendingCount}</span>
                                 <ArrowRight size={11} className="text-neutral-300 ml-1" />
                             </button>
 
@@ -334,8 +334,8 @@ const ProviderDashboard: React.FC<Props> = ({
                                 className="flex items-center gap-2 px-4 py-2.5 bg-white/10 rounded-full border border-white/20 whitespace-nowrap interactive hover:bg-white/15 transition-colors"
                             >
                                 <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-                                <span className="text-[11px] font-semibold text-neutral-200">A Iniciar</span>
-                                <span className="text-[12px] font-black text-white ml-0.5">{stats.scheduledCount}</span>
+                                <span className="text-xs font-semibold text-neutral-200">A iniciar</span>
+                                <span className="text-xs font-black text-white ml-0.5">{stats.scheduledCount}</span>
                                 <ArrowRight size={11} className="text-neutral-300 ml-1" />
                             </button>
                         </div>

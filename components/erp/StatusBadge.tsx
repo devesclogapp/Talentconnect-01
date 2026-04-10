@@ -37,7 +37,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'sm' }) => {
     };
 
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold uppercase tracking-wide ${config.className} ${size === 'md' ? 'text-[11px] px-3 py-1' : 'text-[9px]'}`}>
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold tracking-wide ${config.className} text-xs ${size === 'md' ? 'px-3 py-1' : ''}`}>
             {config.icon}
             {config.label}
         </span>
