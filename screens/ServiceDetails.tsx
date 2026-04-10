@@ -46,15 +46,15 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
         {/* Content Overlay at the base of the image */}
         <div className="absolute bottom-6 left-8 right-8 flex justify-between items-end">
           <div className="space-y-1 drop-shadow-sm">
-            <span className="text-[10px] font-black text-black/60 uppercase tracking-[0.2em]">{service.category || 'Serviço'}</span>
-            <h1 className="text-2xl font-black text-black leading-tight max-w-[220px]">{service.title}</h1>
+            <span className="text-[10px] font-medium text-black/60 uppercase tracking-[0.2em]">{service.category || 'Serviço'}</span>
+            <h1 className="text-2xl font-bold text-black leading-tight max-w-[220px]">{service.title}</h1>
           </div>
           <div className="text-right drop-shadow-sm">
             <div className="flex items-baseline gap-1">
-              <span className="text-[16px] font-black text-accent-primary">R$</span>
-              <span className="text-4xl font-black text-black leading-none">{formatNumber(service.base_price)}</span>
+              <span className="text-[16px] font-semibold text-accent-primary">R$</span>
+              <span className="text-4xl font-bold text-black leading-none">{formatNumber(service.base_price)}</span>
             </div>
-            <p className="text-[9px] text-black/40 uppercase tracking-widest font-black mt-1">
+            <p className="text-[9px] text-black/40 uppercase tracking-widest font-medium mt-1">
               {service.pricing_mode === 'hourly' ? 'por hora base' : 'valor fechado'}
             </p>
           </div>
@@ -69,22 +69,22 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
               <Star key={i} size={14} className="text-warning" fill="currentColor" />
             ))}
           </div>
-          <span className="text-[11px] font-black text-neutral-400 uppercase tracking-widest">
+          <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-widest">
             {reviews > 0 ? `${reviews} avaliações` : 'Especialista Verificado'}
           </span>
         </div>
 
         {/* Provider Profile Section */}
         <div className="space-y-4">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-300">Sobre o Profissional</h3>
+          <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Sobre o profissional</h3>
           <div className="flex items-center gap-4 bg-neutral-50/50 p-5 rounded-[32px] border border-neutral-100/50 group interactive">
             <div className="relative">
               <img src={providerAvatar} alt={providerName} className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-md" />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success border-2 border-white rounded-full"></div>
             </div>
             <div className="flex-1">
-              <p className="text-base font-black text-black mb-0.5">{providerName}</p>
-              <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-tight">
+              <p className="text-base font-bold text-black mb-0.5">{providerName}</p>
+              <p className="text-[10px] text-neutral-400 font-medium uppercase tracking-tight">
                 {service.provider?.provider_profile?.professional_title || 'Expert Talent Connect'}
               </p>
             </div>
@@ -96,8 +96,8 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
 
         {/* Description Section */}
         <div className="space-y-3">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-300">Descrição Técnica</h3>
-          <p className="text-sm text-neutral-600 leading-relaxed font-medium tracking-tight">
+          <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Descrição técnica</h3>
+          <p className="text-sm text-neutral-600 leading-relaxed font-normal tracking-tight">
             {service.description || "Este especialista ainda não adicionou um protocolo detalhado para este serviço."}
           </p>
         </div>
@@ -108,13 +108,13 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
             <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-black shadow-sm">
               <span className="material-symbols-outlined text-[20px]">verified_user</span>
             </div>
-            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-black leading-tight">Garantia <br />Connect</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-black leading-tight">Garantia <br />Connect</p>
           </div>
           <div className="bg-neutral-50/50 p-6 rounded-[28px] border border-neutral-100/50 flex flex-col gap-3">
             <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-black shadow-sm">
               <span className="material-symbols-outlined text-[20px]">bolt</span>
             </div>
-            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-black leading-tight">Reserva <br />Expressa</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-black leading-tight">Reserva <br />Expressa</p>
           </div>
         </div>
       </div>
@@ -123,7 +123,7 @@ const ServiceDetails: React.FC<Props> = ({ service, onBack, onBook }) => {
       <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto p-6 bg-white/80 backdrop-blur-xl border-t border-neutral-100/60 z-50">
         <button
           onClick={() => onBook(service)}
-          className="w-full py-5 bg-black text-white text-[12px] font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl active:scale-[0.98] transition-all hover:bg-neutral-900"
+          className="w-full py-5 bg-black text-white text-[13px] font-medium uppercase tracking-[0.3em] rounded-2xl shadow-xl active:scale-[0.98] transition-all hover:bg-neutral-900"
         >
           Iniciar Agendamento
         </button>

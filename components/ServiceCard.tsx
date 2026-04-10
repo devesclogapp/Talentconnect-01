@@ -15,7 +15,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick, resolveUser
     return (
         <button
             onClick={() => onClick(service)}
-            className="w-full flex gap-4 py-6 px-1 border-b border-neutral-100 hover:bg-neutral-50/50 transition-colors text-left group"
+            className="w-full flex gap-4 py-6 px-1 hover:bg-neutral-50/50 transition-colors text-left group"
         >
             {/* Left side: Image */}
             <div className="relative w-32 h-32 shrink-0 rounded-lg overflow-hidden bg-neutral-100">

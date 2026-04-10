@@ -163,14 +163,14 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderData, onConf
                     {/* Financial */}
                     <Card className="p-8 rounded-[32px] border-none bg-black dark:bg-neutral-800 text-white shadow-2xl">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-white/50 font-normal text-xs">Total estimado</h3>
+                            <h3 className="text-white/50 font-medium text-xs">Total estimado</h3>
                             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
                                 <CreditCard size={20} className="text-black-green" />
                             </div>
                         </div>
                         <div className="flex items-baseline gap-1.5 mb-2">
-                            <span className="text-xl font-bold text-accent-secondary">R$</span>
-                            <p className="text-5xl font-black text-white tracking-tighter">{formatNumber(orderData?.totalEstimated)}</p>
+                            <span className="text-xl font-semibold text-accent-secondary">R$</span>
+                            <p className="text-5xl font-semibold text-white tracking-tighter">{formatNumber(orderData?.totalEstimated)}</p>
                         </div>
                         <p className="meta text-white/40">O pagamento só será liberado após a sua confirmação de conclusão do serviço.</p>
                     </Card>

@@ -162,10 +162,10 @@ const OrderCard: React.FC<OrderCardProps> = ({
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t border-border-subtle dark:border-neutral-800">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.12em] mb-1 opacity-60">{type === 'provider' ? 'Ganhos previstos' : 'Total à pagar'}</span>
+                    <span className="text-[10px] font-medium text-text-tertiary tracking-[0.12em] mb-1 opacity-60">{type === 'provider' ? 'Ganhos previstos' : 'Total a pagar'}</span>
                     <div className="flex items-baseline gap-1.5">
-                        <span className="text-[14px] font-bold text-text-secondary opacity-40">R$</span>
-                        <span className="text-2xl font-bold text-text-primary dark:text-white tracking-tight leading-none">
+                        <span className="text-[14px] font-semibold text-text-secondary opacity-40">R$</span>
+                        <span className="text-2xl font-semibold text-text-primary dark:text-white tracking-normal leading-none">
                             {formatNumber(order.total_amount)}
                         </span>
                     </div>

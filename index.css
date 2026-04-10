@@ -178,9 +178,8 @@
   }
 
   .btn-icon {
-    @apply w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 border;
+    @apply w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200;
     background: var(--bg-tertiary);
-    border-color: var(--border-medium);
   }
 
   /* Cards Hierarchy */
@@ -237,15 +236,13 @@
 
   /* Global UI */
   .header-glass {
-    @apply sticky top-0 z-50 backdrop-blur-md border-b;
+    @apply sticky top-0 z-50 backdrop-blur-md;
     background-color: rgba(255, 255, 255, 0.9);
-    border-color: var(--border-subtle);
   }
 
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 h-20 backdrop-blur-xl border-t flex items-center justify-around z-50;
+    @apply fixed bottom-0 left-0 right-0 h-20 backdrop-blur-xl flex items-center justify-around z-50;
     background: var(--bg-secondary);
-    border-color: var(--border-subtle);
   }
 
   .bottom-nav__item {

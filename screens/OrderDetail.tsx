@@ -424,12 +424,12 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                             </h2>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.12em] mb-1 opacity-60">
-                                {isProviderView ? 'Ganhos previstos' : 'Total à pagar'}
+                            <p className="text-[10px] font-medium text-text-tertiary tracking-[0.12em] mb-1 opacity-60">
+                                {isProviderView ? 'Ganhos previstos' : 'Total a pagar'}
                             </p>
                             <div className="flex items-baseline justify-end gap-1.5">
-                                <span className="text-[14px] font-bold text-text-secondary opacity-40">R$</span>
-                                <span className="text-2xl font-bold text-black dark:text-white leading-none">
+                                <span className="text-[14px] font-semibold text-text-secondary opacity-40">R$</span>
+                                <span className="text-2xl font-semibold text-black dark:text-white leading-none">
                                     {formatNumber(order.total_amount)}
                                 </span>
                             </div>

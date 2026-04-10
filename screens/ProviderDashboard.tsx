@@ -185,15 +185,15 @@ const ProviderDashboard: React.FC<Props> = ({
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <div className="w-12 h-12 rounded-full border-2 border-accent-primary p-0.5 overflow-hidden shadow-glow">
+                            <div className="w-12 h-12 rounded-full p-0.5 overflow-hidden shadow-glow">
                                 <img src={userAvatar} alt={userName} className="w-full h-full object-cover rounded-full" />
                             </div>
-                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success border-2 border-bg-primary rounded-full flex items-center justify-center">
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full flex items-center justify-center">
                                 <Zap size={10} className="text-white" fill="currentColor" />
                             </div>
                         </div>
                         <div>
-                            <p className="meta !text-xs !lowercase text-text-tertiary leading-none mb-0.5">terminal do profissional</p>
+                            <p className="meta !text-xs !lowercase text-text-tertiary leading-none mb-0.5">Bem-vindo</p>
                             <h2 className="heading-lg text-text-primary">{userName}</h2>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
@@ -312,7 +312,7 @@ const ProviderDashboard: React.FC<Props> = ({
                             </div>
                         </div>
 
-                        <div className="flex gap-3 overflow-x-auto no-scrollbar pt-1 pb-2 mt-4 border-t border-white/10">
+                        <div className="flex gap-3 overflow-x-auto no-scrollbar pt-1 pb-2 mt-4">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -357,7 +357,7 @@ const ProviderDashboard: React.FC<Props> = ({
                             className="flex flex-col items-center gap-3 interactive group"
                             onClick={() => onNavigate(action.id)}
                         >
-                            <div className={`w-16 h-16 rounded-2xl ${action.bg} border border-border-subtle shadow-md flex items-center justify-center transition-all group-active:scale-95`}>
+                            <div className={`w-16 h-16 rounded-2xl ${action.bg} shadow-md flex items-center justify-center transition-all group-active:scale-95`}>
                                 <div className={action.color}>{action.icon}</div>
                             </div>
                             <span className="text-[11px] font-medium text-text-secondary tracking-normal">{action.label}</span>
@@ -371,7 +371,7 @@ const ProviderDashboard: React.FC<Props> = ({
                             <h3 className="heading-lg mb-1">Performance</h3>
                             <p className="meta !text-[11px] !lowercase text-text-tertiary">Métricas operacionais reais</p>
                         </div>
-                        <button className="w-10 h-10 rounded-xl bg-bg-secondary border border-border-subtle flex items-center justify-center text-accent-primary">
+                        <button className="w-10 h-10 rounded-xl bg-bg-secondary flex items-center justify-center text-accent-primary">
                             <BarChart3 size={18} />
                         </button>
                     </div>
@@ -408,7 +408,7 @@ const ProviderDashboard: React.FC<Props> = ({
 
                     <div className="space-y-3">
                         {recentRequests.length === 0 ? (
-                            <div className="p-8 text-center bg-bg-tertiary/20 rounded-[28px] border border-dashed border-border-subtle">
+                            <div className="p-8 text-center bg-bg-tertiary/20 rounded-[28px]">
                                 <p className="meta text-text-tertiary tracking-normal !text-[11px]">Sem solicitações pendentes</p>
                             </div>
                         ) : (
@@ -418,7 +418,7 @@ const ProviderDashboard: React.FC<Props> = ({
                                     className="card-transaction group cursor-pointer"
                                     onClick={() => onNavigate('RECEIVED_ORDERS')}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center border bg-accent-primary/10 border-accent-primary/20 text-accent-primary">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-accent-primary/10 text-accent-primary">
                                         <Users size={20} />
                                     </div>
                                     <div className="flex-1">

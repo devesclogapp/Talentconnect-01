@@ -18,6 +18,7 @@ import { getActiveServices } from '../services/servicesService';
 import { supabase } from '../services/supabaseClient';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { CATEGORY_MAP, CATEGORIES_LIST } from '../constants';
+import { Skeleton } from '../components/ui/skeleton';
 import ServiceCard from '../components/ServiceCard';
 import MetricCard from '../components/dashboard/MetricCard';
 
@@ -103,12 +104,12 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
             {/* Marketplace Navigation Bar */}
             <nav className="header-glass px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border border-border-medium overflow-hidden">
+                    <div className="w-10 h-10 rounded-full overflow-hidden">
                         <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
                     </div>
                     <div>
-                        <p className="meta !text-[11px] !lowercase text-text-tertiary leading-none font-medium">Acesso autorizado</p>
-                        <h2 className="heading-md font-bold">Início</h2>
+                        <p className="meta !text-[11px] !lowercase text-text-tertiary leading-none font-medium">Bem-vindo</p>
+                        <h2 className="heading-md font-bold text-text-primary">{userName}</h2>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -271,7 +272,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 onClick={() => onSelectCategory(cat.id)}
                                 className="flex flex-col items-center gap-3 min-w-[80px] group interactive"
                             >
-                                <div className="w-16 h-16 rounded-[24px] bg-bg-secondary border border-border-subtle flex items-center justify-center text-text-tertiary group-hover:bg-accent-primary group-hover:text-bg-primary group-hover:border-accent-primary group-hover:shadow-glow transition-all duration-300">
+                                <div className="w-16 h-16 rounded-[24px] bg-bg-secondary flex items-center justify-center text-text-tertiary group-hover:bg-accent-primary group-hover:text-bg-primary group-hover:shadow-glow transition-all duration-300">
                                     <Icon size={24} />
                                 </div>
                                 <span className="text-[11px] font-medium text-text-secondary group-hover:text-text-primary transition-colors">{cat.label}</span>
@@ -293,14 +294,19 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
 
                     <div className="grid grid-cols-1 gap-4">
                         {loading ? (
-                            <div className="h-64 col-span-2 flex items-center justify-center">
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="w-10 h-10 border-4 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin"></div>
-                                    <span className="meta text-text-primary !text-[11px] font-medium">Lendo Mercado...</span>
-                                </div>
+                            <div className="flex flex-col bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden px-4 py-2">
+                                {[...Array(3)].map((_, i) => (
+                                    <div key={i} className="py-4 border-b border-neutral-50 last:border-0 flex gap-4 items-center">
+                                        <Skeleton className="w-16 h-16 rounded-xl shrink-0" />
+                                        <div className="flex-1 space-y-2">
+                                            <Skeleton className="h-4 w-3/4" />
+                                            <Skeleton className="h-3 w-1/2" />
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : services.length === 0 ? (
-                            <div className="p-12 text-center bg-bg-secondary/20 rounded-[32px] border border-dashed border-border-subtle">
+                            <div className="p-12 text-center bg-bg-secondary/20 rounded-[32px]">
                                 <Zap size={40} className="mx-auto text-text-tertiary mb-4 opacity-20" />
                                 <p className="meta text-text-tertiary !text-[11px] font-medium">Mercado limpo. Aguardando novos especialistas.</p>
                             </div>
@@ -316,7 +322,7 @@ const ClientDashboard: React.FC<Props> = ({ onSelectCategory, onSelectService, o
                                 ))}
                                 <button
                                     onClick={() => onNavigate('SERVICES')}
-                                    className="py-4 text-[13px] font-medium text-black hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                                    className="py-4 text-[13px] font-medium text-black hover:bg-neutral-50 transition-colors"
                                 >
                                     Ver todos os {services.length}+ resultados
                                 </button>

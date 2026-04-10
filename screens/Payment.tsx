@@ -107,8 +107,25 @@ const Payment: React.FC = () => {
     if (paymentComplete) {
         return (
             <div className="screen-container bg-app-bg min-h-screen flex items-center justify-center p-6">
-                <div className="w-full max-w-sm text-center animate-scale-in">
-                    <div className="w-24 h-24 rounded-[32px] bg-primary-green flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-primary-green/30">
+                <div className="w-full max-w-sm text-center relative">
+                    {/* Confetti shards simplified with CSS animation */}
+                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-48 overflow-visible pointer-events-none select-none">
+                        {[...Array(12)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="absolute w-2 h-2 rounded-full animate-confetti-pop"
+                                style={{
+                                    backgroundColor: ['#22C55E', '#3B82F6', '#EAB308', '#F43F5E'][i % 4],
+                                    left: '50%',
+                                    top: '50%',
+                                    '--angle': `${i * 30}deg`,
+                                    '--delay': `${i * 0.1}s`
+                                } as any}
+                            />
+                        ))}
+                    </div>
+
+                    <div className="w-24 h-24 rounded-[32px] bg-primary-green flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-primary-green/30 animate-scale-in relative z-10">
                         <CheckCircle size={48} className="text-black" />
                     </div>
                     <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Pagamento seguro!</h1>
@@ -149,13 +166,13 @@ const Payment: React.FC = () => {
 
                 {/* Total */}
                 <div className="text-center py-4">
-                    <p className="text-black font-normal text-sm mb-1">Total a reter</p>
-                    <h2 className="text-5xl font-bold text-black dark:text-white">R$ {formatNumber(selectedOrder.total_amount)}</h2>
+                    <p className="text-black font-medium text-sm mb-1">Total a reter</p>
+                    <h2 className="text-5xl font-bold text-black dark:text-white tracking-tighter">R$ {formatNumber(selectedOrder.total_amount)}</h2>
                 </div>
 
                 {/* Methods */}
                 <div className="space-y-3">
-                    <h3 className="text-black font-normal text-sm px-1">Escolha o método</h3>
+                    <h3 className="text-black font-medium text-xs px-1">Escolha o método</h3>
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             onClick={() => setPaymentMethod('credit')}
@@ -165,7 +182,7 @@ const Payment: React.FC = () => {
                                 }`}
                         >
                             <CreditCard size={24} />
-                            <span className="text-[11px] font-normal">Cartão</span>
+                            <span className="text-[11px] font-medium">Cartão</span>
                         </button>
                         <button
                             onClick={() => setPaymentMethod('pix')}
@@ -175,7 +192,7 @@ const Payment: React.FC = () => {
                                 }`}
                         >
                             <div className="text-2xl">🔷</div>
-                            <span className="text-[11px] font-normal">Pix instantâneo</span>
+                            <span className="text-[11px] font-medium">Pix instantâneo</span>
                         </button>
                     </div>
                 </div>
@@ -184,7 +201,7 @@ const Payment: React.FC = () => {
                 {paymentMethod !== 'pix' && (
                     <Card className="p-8 rounded-[32px] border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-4 animate-fade-in">
                         <div className="space-y-1">
-                            <label className="text-black font-normal !text-[9px] px-1">Número do cartão</label>
+                            <label className="text-black font-medium !text-[9px] px-1">Número do cartão</label>
                             <Input
                                 placeholder="0000 0000 0000 0000"
                                 value={cardData.number}
@@ -195,7 +212,7 @@ const Payment: React.FC = () => {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-black font-normal !text-[9px] px-1">Nome no cartão</label>
+                            <label className="text-black font-medium !text-[9px] px-1">Nome no cartão</label>
                             <Input
                                 placeholder="JOSÉ SILVA"
                                 value={cardData.name}
@@ -206,7 +223,7 @@ const Payment: React.FC = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-black font-normal !text-[9px] px-1">Validade</label>
+                                <label className="text-black font-medium !text-[9px] px-1">Validade</label>
                                 <Input
                                     placeholder="MM/AA"
                                     value={cardData.expiry}
@@ -216,7 +233,7 @@ const Payment: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-black font-normal !text-[9px] px-1">CVV</label>
+                                <label className="text-black font-medium !text-[9px] px-1">CVV</label>
                                 <Input
                                     type="password"
                                     placeholder="000"
@@ -235,14 +252,14 @@ const Payment: React.FC = () => {
                     {errors.general && (
                         <div className="animate-fade-in bg-error/10 border border-error/20 p-4 rounded-2xl flex items-center gap-3 text-error">
                             <AlertCircle size={18} />
-                            <p className="text-xs font-medium">{errors.general}</p>
+                            <p className="text-xs font-semibold">{errors.general}</p>
                         </div>
                     )}
 
                     <button
                         onClick={handlePayment}
                         disabled={isProcessing}
-                        className="w-full py-6 bg-primary-black text-white rounded-[24px] shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all font-normal"
+                        className="w-full py-6 bg-primary-black text-white rounded-[24px] shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all font-medium"
                     >
                         {isProcessing ? <Loader2 size={20} className="animate-spin" /> : <Lock size={20} />}
                         {isProcessing ? 'Processando...' : `Confirmar R$ ${formatNumber(selectedOrder.total_amount)}`}
