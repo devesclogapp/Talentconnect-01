@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Clock, MapPin, FileText, AlertCircle, Loader2, Thermometer } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Calendar } from '../components/ui/Calendar';
-import { TimePicker } from '../components/ui/TimePicker';
-import { Select } from '../components/ui/Select';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Calendar } from '../components/ui/calendar';
+import { TimePicker } from '../components/ui/time-picker';
+import { Select } from '../components/ui/select';
 import { BRAZILIAN_STATES, CITIES_BY_STATE } from '../constants';
 import { formatNumber } from '../utils/format';
 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, User, Phone, Mail, Camera, Save, Loader2 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 import AvatarUpload from '../components/AvatarUpload';
 import { resolveUserAvatar } from '../utils/userUtils';
 

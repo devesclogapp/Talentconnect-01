@@ -56,8 +56,8 @@ const AdminDisputes: React.FC = () => {
     const fetchDisputes = async () => {
         setIsLoading(true);
         try {
-            const { data: disputesData, error: disputesError } = await supabase
-                .from('disputes').select('*').order('created_at', { ascending: false });
+            const { data: disputesData, error: disputesError } = await (supabase
+                .from('disputes') as any).select('*').order('created_at', { ascending: false });
             if (disputesError) throw disputesError;
 
             const orderIds = [...new Set((disputesData || []).map(d => d.order_id))];

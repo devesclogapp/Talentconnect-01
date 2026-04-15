@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, Calendar, Clock, MapPin, User, FileText, CreditCard, Loader2 } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 import { createOrder } from '../services/ordersService';
 import { formatNumber } from '../utils/format';
 

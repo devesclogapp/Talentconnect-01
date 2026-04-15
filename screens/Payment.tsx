@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CreditCard, Lock, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
+import { Card } from '../components/ui/card';
+import { Input } from '../components/ui/input';
 import { supabase } from '../services/supabaseClient';
 import { useAppStore } from '../store';
 import { processPayment } from '../services/ordersService';

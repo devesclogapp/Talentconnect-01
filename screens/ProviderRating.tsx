@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, CheckCircle } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 
 interface ProviderRatingProps {
     provider: any;

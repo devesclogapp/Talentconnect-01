@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Search, Filter, Clock, CheckCircle, XCircle, AlertCircle, Calendar, MapPin, ChevronRight, DollarSign, Zap } from 'lucide-react';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
 import { getProviderOrders } from '../services/ordersService';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { supabase } from '../services/supabaseClient';

@@ -14,7 +14,7 @@ import { resolveUserName } from '../utils/userUtils';
 import KpiCard from '../components/erp/KpiCard';
 import StatusBadge from '../components/erp/StatusBadge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../components/ui/sheet';
-import { Badge } from '../components/ui/Badge';
+import { Badge } from '../components/ui/badge';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Separator } from '../components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../components/ui/alert-dialog';

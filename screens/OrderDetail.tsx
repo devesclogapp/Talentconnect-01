@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle2, CreditCard, MessageCircle, Phone, CheckCircle, XCircle, AlertCircle, ClipboardList, Sparkles, ShieldCheck, LifeBuoy } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 import { formatNumber } from '../utils/format';
 import { subscribeToOrderUpdates, getOrderById } from '../services/ordersService';
-import { WhatsAppIcon } from '../components/ui/WhatsAppIcon';
+import { WhatsAppIcon } from '../components/ui/whatsapp-icon';
 
 // --- Shared Components (Copied from Tracking.tsx for consistency) ---
 // --- Shared Components (Copied from Tracking.tsx for consistency) ---

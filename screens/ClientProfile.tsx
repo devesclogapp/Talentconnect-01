@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
 import { supabase } from '../services/supabaseClient';
-import { WhatsAppIcon } from '../components/ui/WhatsAppIcon';
+import { WhatsAppIcon } from '../components/ui/whatsapp-icon';
 
 interface ClientProfileProps {
     client: any; // User object

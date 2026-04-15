@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Star, MapPin, Briefcase, Filter } from 'lucide-react';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
 
 interface Provider {
     id: string;

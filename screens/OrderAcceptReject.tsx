@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Calendar, Clock, MapPin, User, FileText, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 import { acceptOrder, rejectOrder } from '../services/ordersService';
 
 interface OrderAcceptRejectProps {

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Play, Square, CheckCircle, Clock, MapPin, User, AlertCircle } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 import { markExecutionStart, markExecutionFinish, subscribeToOrderUpdates } from '../services/ordersService';
 import { resolveUserName } from '../utils/userUtils';
 

@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, User, AlertCircle, LayoutDashboard, Globe, Shield } from 'lucide-react';
 import { signIn } from '../services/authService';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
 
 interface Props {
     onLoginSuccess: (user: any) => void;

@@ -8,7 +8,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.error('❌ Supabase: Variáveis de ambiente VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY não encontradas. Verifique o arquivo .env.local.');
 }
 
-export const supabase: SupabaseClient<Database> = createClient<Database>(
+export const supabase = createClient<Database>(
     supabaseUrl || 'https://placeholder.supabase.co',
     supabaseAnonKey || 'placeholder',
     {

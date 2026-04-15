@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, AlertTriangle, ShieldCheck, Send, Info, CheckCircle2 } from 'lucide-react';
-import { Button } from '../components/ui/Button';
+import { Button } from '../components/ui/button';
 import { DisputeReason } from '../types';
 import { openDispute } from '../services/disputesService';
 

@@ -16,7 +16,7 @@ import {
     CheckCircle
 } from 'lucide-react';
 import { resolveUserName, resolveUserAvatar } from '../utils/userUtils';
-import { WhatsAppIcon } from '../components/ui/WhatsAppIcon';
+import { WhatsAppIcon } from '../components/ui/whatsapp-icon';
 
 interface ProviderProfileProps {
     provider: any;

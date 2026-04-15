@@ -34,7 +34,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({ user, children, onUploadCom
             if (authError) throw authError;
 
             // 3. Update Public Users Table (Relationships)
-            const { error: dbError } = await supabase
+            const { error: dbError } = await (supabase as any)
                 .from('users')
                 .update({ avatar_url: publicUrl })
                 .eq('id', userId);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, User, Mail, Lock, Phone, MapPin, ArrowRight, Zap, Globe, ChevronRight } from 'lucide-react';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 import { signUp } from '../services/authService';
 import { UserRole } from '../types';
 

@@ -15,7 +15,7 @@ import CommunicationModal from '../components/admin/CommunicationModal';
 import SimpleShortcut from '../components/admin/SimpleShortcut';
 import KpiCard from '../components/erp/KpiCard';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../components/ui/sheet';
-import { Badge } from '../components/ui/Badge';
+import { Badge } from '../components/ui/badge';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Separator } from '../components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from "../components/ui/tooltip";
