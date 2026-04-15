@@ -382,11 +382,11 @@ const AdminDashboard: React.FC = () => {
                     tooltip="Casos em mediação onde houve contestação. Exige intervenção administrativa manual."
                 />
                 <KpiCard
-                    label="Prestadores Ativos" value={stats.totalUsers - stats.highRiskUsers}
+                    label="Usuários Ativos" value={stats.totalUsers - stats.highRiskUsers}
                     icon={<Users size={16} />} color="text-folio-accent" bg="bg-folio-accent/10"
                     trend="Verificados"
                     onClick={() => handleDrillDown('ADMIN_USERS')}
-                    tooltip="Número de profissionais com cadastro aprovado (KYC) e habilitados para receber novos pedidos."
+                    tooltip="Número de usuários com cadastro aprovado (KYC) e habilitados para operar na plataforma."
                 />
             </div>
 

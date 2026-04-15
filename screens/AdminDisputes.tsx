@@ -166,7 +166,7 @@ const AdminDisputes: React.FC = () => {
         };
         const labels = { open: 'Aberto', in_review: 'Em análise', resolved: 'Resolvido', closed: 'Fechado' };
         return (
-            <span className={`px-2.5 py-1 rounded-lg text-xs font-black border tracking-widest ${colors[status as keyof typeof colors]}`}>
+            <span className={`px-2.5 py-1 rounded-lg text-xs font-black border  ${colors[status as keyof typeof colors]}`}>
                 {labels[status as keyof typeof labels]}
             </span>
         );
@@ -197,7 +197,7 @@ const AdminDisputes: React.FC = () => {
                                 <DecisionIntelligence negotiationData={{ order: selectedDispute?.order, dispute: selectedDispute }} />
 
                                 <div className="space-y-4">
-                                    <label className="text-xs font-black text-folio-text-dim/40 tracking-[3px] ml-1">Evidências Consideradas</label>
+                                    <label className="text-xs font-black text-folio-text-dim/40  ml-1">Evidências Consideradas</label>
                                     <div className="grid grid-cols-2 gap-3">
                                         {[
                                             { id: 'LATENCIA', label: 'Latência de Início', icon: <Clock size={16} /> },
@@ -210,7 +210,7 @@ const AdminDisputes: React.FC = () => {
                                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedProofs.includes(proof.label) ? 'border-folio-accent' : 'border-folio-border'}`}>
                                                     {selectedProofs.includes(proof.label) && <div className="w-2 h-2 rounded-full bg-folio-accent shadow-glow" />}
                                                 </div>
-                                                <span className="font-black text-xs tracking-widest">{proof.label}</span>
+                                                <span className="font-black text-xs ">{proof.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -234,14 +234,14 @@ const AdminDisputes: React.FC = () => {
                     <div className="p-6 pt-4 border-t border-folio-border bg-folio-surface shrink-0 flex justify-end gap-3 rounded-b-[32px]">
                         <button
                             onClick={() => { setPendingAction(null); setActionReason(''); }}
-                            className="h-12 px-6 rounded-xl border border-folio-border text-xs font-black tracking-widest text-folio-text-dim hover:bg-folio-bg transition-all"
+                            className="h-12 px-6 rounded-xl border border-folio-border text-xs font-black  text-folio-text-dim hover:bg-folio-bg transition-all"
                         >
                             Descartar
                         </button>
                         <button
                             disabled={!actionReason || isProcessing === selectedDispute?.id}
                             onClick={performAction}
-                            className={`h-12 px-8 rounded-xl border-none text-xs font-black tracking-widest text-white shadow-glow transition-all active:scale-95 ${pendingAction === 'resolve_refund' ? 'bg-[#E24B4A]' : 'bg-folio-accent'} disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed`}
+                            className={`h-12 px-8 rounded-xl border-none text-xs font-black  text-white shadow-glow transition-all active:scale-95 ${pendingAction === 'resolve_refund' ? 'bg-[#E24B4A]' : 'bg-folio-accent'} disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed`}
                         >
                             {isProcessing ? 'Processando...' : 'Executar sentença'}
                         </button>
@@ -258,9 +258,9 @@ const AdminDisputes: React.FC = () => {
                                 <NegotiationDossier data={selectedDispute} auditLogs={auditLogs} onBack={() => setSelectedDispute(null)} />
                             </div>
                             <div className="p-6 border-t border-folio-border bg-folio-surface flex flex-wrap gap-2">
-                                <button onClick={() => setPendingAction('resolve_release')} className="flex-1 min-w-[120px] h-12 bg-[#1DB97A]/10 text-[#1DB97A] border border-[#1DB97A]/20 rounded-xl text-xs font-black tracking-widest hover:bg-[#1DB97A] hover:text-white transition-all">Liberar escrow</button>
-                                <button onClick={() => setPendingAction('resolve_refund')} className="flex-1 min-w-[120px] h-12 bg-[#E24B4A]/10 text-[#E24B4A] border border-[#E24B4A]/20 rounded-xl text-xs font-black tracking-widest hover:bg-[#E24B4A] hover:text-white transition-all">Estornar cliente</button>
-                                <button onClick={() => setPendingAction('analyze')} className="w-full h-12 bg-folio-text text-folio-bg rounded-xl text-xs font-black tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2"><Zap size={16} className="text-folio-accent" /> Analisar caso</button>
+                                <button onClick={() => setPendingAction('resolve_release')} className="flex-1 min-w-[120px] h-12 bg-[#1DB97A]/10 text-[#1DB97A] border border-[#1DB97A]/20 rounded-xl text-xs font-black  hover:bg-[#1DB97A] hover:text-white transition-all">Liberar escrow</button>
+                                <button onClick={() => setPendingAction('resolve_refund')} className="flex-1 min-w-[120px] h-12 bg-[#E24B4A]/10 text-[#E24B4A] border border-[#E24B4A]/20 rounded-xl text-xs font-black  hover:bg-[#E24B4A] hover:text-white transition-all">Estornar cliente</button>
+                                <button onClick={() => setPendingAction('analyze')} className="w-full h-12 bg-folio-text text-folio-bg rounded-xl text-xs font-black  hover:opacity-90 transition-all flex items-center justify-center gap-2"><Zap size={16} className="text-folio-accent" /> Analisar caso</button>
                             </div>
                         </div>
                     )}
@@ -270,7 +270,7 @@ const AdminDisputes: React.FC = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-black text-folio-text tracking-tight leading-none">Mediação de Conflitos</h1>
-                    <p className="text-xs font-bold text-folio-text-dim/50 tracking-[2px] mt-2">Dossiê e Governança de Escrow Operacional</p>
+                    <p className="text-xs font-bold text-folio-text-dim/50  mt-2">Dossiê e Governança de Escrow Operacional</p>
                 </div>
                 <button onClick={fetchDisputes} className="w-11 h-11 flex items-center justify-center rounded-2xl border border-folio-border bg-folio-surface text-folio-text-dim hover:text-folio-accent hover:rotate-180 transition-all duration-700 shadow-sm"><RefreshCw size={18} /></button>
             </div>
@@ -284,10 +284,10 @@ const AdminDisputes: React.FC = () => {
 
             <div className="bg-folio-surface border border-folio-border rounded-[32px] p-6 shadow-folio">
                 <div className="hidden md:grid grid-cols-12 px-8 py-4 opacity-40">
-                    <div className="col-span-3 text-xs font-black text-folio-text tracking-[2px]">Caso / Protocolo</div>
-                    <div className="col-span-4 text-xs font-black text-folio-text tracking-[2px]">Reclamante / Motivo</div>
-                    <div className="col-span-2 text-xs font-black text-folio-text tracking-[2px]">Valor</div>
-                    <div className="col-span-2 text-xs font-black text-folio-text tracking-[2px]">Status</div>
+                    <div className="col-span-3 text-xs font-black text-folio-text ">Caso / Protocolo</div>
+                    <div className="col-span-4 text-xs font-black text-folio-text ">Reclamante / Motivo</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text ">Valor</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text ">Status</div>
                     <div className="col-span-1"></div>
                 </div>
 
@@ -297,12 +297,12 @@ const AdminDisputes: React.FC = () => {
                             className="grid grid-cols-12 items-center px-8 py-6 bg-folio-bg border border-folio-border rounded-[28px] hover:border-folio-accent/40 shadow-sm hover:shadow-glow-dim transition-all group cursor-pointer">
                             <div className="col-span-3">
                                 <p className="text-xs font-black text-folio-text-dim/40 font-mono mb-1 tracking-tighter">#{dispute.id.slice(0, 8)}</p>
-                                <p className="text-xs font-bold text-folio-text-dim/60 tracking-widest">{formatDate(dispute.created_at)}</p>
+                                <p className="text-xs font-bold text-folio-text-dim/60 ">{formatDate(dispute.created_at)}</p>
                             </div>
                             <div className="col-span-4 pr-10">
                                 <p className="text-sm font-black text-folio-text tracking-tight truncate leading-none">{dispute.reason || 'S/ descritivo'}</p>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <span className={`px-2 py-0.5 rounded-md text-xs font-black tracking-widest border ${dispute.opened_by === 'client' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-orange-500/10 text-orange-600 border-orange-500/20'}`}>
+                                    <span className={`px-2 py-0.5 rounded-md text-xs font-black  border ${dispute.opened_by === 'client' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-orange-500/10 text-orange-600 border-orange-500/20'}`}>
                                         {dispute.opened_by === 'client' ? 'CLI' : 'PRO'}
                                     </span>
                                     <p className="text-xs font-bold text-folio-text-dim/60 truncate">{resolveUserName(dispute.opened_by === 'client' ? dispute.order?.client : dispute.order?.provider)}</p>

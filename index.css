@@ -22,8 +22,9 @@
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
 
-  --accent: 239 84% 67%;
-  --accent-foreground: 222 47% 11.2%;
+  --accent: 239 84% 57%;
+  /* Slightly darker for better contrast with white text */
+  --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
@@ -40,15 +41,22 @@
   --error: 0 84.2% 60.2%;
   --info: 220 38% 55%;
 
+  --red: 0 84.2% 60.2%;
+  --red-dim: 0 84.2% 92%;
+  --blue-dim: 239 84% 92%;
+  --green-dim: 160 33% 92%;
+  --accent-dim: 239 84% 96%;
+
   /* Talent Connect Identity (Direct HSL Aliases for Utility Support) */
   --bg-primary: var(--background);
   --bg-secondary: var(--card);
   --bg-tertiary: var(--muted);
 
   --text-primary: var(--foreground);
-  --text-secondary: 215.4 16.3% 46.9%;
-  /* Muted Foreground */
-  --text-tertiary: 215.4 16.3% 56.9%;
+  --text-secondary: 215.4 16.3% 35%;
+  /* Darker grey for better contrast */
+  --text-tertiary: 215.4 16.3% 45%;
+  /* Medium grey for icons/placeholders */
 
   --accent-primary: var(--primary);
   --accent-secondary: var(--accent);
@@ -111,6 +119,11 @@
     font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+
+  ::selection {
+    background-color: hsl(var(--accent) / 0.2);
+    color: hsl(var(--accent));
+  }
 }
 
 @layer utilities {
@@ -167,14 +180,24 @@
   /* Premium Buttons */
   .btn-primary {
     @apply h-[56px] px-8 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-150 ease-out active:scale-95;
-    background: var(--accent-primary);
+    background: #4F46E5;
+    /* Indigo 600 for better solid contrast */
     color: #FFFFFF;
-    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.24);
+    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.3);
   }
 
   .btn-primary:hover {
-    background: var(--accent-secondary);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.16);
+    background: #4338CA;
+    /* Indigo 700 */
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.2);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.15);
+  }
+
+  .shadow-glow-accent {
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
   }
 
   .btn-icon {
@@ -223,15 +246,15 @@
 
   /* Inputs */
   .input {
-    @apply rounded-xl p-4 text-sm w-full outline-none transition-all;
-    background: var(--surface);
+    @apply rounded-xl p-4 text-sm w-full outline-none transition-all placeholder:text-text-tertiary;
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
-    color: var(--text);
+    color: var(--text-primary);
   }
 
   .input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
   /* Global UI */

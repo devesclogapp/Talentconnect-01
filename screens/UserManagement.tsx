@@ -169,7 +169,7 @@ const UserManagement: React.FC = () => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="space-y-3 py-6">
-                        <label className="text-xs font-black text-folio-text-dim tracking-[3px] opacity-40">Motivo da Decisão</label>
+                        <label className="text-xs font-black text-folio-text-dim tracking-tight opacity-40">Motivo da Decisão</label>
                         <textarea
                             value={actionReason} onChange={e => setActionReason(e.target.value)}
                             className="w-full h-32 rounded-2xl p-4 text-sm outline-none bg-folio-bg border border-folio-border text-folio-text focus:border-folio-accent transition-all resize-none shadow-inner"
@@ -177,11 +177,11 @@ const UserManagement: React.FC = () => {
                         />
                     </div>
                     <AlertDialogFooter className="gap-3">
-                        <AlertDialogCancel onClick={() => { setActionModal(null); setActionReason(''); }} className="h-12 px-6 rounded-2xl border border-folio-border text-xs font-black tracking-widest text-folio-text-dim hover:bg-folio-bg transition-all">Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => { setActionModal(null); setActionReason(''); }} className="h-12 px-6 rounded-2xl border border-folio-border text-xs font-black tracking-tight text-folio-text-dim hover:bg-folio-bg transition-all">Cancelar</AlertDialogCancel>
                         <AlertDialogAction
                             disabled={!actionReason || isProcessing}
                             onClick={performAction}
-                            className={`h-12 px-8 rounded-2xl border-none text-xs font-black tracking-widest text-white shadow-glow transition-all active:scale-95 ${actionModal?.type === 'BLOCK' || actionModal?.type === 'KYC_REJECT' ? 'bg-[#E24B4A] hover:bg-[#CC2200]' : 'bg-folio-accent hover:opacity-90'}`}
+                            className={`h-12 px-8 rounded-2xl border-none text-xs font-black tracking-tight text-white shadow-glow transition-all active:scale-95 ${actionModal?.type === 'BLOCK' || actionModal?.type === 'KYC_REJECT' ? 'bg-[#E24B4A] hover:bg-[#CC2200]' : 'bg-folio-accent hover:opacity-90'}`}
                         >
                             {isProcessing ? 'Processando...' : 'Confirmar & registrar'}
                         </AlertDialogAction>
@@ -191,7 +191,7 @@ const UserManagement: React.FC = () => {
 
             {/* ── Sheet — Dossier ── */}
             <Sheet open={!!selectedUser} onOpenChange={(open) => { if (!open) setSelectedUser(null); }}>
-                <SheetContent side="right" className="w-full max-w-xl p-0 flex flex-col gap-0 overflow-hidden bg-folio-bg border-l border-folio-border shadow-2xl">
+                <SheetContent side="right" className="w-full max-w-[700px] p-0 flex flex-col gap-0 overflow-hidden bg-folio-bg border-l border-folio-border shadow-2xl">
                     {selectedUser && (
                         <>
                             <SheetHeader className="px-8 py-6 border-b border-folio-border bg-folio-surface flex-row items-center gap-4 space-y-0">
@@ -201,19 +201,16 @@ const UserManagement: React.FC = () => {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
                                         <SheetTitle className="text-lg font-black text-folio-text tracking-tight leading-none">{resolveUserName(selectedUser)}</SheetTitle>
-                                        <span className="px-2 py-0.5 rounded-md bg-folio-accent/10 border border-folio-accent/20 text-folio-accent text-xs font-black tracking-widest">{selectedUser.role}</span>
+                                        <span className="px-2 py-0.5 rounded-md bg-folio-accent/10 border border-folio-accent/20 text-folio-accent text-xs font-black tracking-tight">{selectedUser.role}</span>
                                     </div>
                                     <p className="text-xs text-folio-text-dim/60 font-mono tracking-tight font-medium">{selectedUser.email}</p>
                                 </div>
-                                <button onClick={() => setSelectedUser(null)} className="w-10 h-10 rounded-xl bg-folio-bg border border-folio-border flex items-center justify-center text-folio-text-dim hover:text-folio-text transition-colors">
-                                    <X size={18} />
-                                </button>
                             </SheetHeader>
 
                             <div className="flex px-8 border-b border-folio-border bg-folio-surface gap-2">
                                 {['profile', 'orders', 'risk', 'actions'].map(tab => (
                                     <button key={tab} onClick={() => setDossierTab(tab)}
-                                        className={`px-4 py-4 text-xs font-black tracking-[2px] border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
+                                        className={`px-4 py-4 text-xs font-black tracking-tight border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
                                         {tab === 'profile' ? 'Perfil' : tab === 'orders' ? 'Pedidos' : tab === 'risk' ? 'Risco & KYC' : 'Ações'}
                                     </button>
                                 ))}
@@ -232,14 +229,14 @@ const UserManagement: React.FC = () => {
                                                 <div key={s.label} className="bg-folio-surface border border-folio-border rounded-[24px] p-5 shadow-sm group hover:shadow-glow-dim transition-all">
                                                     <div className="flex items-center gap-2 mb-2 opacity-50 group-hover:opacity-100 transition-opacity">
                                                         <span className={s.color}>{s.icon}</span>
-                                                        <p className="text-xs text-folio-text-dim font-black tracking-[2px]">{s.label}</p>
+                                                        <p className="text-xs text-folio-text-dim font-black tracking-tight">{s.label}</p>
                                                     </div>
                                                     <p className={`text-2xl font-black tabular-nums tracking-tighter ${s.color}`}>{s.value}</p>
                                                 </div>
                                             ))}
                                         </div>
                                         <div className="bg-folio-surface border border-folio-border rounded-[28px] p-6 space-y-4 shadow-folio">
-                                            <p className="text-xs font-black text-folio-text-dim/40 tracking-[3px] mb-2">Detalhes da Identidade</p>
+                                            <p className="text-xs font-black text-folio-text-dim/40 tracking-tight mb-2">Detalhes da Identidade</p>
                                             {[
                                                 { label: 'E-mail Principal', value: selectedUser.email },
                                                 { label: 'Perfil de Acesso', value: selectedUser.role },
@@ -248,8 +245,8 @@ const UserManagement: React.FC = () => {
                                                 { label: 'Identificador Global', value: selectedUser.id },
                                             ].map(row => (
                                                 <div key={row.label} className="flex flex-col gap-1 border-b border-folio-border last:border-0 pb-4 last:pb-0">
-                                                    <span className="text-xs font-black text-folio-text-dim/50 tracking-[2px]">{row.label}</span>
-                                                    <span className="text-xs font-bold text-folio-text font-mono truncate">{row.value || '—'}</span>
+                                                    <span className="text-xs font-black text-folio-text-dim/50 tracking-tight">{row.label}</span>
+                                                    <span className="text-xs font-bold text-folio-text font-mono">{row.value || '—'}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -263,13 +260,13 @@ const UserManagement: React.FC = () => {
                                                 <ShieldAlert size={80} />
                                             </div>
                                             <div className="relative z-10">
-                                                <p className="text-xs font-black text-folio-text-dim tracking-[3px] mb-2">Score de Risco Operacional</p>
+                                                <p className="text-xs font-black text-folio-text-dim tracking-tight mb-2">Score de Risco Operacional</p>
                                                 <h3 className={`text-6xl font-black leading-none tracking-tighter tabular-nums ${selectedUser.riskScore > 60 ? 'text-[#E24B4A]' : selectedUser.riskScore > 30 ? 'text-[#F5C842]' : 'text-[#1DB97A]'}`}>
                                                     {selectedUser.riskScore}<span className="text-xl text-folio-text-dim/30 font-black ml-2 tracking-tight">/100</span>
                                                 </h3>
                                             </div>
                                             <div className="relative z-10">
-                                                <div className={`px-4 py-2 rounded-xl font-black text-sm tracking-[2px] border ${selectedUser.riskLevel === 'high' ? 'bg-[#E24B4A]/10 border-[#E24B4A]/30 text-[#E24B4A]' : 'bg-[#1DB97A]/10 border-[#1DB97A]/30 text-[#1DB97A]'
+                                                <div className={`px-4 py-2 rounded-xl font-black text-sm tracking-tight border ${selectedUser.riskLevel === 'high' ? 'bg-[#E24B4A]/10 border-[#E24B4A]/30 text-[#E24B4A]' : 'bg-[#1DB97A]/10 border-[#1DB97A]/30 text-[#1DB97A]'
                                                     }`}>
                                                     {selectedUser.riskLevel === 'high' ? 'Crítico' : 'Seguro'}
                                                 </div>
@@ -280,9 +277,9 @@ const UserManagement: React.FC = () => {
                                             <div className="flex items-center justify-between mb-4">
                                                 <div className="flex items-center gap-3">
                                                     <ShieldCheck className="text-folio-accent" size={20} />
-                                                    <h4 className="text-sm font-black text-folio-text tracking-widest">Documentação Comprobatória</h4>
+                                                    <h4 className="text-sm font-black text-folio-text tracking-tight">Documentação Comprobatória</h4>
                                                 </div>
-                                                <div className={`px-3 py-1 rounded-lg border text-xs font-black tracking-widest ${selectedUser.kyc_status === 'approved' ? 'bg-success/10 border-success/20 text-success' :
+                                                <div className={`px-3 py-1 rounded-lg border text-xs font-black tracking-tight ${selectedUser.kyc_status === 'approved' ? 'bg-success/10 border-success/20 text-success' :
                                                     selectedUser.kyc_status === 'submitted' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
                                                         'bg-folio-bg border-folio-border text-folio-text-dim'
                                                     }`}>
@@ -312,7 +309,7 @@ const UserManagement: React.FC = () => {
                                                 </div>
                                             ) : (
                                                 <div className="py-16 text-center bg-folio-bg/50 rounded-[28px] border-2 border-dashed border-folio-border">
-                                                    <p className="text-xs font-black text-folio-text-dim tracking-[3px] opacity-40">Aguardando envio de documentação</p>
+                                                    <p className="text-xs font-black text-folio-text-dim tracking-tight opacity-40">Aguardando envio de documentação</p>
                                                     <p className="text-xs text-folio-text-dim/60 mt-2 font-medium">Nenhum arquivo localizado no storage para este perfil.</p>
                                                 </div>
                                             )}
@@ -324,7 +321,7 @@ const UserManagement: React.FC = () => {
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-3 mb-6">
                                             <Lock className="text-[#E24B4A]" size={20} />
-                                            <h4 className="text-sm font-black text-folio-text tracking-widest">Controles de Governança</h4>
+                                            <h4 className="text-sm font-black text-folio-text tracking-tight">Controles de Governança</h4>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             {[
@@ -361,7 +358,7 @@ const UserManagement: React.FC = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-black text-folio-text tracking-tight leading-none">Gestão de Usuários</h1>
-                    <p className="text-xs font-bold text-folio-text-dim/50 tracking-[2px] mt-2">Governança, KYC e Análise de Risco</p>
+                    <p className="text-xs font-bold text-folio-text-dim/50 tracking-tight mt-2">Governança, KYC e Análise de Risco</p>
                 </div>
                 <button onClick={fetchUsers}
                     className="w-11 h-11 flex items-center justify-center rounded-2xl border border-folio-border bg-folio-surface text-folio-text-dim hover:text-folio-accent hover:rotate-180 transition-all duration-700 shadow-sm">
@@ -417,22 +414,22 @@ const UserManagement: React.FC = () => {
                     {/* ── Users List ── */}
                     <div className="space-y-4">
                         <div className="hidden md:grid grid-cols-12 px-8 py-4 bg-folio-surface2/30 rounded-2xl border border-folio-border/50">
-                            <div className="col-span-4 text-xs font-black text-folio-text-dim tracking-[2px]">Usuário / Protocolo</div>
-                            <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-[2px]">Papel / Verificação</div>
-                            <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-[2px] cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('risk')}>
+                            <div className="col-span-4 text-xs font-black text-folio-text-dim tracking-tight">Usuário / Protocolo</div>
+                            <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-tight">Papel / Verificação</div>
+                            <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-tight cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('risk')}>
                                 <span className="flex items-center gap-2">SCORE RISCO {sortField === 'risk' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
                             </div>
-                            <div className="col-span-1 text-xs font-black text-folio-text-dim tracking-[2px]">Pedidos</div>
-                            <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-[2px] cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('created')}>
+                            <div className="col-span-1 text-xs font-black text-folio-text-dim tracking-tight">Pedidos</div>
+                            <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-tight cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('created')}>
                                 <span className="flex items-center gap-2">CADASTRO {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
                             </div>
-                            <div className="col-span-1 text-right text-xs font-black text-folio-text-dim tracking-[2px]">Ação</div>
+                            <div className="col-span-1 text-right text-xs font-black text-folio-text-dim tracking-tight">Ação</div>
                         </div>
 
                         {filteredUsers.length === 0 ? (
                             <div className="py-24 text-center bg-folio-surface border border-dashed border-folio-border rounded-[32px] opacity-40">
                                 <Users size={56} className="mx-auto mb-4 text-folio-accent" />
-                                <p className="text-sm font-black tracking-[3px]">Nenhum usuário localizado</p>
+                                <p className="text-sm font-black tracking-tight">Nenhum usuário localizado</p>
                             </div>
                         ) : filteredUsers.map(u => (
                             <div key={u.id}
@@ -450,11 +447,11 @@ const UserManagement: React.FC = () => {
                                 </div>
 
                                 <div className="col-span-2 flex flex-col gap-1.5 justify-center">
-                                    <div className={`px-2 py-0.5 rounded-lg border text-xs font-black tracking-widest text-center ${u.role === 'provider' ? 'bg-folio-accent/10 border-folio-accent/20 text-folio-accent' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+                                    <div className={`px-2 py-0.5 rounded-lg border text-xs font-black tracking-tight text-center ${u.role === 'provider' ? 'bg-folio-accent/10 border-folio-accent/20 text-folio-accent' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'
                                         }`}>
                                         {u.role}
                                     </div>
-                                    <div className={`px-2 py-0.5 rounded-lg border text-xs font-black tracking-widest text-center ${u.kyc_status === 'approved' ? 'bg-[#1DB97A]/10 border-[#1DB97A]/20 text-[#1DB97A]' : 'bg-[#F5C842]/10 border-[#F5C842]/20 text-[#F5C842]'
+                                    <div className={`px-2 py-0.5 rounded-lg border text-xs font-black tracking-tight text-center ${u.kyc_status === 'approved' ? 'bg-[#1DB97A]/10 border-[#1DB97A]/20 text-[#1DB97A]' : 'bg-[#F5C842]/10 border-[#F5C842]/20 text-[#F5C842]'
                                         }`}>
                                         KYC: {u.kyc_status || 'none'}
                                     </div>
@@ -471,7 +468,7 @@ const UserManagement: React.FC = () => {
                                 </div>
 
                                 <div className="col-span-2 text-center">
-                                    <span className="text-xs font-bold text-folio-text-dim/60 font-mono tracking-widest">{formatDate(u.created_at)}</span>
+                                    <span className="text-xs font-bold text-folio-text-dim/60 font-mono tracking-tight">{formatDate(u.created_at)}</span>
                                 </div>
 
                                 <div className="col-span-1 text-right">
@@ -493,7 +490,7 @@ const KycImageCard = ({ title, path, aspect = 'aspect-[16/10]' }: { title: strin
 
     return (
         <div className="space-y-2 group">
-            <p className="text-xs font-black text-folio-text-dim/50 tracking-[2px] ml-1 group-hover:text-folio-accent transition-colors">
+            <p className="text-xs font-black text-folio-text-dim/50 tracking-tight ml-1 group-hover:text-folio-accent transition-colors">
                 {title}
             </p>
             <div className={`${aspect} rounded-[24px] overflow-hidden border border-folio-border bg-folio-bg flex items-center justify-center relative group shadow-inner`}>
@@ -507,7 +504,7 @@ const KycImageCard = ({ title, path, aspect = 'aspect-[16/10]' }: { title: strin
                         e.target.parentElement.innerHTML = `
                             <div class="flex flex-col items-center gap-2 text-folio-text-dim opacity-30">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                                <span class="text-xs font-black tracking-widest">Erro no Carregamento</span>
+                                <span class="text-xs font-black tracking-tight">Erro no Carregamento</span>
                             </div>
                         `;
                     }}

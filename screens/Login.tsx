@@ -69,13 +69,13 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onRegister, onForgotPassword }
                         <ShieldCheck size={32} className="text-accent-primary" />
                     </div>
                     <h1 className="text-4xl font-black text-text-primary uppercase tracking-tighter mb-3">Bem-vindo</h1>
-                    <p className="body text-text-tertiary">Acesse sua conta para gerenciar seus pedidos e serviços.</p>
+                    <p className="body text-text-secondary">Acesse sua conta para gerenciar seus pedidos e serviços.</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6 relative z-10">
                     {/* Profile Selector */}
-                    <div className="bg-bg-secondary p-1 rounded-2xl border border-border-subtle flex relative">
+                    <div className="bg-bg-tertiary p-1 rounded-2xl border border-border-subtle flex relative">
                         <div
-                            className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-bg-tertiary rounded-xl border border-border-medium transition-all duration-300 ${role === 'provider' ? 'left-[calc(50%+1px)]' : 'left-1'}`}
+                            className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-bg-secondary rounded-xl border border-border-medium shadow-sm transition-all duration-300 ${role === 'provider' ? 'left-[calc(50%+1px)]' : 'left-1'}`}
                         ></div>
                         <button
                             type="button"
@@ -154,7 +154,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onRegister, onForgotPassword }
                 <div className="mt-auto pt-10 text-center relative z-10">
                     <button
                         onClick={onForgotPassword}
-                        className="text-[10px] font-black uppercase tracking-widest text-text-tertiary hover:text-text-primary transition-colors"
+                        className="text-[10px] font-black uppercase tracking-widest text-text-secondary hover:text-accent-primary transition-colors"
                     >
                         Esqueceu a senha?
                     </button>
@@ -167,9 +167,9 @@ const Login: React.FC<Props> = ({ onLoginSuccess, onRegister, onForgotPassword }
                         </button>
                         <button
                             onClick={() => navigate('/admin-login')}
-                            className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity mt-4 flex items-center justify-center gap-2"
+                            className="text-[9px] font-bold text-text-secondary uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity mt-4 flex items-center justify-center gap-2"
                         >
-                            <ShieldCheck size={10} /> Acesso Administrativo
+                            <ShieldCheck size={10} className="text-accent-primary" /> Acesso Administrativo
                         </button>
                     </div>
                 </div>

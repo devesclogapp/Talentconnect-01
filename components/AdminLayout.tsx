@@ -76,13 +76,13 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
             >
                 {/* Logo */}
                 <div className="h-16 flex items-center px-5 border-b border-folio-border/50 overflow-hidden shrink-0">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-folio-accent shadow-glow">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-primary shadow-glow">
                         <span className="font-bold text-[11px] text-white">TC</span>
                     </div>
                     {isSidebarOpen && (
                         <div className="ml-3 overflow-hidden">
                             <p className="font-bold text-[14px] text-folio-text whitespace-nowrap tracking-tight leading-none">Talent Connect</p>
-                            <p className="text-[10px] font-bold text-folio-accent uppercase tracking-widest mt-1">ERP ADMIN</p>
+                            <p className="text-[10px] font-bold text-folio-accent uppercase tracking-tight mt-1">ERP ADMIN</p>
                         </div>
                     )}
                 </div>
@@ -92,7 +92,7 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
                     {MENU_GROUPS.map((group) => (
                         <div key={group.label} className="mb-6">
                             {isSidebarOpen && (
-                                <p className="px-3 mb-2 text-[10px] font-bold text-folio-text-dim/40 uppercase tracking-[1.5px]">{group.label}</p>
+                                <p className="px-3 mb-2 text-[10px] font-bold text-folio-text-dim/40 uppercase tracking-tight">{group.label}</p>
                             )}
                             <div className="space-y-1">
                                 {group.items.map((item) => {
@@ -169,7 +169,7 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
                         {/* Live indicator */}
                         <div className="hidden lg:flex items-center gap-2 bg-[#1DB97A]/10 text-[#1DB97A] px-3 py-1.5 rounded-full border border-[#1DB97A]/20">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#1DB97A] animate-pulse" />
-                            <span className="text-[9px] font-bold uppercase tracking-widest">SISTEMA ATIVO</span>
+                            <span className="text-[9px] font-bold uppercase tracking-tight">SISTEMA ATIVO</span>
                         </div>
 
                         {/* Actions */}
@@ -196,7 +196,7 @@ const AdminLayout: React.FC<Props> = ({ children, activeView, onNavigate }) => {
                                 <p className="text-[12px] font-bold text-folio-text leading-tight">{userName}</p>
                                 <p className="text-[10px] font-bold text-[#1DB97A] uppercase tracking-wider">OPERADOR MASTER</p>
                             </div>
-                            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-[13px] font-bold bg-folio-accent shadow-glow shrink-0 border-2 border-white/10">
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-[13px] font-bold bg-primary shadow-glow shrink-0 border-2 border-white/10">
                                 {userInitial}
                             </div>
                         </div>

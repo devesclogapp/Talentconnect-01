@@ -123,7 +123,7 @@ const AdminOrders: React.FC = () => {
             {/* ── Order Dossier (Overlay) ── */}
             {selectedOrder && (
                 <div className="fixed inset-0 bg-folio-bg/80 backdrop-blur-md z-[100] flex justify-end animate-in fade-in duration-300">
-                    <div className="h-full w-full max-w-2xl bg-folio-bg shadow-2xl flex flex-col border-l border-folio-border animate-in slide-in-from-right duration-500">
+                    <div className="h-full w-full max-w-[700px] bg-folio-bg shadow-2xl flex flex-col border-l border-folio-border animate-in slide-in-from-right duration-500">
                         <div className="px-10 py-8 border-b border-folio-border bg-folio-surface flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="w-14 h-14 rounded-2xl bg-folio-bg border border-folio-border text-folio-accent flex items-center justify-center shadow-inner">
@@ -131,7 +131,7 @@ const AdminOrders: React.FC = () => {
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-black text-folio-text tracking-tight">Dossiê do Pedido</h2>
-                                    <p className="text-xs text-folio-text-dim/60 font-mono font-bold tracking-[2px] mt-1">ID: {selectedOrder.id}</p>
+                                    <p className="text-xs text-folio-text-dim/60 font-mono font-bold mt-1">ID: {selectedOrder.id}</p>
                                 </div>
                             </div>
                             <button onClick={() => setSelectedOrder(null)} className="w-12 h-12 rounded-2xl bg-folio-bg border border-folio-border flex items-center justify-center text-folio-text-dim hover:text-folio-text transition-all">
@@ -142,7 +142,7 @@ const AdminOrders: React.FC = () => {
                         <div className="flex px-10 border-b border-folio-border bg-folio-surface gap-2">
                             {['summary', 'financial', 'intervention'].map(tab => (
                                 <button key={tab} onClick={() => setDossierTab(tab)}
-                                    className={`px-4 py-5 text-xs font-black tracking-[2px] border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
+                                    className={`px-4 py-5 text-xs font-black border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
                                     {tab === 'summary' ? 'Operacional' : tab === 'financial' ? 'Financeiro' : 'Governança'}
                                 </button>
                             ))}
@@ -154,11 +154,11 @@ const AdminOrders: React.FC = () => {
                                     <div className="grid grid-cols-3 gap-4">
                                         {[
                                             { label: 'Estado Atual', value: <StatusBadge status={selectedOrder.status} /> },
-                                            { label: 'Aging SLA', value: <span className={`font-black tracking-widest ${getSlaInfo(selectedOrder.slaStatus).color}`}>{selectedOrder.agingHours}H</span> },
+                                            { label: 'Aging SLA', value: <span className={`font-black ${getSlaInfo(selectedOrder.slaStatus).color}`}>{selectedOrder.agingHours}H</span> },
                                             { label: 'Risco', value: <RiskBar score={selectedOrder.riskScore} /> },
                                         ].map(s => (
                                             <div key={s.label} className="bg-folio-surface border border-folio-border rounded-[24px] p-6 shadow-sm">
-                                                <p className="text-xs text-folio-text-dim/50 font-black tracking-[2px] mb-3">{s.label}</p>
+                                                <p className="text-xs text-folio-text-dim/50 font-black mb-3">{s.label}</p>
                                                 <div className="flex items-center">{s.value}</div>
                                             </div>
                                         ))}
@@ -172,7 +172,7 @@ const AdminOrders: React.FC = () => {
                                             { label: 'Local de Prestação', value: selectedOrder.location_text || 'Remoto/Não Definido' },
                                         ].map(row => (
                                             <div key={row.label} className="flex flex-col gap-1.5 border-b border-folio-border last:border-0 pb-5 last:pb-0">
-                                                <span className="text-xs font-black text-folio-text-dim/50 tracking-[2px]">{row.label}</span>
+                                                <span className="text-xs font-black text-folio-text-dim/50">{row.label}</span>
                                                 <span className="text-sm font-bold text-folio-text tracking-tight">{row.value || '—'}</span>
                                             </div>
                                         ))}
@@ -184,11 +184,7 @@ const AdminOrders: React.FC = () => {
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 shadow-folio">
-                                            <p className="text-xs text-folio-text-dim/50 font-black tracking-[2px] mb-2">Total Transacionado</p>
-                                            <p className="text-3xl font-black text-folio-text tabular-nums tracking-tighter">{formatCurrency(selectedOrder.payment?.amount_total || 0)}</p>
-                                        </div>
-                                        <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 shadow-folio">
-                                            <p className="text-xs text-folio-text-dim/50 font-black tracking-[2px] mb-2">Estado de Liquidez</p>
+                                            <p className="text-xs text-folio-text-dim/50 font-black mb-2">Estado de Liquidez</p>
                                             <div className="mt-2"><StatusBadge status={selectedOrder.payment?.escrow_status || 'pending'} /></div>
                                         </div>
                                     </div>
@@ -236,7 +232,7 @@ const AdminOrders: React.FC = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-black text-folio-text tracking-tight leading-none">Gestão Operacional de Pedidos</h1>
-                    <p className="text-xs font-bold text-folio-text-dim/50 tracking-[2px] mt-2">Controle de Ciclo de Vida e Monitoramento de SLA</p>
+                    <p className="text-xs font-bold text-folio-text-dim/50 mt-2">Controle de Ciclo de Vida e Monitoramento de SLA</p>
                 </div>
                 <button onClick={fetchOrders} className="w-11 h-11 flex items-center justify-center rounded-2xl border border-folio-border bg-folio-surface text-folio-text-dim hover:text-folio-accent hover:rotate-180 transition-all duration-700 shadow-sm"><RefreshCw size={18} /></button>
             </div>

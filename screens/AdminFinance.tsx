@@ -191,7 +191,7 @@ const AdminFinance: React.FC = () => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-background border border-border p-3 rounded-xl shadow-xl animate-in zoom-in-95 backdrop-blur-md bg-opacity-80">
-                    <p className="text-xs font-bold text-muted-foreground tracking-widest mb-2 border-b border-border pb-1">{label}</p>
+                    <p className="text-xs font-bold text-muted-foreground  mb-2 border-b border-border pb-1">{label}</p>
                     <div className="space-y-1.5">
                         <div className="flex justify-between items-center gap-6">
                             <span className="text-xs font-medium text-foreground">Gmv Total</span>
@@ -211,100 +211,7 @@ const AdminFinance: React.FC = () => {
     return (
         <div className="space-y-5 animate-fade-in pb-12">
 
-            {/* ── Payment Dossier ── */}
-            {selectedPayment && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
-                    <div className="h-full w-full max-w-2xl bg-background shadow-2xl flex flex-col border-l border-border">
-                        <div className="p-5 border-b border-border bg-card flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400">
-                                    <DollarSign size={18} />
-                                </div>
-                                <div>
-                                    <h2 className="text-sm font-semibold text-foreground">Dossiê Financeiro</h2>
-                                    <p className="text-xs text-muted-foreground font-mono">#{selectedPayment.id.slice(0, 8)}</p>
-                                </div>
-                            </div>
-                            <button onClick={() => setSelectedPayment(null)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all">
-                                <X size={18} />
-                            </button>
-                        </div>
 
-                        <div className="flex px-5 border-b border-border bg-card">
-                            {['details', 'ledger', 'intervention'].map(tab => (
-                                <button key={tab} onClick={() => setDossierTab(tab)}
-                                    className={`px-4 py-3 text-xs font-semibold tracking-widest border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
-                                    {tab === 'details' ? 'Detalhes' : tab === 'ledger' ? 'Ledger' : 'Intervenção'}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                            {dossierTab === 'details' && (
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {[
-                                            { label: 'Total Bruto', value: formatCurrency(selectedPayment.amount_total), color: 'text-foreground' },
-                                            { label: 'Taxa (10%)', value: formatCurrency(selectedPayment.operator_fee), color: 'text-yellow-500' },
-                                            { label: 'Repasse Líquido', value: formatCurrency(selectedPayment.provider_amount), color: 'text-green-600 dark:text-green-400' },
-                                        ].map(s => (
-                                            <div key={s.label} className="bg-card border border-border rounded-xl p-4">
-                                                <p className="text-xs text-muted-foreground tracking-widest mb-1">{s.label}</p>
-                                                <p className={`text-base font-semibold font-mono ${s.color}`}>{s.value}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-                                        {[
-                                            { label: 'Status Escrow', value: <StatusBadge status={selectedPayment.escrow_status} size="md" /> },
-                                            { label: 'Serviço', value: selectedPayment.order?.service?.title },
-                                            { label: 'Cliente', value: resolveUserName(selectedPayment.order?.client) },
-                                            { label: 'Profissional', value: resolveUserName(selectedPayment.order?.provider) },
-                                            { label: 'Data', value: formatDate(selectedPayment.created_at) },
-                                        ].map(row => (
-                                            <div key={row.label} className="flex justify-between items-center border-b border-border last:border-0 pb-3 last:pb-0">
-                                                <span className="text-xs font-semibold text-muted-foreground tracking-widest">{row.label}</span>
-                                                <span className="text-xs font-medium text-foreground">{row.value || '—'}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {dossierTab === 'ledger' && (
-                                <div className="space-y-3">
-                                    <p className="text-xs font-semibold text-muted-foreground tracking-widest">Simulação de Razão Contábil</p>
-                                    <div className="bg-card border border-border rounded-xl p-4 space-y-2">
-                                        <LedgerRow label="D - Caixa Escrow" value={formatCurrency(selectedPayment.amount_total)} type="debit" />
-                                        <LedgerRow label="C - Receita por Serviços" value={formatCurrency(selectedPayment.amount_total)} type="credit" />
-                                        <div className="h-px bg-border my-2" />
-                                        <LedgerRow label="D - Repasse ao Profissional" value={formatCurrency(selectedPayment.provider_amount)} type="debit" />
-                                        <LedgerRow label="C - Receita Operadora (10%)" value={formatCurrency(selectedPayment.operator_fee)} type="credit" />
-                                    </div>
-                                </div>
-                            )}
-                            {dossierTab === 'intervention' && (
-                                <div className="space-y-3">
-                                    <p className="text-xs font-semibold text-muted-foreground tracking-widest">Intervenção Financeira Manual</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button onClick={() => handleAction(selectedPayment.id, 'released')} disabled={isProcessing === selectedPayment.id}
-                                            className="p-4 text-left bg-card border border-border rounded-xl hover:bg-green-500/10 hover:border-green-500/30 text-green-600 dark:text-green-400 transition-all group disabled:opacity-30">
-                                            <Unlock size={18} className="mb-3 group-hover:scale-110 transition-transform" />
-                                            <p className="text-xs font-semibold text-foreground mb-1">Liberar Escrow</p>
-                                            <p className="text-xs text-muted-foreground">Autoriza repasse imediato.</p>
-                                        </button>
-                                        <button onClick={() => handleAction(selectedPayment.id, 'refunded')} disabled={isProcessing === selectedPayment.id}
-                                            className="p-4 text-left bg-card border border-border rounded-xl hover:bg-red-500/10 hover:border-red-500/30 text-red-600 dark:text-red-400 transition-all group disabled:opacity-30">
-                                            <XCircle size={18} className="mb-3 group-hover:scale-110 transition-transform" />
-                                            <p className="text-xs font-semibold text-foreground mb-1">Reembolsar Cliente</p>
-                                            <p className="text-xs text-muted-foreground">Estorna o valor total.</p>
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* ── Escrow Detail Sheet ── */}
             <Sheet open={showEscrowSheet} onOpenChange={setShowEscrowSheet}>
@@ -333,7 +240,7 @@ const AdminFinance: React.FC = () => {
                                         <div key={payment.id} className="group animate-in fade-in slide-in-from-right-4 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
                                             <div className="flex items-start justify-between mb-3">
                                                 <div>
-                                                    <p className="text-[10px] font-bold text-yellow-600 dark:text-yellow-400 tracking-widest mb-1 flex items-center gap-1.5">
+                                                    <p className="text-[10px] font-bold text-yellow-600 dark:text-yellow-400  mb-1 flex items-center gap-1.5">
                                                         <Clock size={10} /> Escrow ativo
                                                     </p>
                                                     <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -347,11 +254,11 @@ const AdminFinance: React.FC = () => {
 
                                             <div className="grid grid-cols-2 gap-3 mb-3">
                                                 <div className="p-2.5 rounded-lg bg-muted/50 border border-border/50">
-                                                    <p className="text-[9px] font-bold text-muted-foreground mb-1 tracking-wider">Profissional</p>
+                                                    <p className="text-[9px] font-bold text-muted-foreground mb-1 ">Profissional</p>
                                                     <p className="text-[11px] font-medium text-foreground truncate">{payment.order?.provider?.name || '---'}</p>
                                                 </div>
                                                 <div className="p-2.5 rounded-lg bg-muted/50 border border-border/50">
-                                                    <p className="text-[9px] font-bold text-muted-foreground mb-1 tracking-wider">Taxa plataforma</p>
+                                                    <p className="text-[9px] font-bold text-muted-foreground mb-1 ">Taxa plataforma</p>
                                                     <p className="text-[11px] font-medium text-foreground">{formatCurrency(payment.operator_fee)}</p>
                                                 </div>
                                             </div>
@@ -373,7 +280,7 @@ const AdminFinance: React.FC = () => {
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
                                     <Activity size={32} className="mb-2" />
-                                    <p className="text-xs font-semibold tracking-widest leading-relaxed">
+                                    <p className="text-xs font-semibold  leading-relaxed">
                                         Nenhuma transação<br />em garantia
                                     </p>
                                 </div>
@@ -392,7 +299,7 @@ const AdminFinance: React.FC = () => {
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full mr-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 tracking-widest">Live Ledger</span>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 ">Live Ledger</span>
                     </div>
                     <button onClick={fetchPayments} className="p-2 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:rotate-180 transition-all duration-500">
                         <RefreshCw size={16} />
@@ -473,13 +380,13 @@ const AdminFinance: React.FC = () => {
                     <div className="flex bg-folio-bg p-1 rounded-2xl border border-folio-border">
                         <button
                             onClick={() => setChartType('line')}
-                            className={`px-4 py-2 text-xs font-black tracking-widest rounded-xl transition-all ${chartType === 'line' ? 'bg-folio-accent text-white shadow-glow' : 'text-folio-text-dim hover:text-folio-text'}`}
+                            className={`px-4 py-2 text-xs font-black  rounded-xl transition-all ${chartType === 'line' ? 'bg-folio-accent text-white shadow-glow' : 'text-folio-text-dim hover:text-folio-text'}`}
                         >
                             Linear
                         </button>
                         <button
                             onClick={() => setChartType('bar')}
-                            className={`px-4 py-2 text-xs font-black tracking-widest rounded-xl transition-all ${chartType === 'bar' ? 'bg-folio-accent text-white shadow-glow' : 'text-folio-text-dim hover:text-folio-text'}`}
+                            className={`px-4 py-2 text-xs font-black  rounded-xl transition-all ${chartType === 'bar' ? 'bg-folio-accent text-white shadow-glow' : 'text-folio-text-dim hover:text-folio-text'}`}
                         >
                             Sazonal
                         </button>
@@ -580,7 +487,7 @@ const AdminFinance: React.FC = () => {
                 <div className="flex gap-2 flex-wrap">
                     {[{ val: 'all', label: 'Todos' }, { val: 'held', label: 'Retidos' }, { val: 'released', label: 'Liberados' }, { val: 'refunded', label: 'Estornados' }].map(opt => (
                         <button key={opt.val} onClick={() => setFilterStatus(opt.val)}
-                            className={`h-11 px-5 rounded-xl text-xs font-black tracking-widest transition-all border ${filterStatus === opt.val ? 'bg-folio-accent border-folio-accent text-white shadow-glow' : 'bg-folio-bg border-folio-border text-folio-text-dim hover:text-folio-text hover:border-folio-text-dim/30'}`}>
+                            className={`h-11 px-5 rounded-xl text-xs font-black  transition-all border ${filterStatus === opt.val ? 'bg-folio-accent border-folio-accent text-white shadow-glow' : 'bg-folio-bg border-folio-border text-folio-text-dim hover:text-folio-text hover:border-folio-text-dim/30'}`}>
                             {opt.label}
                         </button>
                     ))}
@@ -590,13 +497,13 @@ const AdminFinance: React.FC = () => {
             {/* ── Finance List (Floating Rows) ── */}
             <div className="space-y-4">
                 <div className="hidden md:grid grid-cols-12 px-8 py-4 bg-folio-surface2/30 rounded-2xl border border-folio-border/50">
-                    <div className="col-span-3 text-xs font-black text-folio-text-dim tracking-widest">TX / Serviço</div>
-                    <div className="col-span-3 text-xs font-black text-folio-text-dim tracking-widest">Intervenientes (C → P)</div>
-                    <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-widest">Status Escrow</div>
-                    <div className="col-span-2 text-xs font-black text-folio-text-dim tracking-widest cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('amount')}>
+                    <div className="col-span-3 text-xs font-black text-folio-text-dim ">TX / Serviço</div>
+                    <div className="col-span-3 text-xs font-black text-folio-text-dim ">Intervenientes (C → P)</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text-dim ">Status Escrow</div>
+                    <div className="col-span-2 text-xs font-black text-folio-text-dim  cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('amount')}>
                         <span className="flex items-center gap-2">Valor {sortField === 'amount' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
                     </div>
-                    <div className="col-span-2 text-right text-xs font-black text-folio-text-dim tracking-widest cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('created')}>
+                    <div className="col-span-2 text-right text-xs font-black text-folio-text-dim  cursor-pointer hover:text-folio-accent transition-colors" onClick={() => toggleSort('created')}>
                         <span className="flex items-center justify-end gap-2">Data {sortField === 'created' ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : null}</span>
                     </div>
                 </div>
@@ -627,7 +534,7 @@ const AdminFinance: React.FC = () => {
                 ) : filteredPayments.length === 0 ? (
                     <div className="py-24 text-center bg-folio-surface border border-dashed border-folio-border rounded-[32px] opacity-40">
                         <DollarSign size={56} className="mx-auto mb-4 text-folio-accent" />
-                        <p className="text-[12px] font-black tracking-[3px]">Sem transações registradas</p>
+                        <p className="text-[12px] font-black ">Sem transações registradas</p>
                     </div>
                 ) : filteredPayments.map(p => (
                     <div key={p.id}
@@ -648,7 +555,7 @@ const AdminFinance: React.FC = () => {
                         </div>
 
                         <div className="col-span-2">
-                            <div className={`inline-flex px-3 py-1 rounded-lg border text-xs font-black tracking-widest ${p.escrow_status === 'released' ? 'bg-[#1DB97A]/10 border-[#1DB97A]/20 text-[#1DB97A]' :
+                            <div className={`inline-flex px-3 py-1 rounded-lg border text-xs font-black  ${p.escrow_status === 'released' ? 'bg-[#1DB97A]/10 border-[#1DB97A]/20 text-[#1DB97A]' :
                                 p.escrow_status === 'held' ? 'bg-[#F5C842]/10 border-[#F5C842]/20 text-[#F5C842]' :
                                     'bg-folio-bg border-folio-border text-folio-text-dim'
                                 }`}>
@@ -661,12 +568,12 @@ const AdminFinance: React.FC = () => {
                                 <span className="text-sm font-black text-folio-text tabular-nums tracking-tighter">
                                     {formatCurrency(p.amount_total)}
                                 </span>
-                                <span className="text-xs font-black text-[#F5C842] tracking-[1px]">Fee: {formatCurrency(p.operator_fee)}</span>
+                                <span className="text-xs font-black text-[#F5C842] ">Fee: {formatCurrency(p.operator_fee)}</span>
                             </div>
                         </div>
 
                         <div className="col-span-2 text-right">
-                            <p className="text-xs font-bold text-folio-text-dim font-mono tracking-[1px]">{formatDate(p.created_at)}</p>
+                            <p className="text-xs font-bold text-folio-text-dim font-mono ">{formatDate(p.created_at)}</p>
                             <div className="mt-2 text-folio-text-dim group-hover:text-folio-accent transition-colors flex justify-end">
                                 <Eye size={16} />
                             </div>
@@ -678,7 +585,7 @@ const AdminFinance: React.FC = () => {
             {/* ── Payment Dossier (Overlay) ── */}
             {selectedPayment && (
                 <div className="fixed inset-0 bg-folio-bg/80 backdrop-blur-md z-[100] flex justify-end animate-in fade-in duration-300">
-                    <div className="h-full w-full max-w-2xl bg-folio-bg shadow-2xl flex flex-col border-l border-folio-border animate-in slide-in-from-right duration-500">
+                    <div className="h-full w-full max-w-[700px] bg-folio-bg shadow-2xl flex flex-col border-l border-folio-border animate-in slide-in-from-right duration-500">
                         <div className="px-10 py-8 border-b border-folio-border bg-folio-surface flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="w-14 h-14 rounded-2xl bg-folio-bg border border-folio-border text-[#1DB97A] flex items-center justify-center shadow-inner">
@@ -686,7 +593,7 @@ const AdminFinance: React.FC = () => {
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-black text-folio-text tracking-tight">Dossiê de Transação</h2>
-                                    <p className="text-xs text-folio-text-dim/60 font-mono font-bold tracking-[2px] mt-1">Protocol: {selectedPayment.id}</p>
+                                    <p className="text-xs text-folio-text-dim/60 font-mono font-bold  mt-1">Protocol: {selectedPayment.id}</p>
                                 </div>
                             </div>
                             <button onClick={() => setSelectedPayment(null)} className="w-12 h-12 rounded-2xl bg-folio-bg border border-folio-border flex items-center justify-center text-folio-text-dim hover:text-folio-text transition-all">
@@ -697,7 +604,7 @@ const AdminFinance: React.FC = () => {
                         <div className="flex px-10 border-b border-folio-border bg-folio-surface gap-2">
                             {['details', 'ledger', 'intervention'].map(tab => (
                                 <button key={tab} onClick={() => setDossierTab(tab)}
-                                    className={`px-4 py-5 text-xs font-black tracking-[2px] border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
+                                    className={`px-4 py-5 text-xs font-black  border-b-2 transition-all shrink-0 ${dossierTab === tab ? 'border-folio-accent text-folio-accent' : 'border-transparent text-folio-text-dim hover:text-folio-text'}`}>
                                     {tab === 'details' ? 'Auditoria' : tab === 'ledger' ? 'Razão Contábil' : 'Intervenção'}
                                 </button>
                             ))}
@@ -713,22 +620,22 @@ const AdminFinance: React.FC = () => {
                                             { label: 'Repasse', value: formatCurrency(selectedPayment.provider_amount), color: 'text-[#1DB97A]' },
                                         ].map(s => (
                                             <div key={s.label} className="bg-folio-surface border border-folio-border rounded-[24px] p-6 shadow-sm">
-                                                <p className="text-xs text-folio-text-dim/50 font-black tracking-[2px] mb-2">{s.label}</p>
+                                                <p className="text-xs text-folio-text-dim/50 font-black  mb-2">{s.label}</p>
                                                 <p className={`text-lg font-black font-mono tracking-tighter ${s.color}`}>{s.value}</p>
                                             </div>
                                         ))}
                                     </div>
                                     <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 space-y-6 shadow-folio">
-                                        <p className="text-xs font-black text-folio-text-dim/40 tracking-[3px] mb-2">Metadata da Negociação</p>
+                                        <p className="text-xs font-black text-folio-text-dim/40  mb-2">Metadata da Negociação</p>
                                         {[
-                                            { label: 'Estado de Escrow', value: <div className={`inline-flex px-3 py-1 rounded-lg text-xs font-black tracking-widest border border-folio-border bg-folio-bg`}>{selectedPayment.escrow_status}</div> },
+                                            { label: 'Estado de Escrow', value: <div className={`inline-flex px-3 py-1 rounded-lg text-xs font-black  border border-folio-border bg-folio-bg`}>{selectedPayment.escrow_status}</div> },
                                             { label: 'Item de Serviço', value: selectedPayment.order?.service?.title },
                                             { label: 'Emissor (Cliente)', value: resolveUserName(selectedPayment.order?.client) },
                                             { label: 'Beneficiário (Prof.)', value: resolveUserName(selectedPayment.order?.provider) },
                                             { label: 'Timestamp Interno', value: selectedPayment.created_at },
                                         ].map(row => (
                                             <div key={row.label} className="flex flex-col gap-1.5 border-b border-folio-border last:border-0 pb-5 last:pb-0">
-                                                <span className="text-xs font-black text-folio-text-dim/50 tracking-[2px]">{row.label}</span>
+                                                <span className="text-xs font-black text-folio-text-dim/50 ">{row.label}</span>
                                                 <span className="text-xs font-bold text-folio-text tracking-tight">{row.value || '—'}</span>
                                             </div>
                                         ))}
@@ -740,7 +647,7 @@ const AdminFinance: React.FC = () => {
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-3 mb-4">
                                         <Activity className="text-folio-accent" size={20} />
-                                        <h4 className="text-sm font-black text-folio-text tracking-[2px]">Simulação Ledger Partida Dobrada</h4>
+                                        <h4 className="text-sm font-black text-folio-text ">Simulação Ledger Partida Dobrada</h4>
                                     </div>
                                     <div className="bg-folio-surface border border-folio-border rounded-[32px] p-8 space-y-4 shadow-folio">
                                         <LedgerRow label="D - Caixa Escrow (Holding)" value={formatCurrency(selectedPayment.amount_total)} type="debit" />
@@ -759,7 +666,7 @@ const AdminFinance: React.FC = () => {
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-3 mb-6">
                                         <Shield className="text-[#E24B4A]" size={20} />
-                                        <h4 className="text-sm font-black text-folio-text tracking-[2px]">Intervenção Financeira Admin</h4>
+                                        <h4 className="text-sm font-black text-folio-text ">Intervenção Financeira Admin</h4>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <button onClick={() => handleAction(selectedPayment.id, 'released')} disabled={isProcessing === selectedPayment.id}
@@ -789,7 +696,7 @@ const AdminFinance: React.FC = () => {
 // --- Sub-components ---
 const LedgerRow = ({ label, value, type }: any) => (
     <div className="flex justify-between items-center py-2 text-xs">
-        <span className={`font-semibold tracking-widest ${type === 'debit' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>{label}</span>
+        <span className={`font-semibold  ${type === 'debit' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>{label}</span>
         <span className="font-mono font-semibold text-foreground">{value}</span>
     </div>
 );

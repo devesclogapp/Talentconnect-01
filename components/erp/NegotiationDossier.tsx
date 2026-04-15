@@ -55,7 +55,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <h2 className="text-xs font-bold tracking-[1.5px] text-folio-text-dim/60">Dossiê de negociação</h2>
+                            <h2 className="text-xs font-bold text-folio-text-dim/60">Dossiê de negociação</h2>
                             <span className="text-xs font-mono text-folio-text-dim/40 bg-folio-surface px-1.5 py-0.5 rounded border border-folio-border">#{order.id?.slice(0, 8)}</span>
                         </div>
                         <div className="flex items-center gap-2 mt-1.5 overflow-x-auto no-scrollbar pb-1">
@@ -86,7 +86,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`
-                                flex items-center gap-2 px-5 py-4 text-xs font-bold tracking-[1.2px] transition-all shrink-0
+                                flex items-center gap-2 px-5 py-4 text-xs font-bold transition-all shrink-0
                                 border-b-2 relative
                                 ${activeTab === tab.id ? 'border-folio-accent text-folio-text' : 'border-transparent text-folio-text-dim hover:text-folio-text'}
                             `}
@@ -113,7 +113,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                 <div className="w-8 h-8 rounded-xl bg-folio-accent-dim flex items-center justify-center text-folio-accent">
                                     <Package size={16} />
                                 </div>
-                                <h3 className="text-xs font-bold tracking-widest text-folio-text">Objeto da negociação</h3>
+                                <h3 className="text-xs font-bold text-folio-text">Objeto da negociação</h3>
                             </div>
                             <div className="flex justify-between items-end gap-4 p-4 bg-folio-bg rounded-xl border border-folio-border/50">
                                 <div>
@@ -121,7 +121,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                     <div className="flex items-center gap-3 mt-2">
                                         <div className="flex items-center gap-1.5 px-2 py-1 bg-folio-surface border border-folio-border rounded-lg">
                                             <div className={`w-1.5 h-1.5 rounded-full ${order.pricing_mode === 'hourly' ? 'bg-blue-500' : 'bg-folio-accent'}`} />
-                                            <span className="text-xs font-bold tracking-wider">{order.pricing_mode === 'hourly' ? 'Por hora' : 'Valor fixo'}</span>
+                                            <span className="text-xs font-bold ">{order.pricing_mode === 'hourly' ? 'Por hora' : 'Valor fixo'}</span>
                                         </div>
                                         <span className="text-xs font-medium text-folio-text-dim opacity-60">
                                             {new Date(order.scheduled_at).toLocaleString('pt-BR')}
@@ -129,7 +129,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs font-bold text-folio-text-dim tracking-[1.5px] mb-1">Valor auditado</p>
+                                    <p className="text-xs font-bold text-folio-text-dim mb-1">Valor auditado</p>
                                     <p className="text-2xl font-black text-folio-text">R$ {formatNumber(order.total_amount)}</p>
                                 </div>
                             </div>
@@ -139,7 +139,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-folio-surface border border-folio-border shadow-folio rounded-2xl p-5 space-y-4">
-                                <p className="text-xs font-bold text-folio-text-dim tracking-widest flex items-center gap-2">
+                                <p className="text-xs font-bold text-folio-text-dim  flex items-center gap-2">
                                     <User size={14} className="text-blue-500" /> Histórico cliente
                                 </p>
                                 <div className="flex items-center gap-3">
@@ -155,7 +155,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                 </p>
                             </div>
                             <div className="bg-folio-surface border border-folio-border shadow-folio rounded-2xl p-5 space-y-4">
-                                <p className="text-xs font-bold text-folio-text-dim tracking-widest flex items-center gap-2">
+                                <p className="text-xs font-bold text-folio-text-dim  flex items-center gap-2">
                                     <Briefcase size={14} className="text-folio-accent" /> Histórico prof.
                                 </p>
                                 <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                 {activeTab === 'intelligence' && (
                     <div className="space-y-6 animate-fade-in">
                         <section className="bg-folio-surface border border-folio-border shadow-folio rounded-2xl p-6 space-y-5">
-                            <p className="text-xs font-bold text-folio-accent tracking-[2px] flex items-center gap-2">
+                            <p className="text-xs font-bold text-folio-accent  flex items-center gap-2">
                                 <Activity size={16} /> Investigação assistida
                             </p>
 
@@ -188,7 +188,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex justify-between items-center">
-                                            <p className="text-xs font-bold tracking-widest text-folio-text-dim/60">Sinal de presença</p>
+                                            <p className="text-xs font-bold  text-folio-text-dim/60">Sinal de presença</p>
                                             <span className={`text-xs font-bold px-2 py-1 rounded-lg border ${execution?.location_lat ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
                                                 {execution?.location_lat ? 'Rastreamento ativo' : 'Sem coordenadas'}
                                             </span>
@@ -204,20 +204,20 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                         <Clock size={20} className="text-folio-text-dim" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs font-bold tracking-widest text-folio-text-dim/60 mb-3">Linha do tempo de execução</p>
+                                        <p className="text-xs font-bold  text-folio-text-dim/60 mb-3">Linha do tempo de execução</p>
                                         <div className="flex items-center gap-4 bg-folio-surface p-4 rounded-xl border border-folio-border/50">
                                             <div className="text-center flex-1">
-                                                <p className="text-xs text-folio-text-dim font-bold tracking-wider">Acordado</p>
+                                                <p className="text-xs text-folio-text-dim font-bold ">Acordado</p>
                                                 <p className="text-xs font-bold text-folio-text">{new Date(order.scheduled_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
                                             </div>
                                             <div className="w-px h-6 bg-folio-border" />
                                             <div className="text-center flex-1">
-                                                <p className="text-xs text-folio-text-dim font-bold tracking-wider">Início real</p>
+                                                <p className="text-xs text-folio-text-dim font-bold ">Início real</p>
                                                 <p className="text-xs font-bold text-folio-text">{execution?.started_at ? new Date(execution.started_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—'}</p>
                                             </div>
                                             <div className="w-px h-6 bg-folio-border" />
                                             <div className="text-center flex-1">
-                                                <p className="text-xs text-folio-text-dim font-bold tracking-wider">Divergência</p>
+                                                <p className="text-xs text-folio-text-dim font-bold ">Divergência</p>
                                                 <p className={`text-xs font-bold ${execution?.started_at && new Date(execution.started_at).getTime() > new Date(order.scheduled_at).getTime() ? 'text-red-500' : 'text-green-500'}`}>
                                                     {execution?.started_at ? `${Math.floor((new Date(execution.started_at).getTime() - new Date(order.scheduled_at).getTime()) / 60000)}m` : '—'}
                                                 </p>
@@ -229,7 +229,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                         </section>
 
                         <section className="space-y-3">
-                            <p className="text-xs font-bold text-folio-text-dim tracking-[1.5px] p-1">Alertas preditivos de risco</p>
+                            <p className="text-xs font-bold text-folio-text-dim p-1">Alertas preditivos de risco</p>
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="p-4 rounded-2xl bg-folio-surface border border-folio-border border-l-[6px] border-l-blue-500 shadow-sm">
                                     <p className="text-xs font-bold text-folio-text-dim mb-1">SLA do profissional</p>
@@ -247,7 +247,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                 {activeTab === 'contract' && (
                     <div className="space-y-4 animate-fade-in">
                         <div className="bg-folio-surface border border-folio-border shadow-folio rounded-2xl p-6 space-y-5">
-                            <p className="text-xs font-bold text-folio-text-dim tracking-[2px] flex items-center gap-2"><FileText size={16} /> Cláusulas do pedido</p>
+                            <p className="text-xs font-bold text-folio-text-dim  flex items-center gap-2"><FileText size={16} /> Cláusulas do pedido</p>
                             <div className="space-y-1">
                                 {[
                                     { label: 'ID único', value: order.id, mono: true },
@@ -257,7 +257,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                     { label: 'Ponto de execução', value: order.location_text || 'GPS Local' },
                                 ].map((item, idx) => (
                                     <div key={idx} className="flex justify-between items-center py-4 border-b border-folio-border/50 last:border-0 h-14">
-                                        <span className="text-xs font-bold text-folio-text-dim tracking-wider shrink-0">{item.label}</span>
+                                        <span className="text-xs font-bold text-folio-text-dim  shrink-0">{item.label}</span>
                                         <span className={`text-xs font-bold text-folio-text text-right max-w-[300px] truncate ${item.mono ? 'font-mono opacity-60' : ''}`}>{item.value || 'N/A'}</span>
                                     </div>
                                 ))}
@@ -270,19 +270,19 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                     <div className="space-y-4 animate-fade-in">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-folio-surface border border-folio-border shadow-folio rounded-2xl p-6">
-                                <p className="text-xs font-bold text-folio-text-dim tracking-[2px] mb-2">Custódia ativa</p>
+                                <p className="text-xs font-bold text-folio-text-dim  mb-2">Custódia ativa</p>
                                 <p className="text-3xl font-black text-folio-text tabular-nums">R$ {formatNumber(order.total_amount)}</p>
                                 <div className="mt-5 flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 text-yellow-600 rounded-xl w-fit border border-yellow-500/20">
                                     <ShieldCheck size={14} />
-                                    <span className="text-xs font-black tracking-widest">Protegido em garantia</span>
+                                    <span className="text-xs font-black ">Protegido em garantia</span>
                                 </div>
                             </div>
                             <div className="bg-folio-surface border border-folio-border shadow-folio rounded-2xl p-6">
-                                <p className="text-xs font-bold text-folio-text-dim tracking-[2px] mb-2">Repasse estimado</p>
+                                <p className="text-xs font-bold text-folio-text-dim  mb-2">Repasse estimado</p>
                                 <p className="text-3xl font-black text-[#1DB97A] tabular-nums">R$ {formatNumber(order.total_amount * 0.9)}</p>
                                 <div className="mt-5 flex items-center gap-2 px-3 py-1.5 bg-[#1DB97A]/10 text-[#1DB97A] rounded-xl w-fit border border-[#1DB97A]/20">
                                     <Activity size={14} />
-                                    <span className="text-xs font-black tracking-widest">Liquidável</span>
+                                    <span className="text-xs font-black ">Liquidável</span>
                                 </div>
                             </div>
                         </div>
@@ -300,7 +300,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
 
                 {activeTab === 'audit' && (
                     <div className="space-y-6 animate-fade-in">
-                        <p className="text-xs font-bold text-folio-text-dim tracking-[2px] flex items-center gap-2 px-1">
+                        <p className="text-xs font-bold text-folio-text-dim flex items-center gap-2 px-1">
                             <History size={16} /> Linha do tempo imutável
                         </p>
                         <div className="space-y-0 relative pb-10">
@@ -314,8 +314,8 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                                     </div>
                                     <div className="flex-1 space-y-2 bg-folio-surface p-4 rounded-2xl border border-folio-border shadow-sm group-hover:shadow-folio transition-all">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs font-mono text-folio-text-dim/60 font-bold tracking-widest">{new Date(log.created_at || log.timestamp).toLocaleString('pt-BR')}</span>
-                                            <span className="text-xs font-black px-2 py-0.5 bg-folio-bg rounded-lg border border-folio-border tracking-[1.5px] text-folio-text opacity-70">{log.action?.split('_').join(' ').toLowerCase()}</span>
+                                            <span className="text-xs font-mono text-folio-text-dim/60 font-bold">{new Date(log.created_at || log.timestamp).toLocaleString('pt-BR')}</span>
+                                            <span className="text-xs font-black px-2 py-0.5 bg-folio-bg rounded-lg border border-folio-border text-folio-text opacity-70">{log.action?.split('_').join(' ').toLowerCase()}</span>
                                         </div>
                                         <p className="text-xs font-bold text-folio-text leading-tight tracking-tight">
                                             {log.details || log.action?.split('_').join(' ').toLowerCase()}
@@ -338,7 +338,7 @@ const NegotiationDossier: React.FC<NegotiationDossierProps> = ({ data, auditLogs
                 {onBack && (
                     <button
                         onClick={onBack}
-                        className="flex-1 h-12 rounded-2xl border border-folio-border bg-folio-surface text-xs font-bold text-folio-text tracking-[2px] hover:bg-folio-bg transition-all active:scale-95 shadow-sm"
+                        className="flex-1 h-12 rounded-2xl border border-folio-border bg-folio-surface text-xs font-bold text-folio-text  hover:bg-folio-bg transition-all active:scale-95 shadow-sm"
                     >
                         Fechar dossiê
                     </button>

@@ -56,6 +56,17 @@ export default {
                 error: 'hsl(var(--error))',
                 info: 'hsl(var(--info))',
 
+                // Folioblox System Tokens
+                folio: {
+                    bg: 'hsl(var(--background))',
+                    surface: 'hsl(var(--card))',
+                    surface2: 'hsl(var(--muted))',
+                    text: 'hsl(var(--foreground))',
+                    'text-dim': 'hsl(var(--muted-foreground))',
+                    border: 'hsl(var(--border))',
+                    accent: 'hsl(var(--accent))',
+                },
+
                 // App Specific Tokens (from index.html)
                 'app-bg': 'hsl(var(--background))',
                 'app-text': 'hsl(var(--foreground))',
@@ -84,6 +95,8 @@ export default {
                 'sm': 'var(--shadow-sm)',
                 'md': 'var(--shadow-md)',
                 'lg': 'var(--shadow-lg)',
+                'folio': '0 4px 20px rgba(0, 0, 0, 0.05)',
+                'glow-dim': '0 0 15px rgba(79, 70, 229, 0.08)',
             },
             spacing: {
                 'safe-top': 'env(safe-area-inset-top)',

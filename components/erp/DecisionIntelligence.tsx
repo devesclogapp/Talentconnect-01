@@ -66,13 +66,13 @@ const DecisionIntelligence: React.FC<DecisionIntelligenceProps> = ({ negotiation
     return (
         <div className="space-y-4">
             <div className="bg-card border border-border rounded-2xl p-5 space-y-6">
-                <p className="text-xs font-black text-primary tracking-widest flex items-center gap-2">
+                <p className="text-xs font-black text-primary  flex items-center gap-2">
                     <BrainCircuit size={14} /> Recomendação da IA de Decisão
                 </p>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-bold tracking-widest text-muted-foreground">
+                        <div className="flex justify-between text-xs font-bold  text-muted-foreground">
                             <span>Razão Cliente: {probs.client}%</span>
                             <span>Razão Profissional: {probs.provider}%</span>
                         </div>
@@ -83,7 +83,7 @@ const DecisionIntelligence: React.FC<DecisionIntelligenceProps> = ({ negotiation
                     </div>
 
                     <div className="p-4 bg-muted/30 rounded-xl border border-border/50">
-                        <p className="text-xs font-bold text-muted-foreground tracking-widest mb-1 flex items-center gap-1.5">
+                        <p className="text-xs font-bold text-muted-foreground  mb-1 flex items-center gap-1.5">
                             <Scale size={12} /> Resumo Analítico
                         </p>
                         <p className="text-xs text-foreground leading-relaxed italic">
